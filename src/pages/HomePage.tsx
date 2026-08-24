@@ -123,14 +123,12 @@ export function HomePage() {
             <h1>{marketplaceConfig.homepage.headline}</h1>
 
             <div className="intro-side">
-              <p>
-                <p>{marketplaceConfig.homepage.description}</p>
-              </p>
+  <p>{marketplaceConfig.homepage.description}</p>
 
-              <a href="#add-listing">
-                {marketplaceConfig.homepage.listingCta}
-              </a>
-            </div>
+  <a href="#add-listing">
+    {marketplaceConfig.homepage.listingCta}
+  </a>
+</div>
           </div>
         </section>
 
