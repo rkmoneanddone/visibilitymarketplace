@@ -1199,7 +1199,8 @@ select {
     height: 27px;
     min-height: 27px;
     padding: 0 8px;
-    font-size: 12px
+    font-size: 12px;
+    text-decoration:none;
   }
 
   .push-button svg {

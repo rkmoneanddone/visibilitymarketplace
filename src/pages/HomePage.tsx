@@ -1,65 +1,76 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowUp,
   BarChart3,
   Eye,
   Flame,
-  Globe2,
-  Camera,
   ListPlus,
-  MonitorSmartphone,
   Rocket,
   Search,
   Sparkles,
   TrendingUp,
   Users,
-  Play,
   Zap,
 } from "lucide-react";
 import { marketplaceConfig } from "../config/marketplace";
 import {
+  getCategoryName,
+  getListingTypeName,
+  getSubcategoryName,
+} from "../lib/marketplace/listing";
+
+import { formatMoneyMinor } from "../lib/marketplace/money";
+
+import { getTypeIcon } from "../lib/marketplace/icons";
+import {
   demoBoardStats,
-  demoListings,
   newToday,
-  type DemoListing,
 } from "../data/demoMarketplace";
 import { initialCategories } from "../config/categories";
 import { initialListingTypes } from "../config/listingTypes";
 import { siteConfig } from "../config/site";
+import { getPublishedListings } from "../services/firestore/listings";
+import type { Listing } from "../types/marketplace";
 
-
-function getTypeIcon(type: string) {
-  const props = {
-    size: 15,
-    strokeWidth: 2,
-  };
-
-  switch (type) {
-    case "YouTube":
-      return <Play {...props} />;
-
-    case "Instagram":
-      return <Camera {...props} />;
-
-    case "App":
-      return <MonitorSmartphone {...props} />;
-
-    case "Startup":
-      return <Rocket {...props} />;
-
-    case "Website":
-      return <Globe2 {...props} />;
-
-    case "Facebook":
-      return <Users {...props} />;
-
-    default:
-      return <Sparkles {...props} />;
-  }
-}
 
 export function HomePage() {
   const [selectedType, setSelectedType] = useState("All");
+const [listings, setListings] = useState<Listing[]>([]);
+const [listingsLoading, setListingsLoading] = useState(true);
+const [listingsError, setListingsError] = useState<string | null>(null);
+
+useEffect(() => {
+  let active = true;
+
+  async function loadListings() {
+    try {
+      setListingsLoading(true);
+      setListingsError(null);
+
+      const publishedListings = await getPublishedListings();
+
+      if (active) {
+        setListings(publishedListings);
+      }
+    } catch (error) {
+      console.error("Failed to load marketplace listings:", error);
+
+      if (active) {
+        setListingsError("Unable to load listings right now.");
+      }
+    } finally {
+      if (active) {
+        setListingsLoading(false);
+      }
+    }
+  }
+
+  void loadListings();
+
+  return () => {
+    active = false;
+  };
+}, []);
 
   const enabledTypes = useMemo(
     () =>
@@ -70,26 +81,24 @@ export function HomePage() {
   );
 
   const visibleListings =
-    selectedType === "All"
-      ? demoListings
-      : demoListings.filter((listing) => listing.type === selectedType);
+  selectedType === "All"
+    ? listings
+    : listings.filter(
+        (listing) =>
+          getListingTypeName(listing.listingTypeId) === selectedType,
+      );
 
   const boardStats = {
-    listed:
-      selectedType === "All"
-        ? demoBoardStats.allListings
-        : visibleListings.length * 19 + 12,
+  listed: visibleListings.length,
 
-    today:
-      selectedType === "All"
-        ? demoBoardStats.newToday
-        : Math.max(1, visibleListings.length),
+  today: demoBoardStats.newToday,
 
-    pushed: visibleListings.reduce(
-      (total, listing) => total + listing.boostTotal,
-      0,
-    ),
-  };
+  pushedMinor: visibleListings.reduce(
+    (total, listing) =>
+      total + listing.currentBoostTotalMinor,
+    0,
+  ),
+};
 
   return (
     <>
@@ -168,7 +177,7 @@ export function HomePage() {
                 new today
               </span>
               <span>
-                <strong>${boardStats.pushed}</strong>
+                <strong>{formatMoneyMinor(boardStats.pushedMinor)}</strong>
                 pushed
               </span>
             </div>
@@ -233,72 +242,113 @@ export function HomePage() {
             </div>
 
             <div className="board-list">
-              {visibleListings.length > 0 ? (
-                visibleListings.map((listing) => (
-                  <article className="board-row" key={listing.id}>
-                    <div className="rank">
-                      {String(listing.rank).padStart(2, "0")}
-                    </div>
+  {listingsLoading ? (
+    <div className="empty-board">Loading listings...</div>
+  ) : listingsError ? (
+    <div className="empty-board">{listingsError}</div>
+  ) : visibleListings.length > 0 ? (
+    visibleListings.map((listing, index) => {
+      const typeName = getListingTypeName(listing.listingTypeId);
+      const categoryName = getCategoryName(listing.categoryId);
+      const subcategoryName = getSubcategoryName(
+        listing.categoryId,
+        listing.subcategoryId,
+      );
 
-                    <div
-                      className={`listing-mark listing-mark-${listing.type
-                        .toLowerCase()
-                        .replace(/\s+/g, "-")}`}
-                    >
-                      {listing.title.charAt(0)}
-                    </div>
+      const rank = listing.currentBoardRank ?? index + 1;
 
-                    <div className="listing-content">
-                      <div className="listing-title-line">
-                        <h3>{listing.title}</h3>
+      return (
+        <article className="board-row" key={listing.id}>
+          <div className="rank">
+            {String(rank).padStart(2, "0")}
+          </div>
 
-                        {listing.badge && (
-                          <span
-                            className={`rank-badge badge-${listing.badge.toLowerCase()}`}
-                          >
-                            {listing.badge}
-                          </span>
-                        )}
-                      </div>
+          <div
+            className={`listing-mark listing-mark-${typeName
+              .toLowerCase()
+              .replace(/\s+/g, "-")}`}
+          >
+            {listing.title.charAt(0)}
+          </div>
 
-                      <p className="listing-meta">
-                        {listing.type} · {listing.category} · {listing.subcategory}
-                        <span className="meta-separator"> · </span>
-                        <strong> {listing.handle}</strong>
-                        <span className="meta-owner"> · {listing.owner}</span>
-                      </p>
+          <div className="listing-content">
+            <div className="listing-title-line">
+              <h3>{listing.title}</h3>
 
-                      <p className="listing-description">
-                        {listing.description}
-                      </p>
-                    </div>
-
-                    <div className="listing-score">
-                      <strong>${listing.boostTotal}</strong>
-                      <span>
-                        <Users size={12} />
-                        {listing.supporters}
-                      </span>
-                    </div>
-
-                    <div className="listing-actions">
-                      <button className="visit-button" type="button">
-                        Visit ↗
-                      </button>
-
-                      <button className="push-button" type="button">
-                        <ArrowUp size={14} strokeWidth={2.5} />
-                        {marketplaceConfig.terminology.pushAction}
-                      </button>
-                    </div>
-                  </article>
-                ))
-              ) : (
-                <div className="empty-board">
-                  No demo listings in this type yet.
-                </div>
+              {rank === 1 && (
+                <span className="rank-badge badge-top">
+                  TOP
+                </span>
               )}
             </div>
+
+            <p className="listing-meta">
+              {typeName}
+              {" · "}
+              {categoryName}
+
+              {subcategoryName && (
+                <>
+                  {" · "}
+                  {subcategoryName}
+                </>
+              )}
+
+              {listing.handle && (
+                <>
+                  <span className="meta-separator"> · </span>
+                  <strong>{listing.handle}</strong>
+                </>
+              )}
+
+              {listing.ownerDisplayName && (
+                <span className="meta-owner">
+                  {" · "}
+                  {listing.ownerDisplayName}
+                </span>
+              )}
+            </p>
+
+            <p className="listing-description">
+              {listing.shortDescription}
+            </p>
+          </div>
+
+          <div className="listing-score">
+            <strong>
+              {formatMoneyMinor(listing.currentBoostTotalMinor)}
+            </strong>
+
+            <span>
+              <Users size={12} />
+              0
+            </span>
+          </div>
+
+          <div className="listing-actions">
+            <a
+              className="visit-button"
+              href={listing.externalUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Visit ↗
+            </a>
+
+            <button className="push-button" type="button">
+              <ArrowUp size={14} strokeWidth={2.5} />
+              {marketplaceConfig.terminology.pushAction}
+            </button>
+          </div>
+        </article>
+      );
+    })
+  ) : (
+    <div className="empty-board">
+      No published listings in this type yet.
+    </div>
+  )}
+</div>
 
             <div className="board-bottom">
               <span>Ranking is based on paid pushes this board period.</span>
@@ -342,7 +392,7 @@ export function HomePage() {
                 </div>
 
                 <div>
-                  <strong>${boardStats.pushed}</strong>
+                  <strong>{formatMoneyMinor(boardStats.pushedMinor)}</strong>
                   <span>pushed</span>
                 </div>
               </div>
