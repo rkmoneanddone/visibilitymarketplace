@@ -1,0 +1,166 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /listings/{listingId} {
+
+
+  	allow read:
+      if resource.data.status == "published"
+      || (
+        request.auth != null
+        && resource.data.submittedByUserId == request.auth.uid
+      )
+      || (
+        request.auth != null
+        && "claimedOwnerUserId" in resource.data
+        && resource.data.claimedOwnerUserId == request.auth.uid
+      );
+      allow create:
+        if request.auth != null
+
+        && request.resource.data.submittedByUserId
+           == request.auth.uid
+
+        && request.resource.data.status
+           == "submitted"
+
+        && request.resource.data.externalClicks
+           == 0
+
+        && request.resource.data.currentBoostTotalMinor
+           == 0
+
+        && (
+          (
+            request.resource.data.submissionRelationship
+              == "supporter"
+
+            && request.resource.data.ownershipStatus
+              == "unclaimed"
+
+            && !(
+              "claimedOwnerUserId"
+              in request.resource.data
+            )
+          )
+
+          ||
+
+          (
+            request.resource.data.submissionRelationship
+              == "owner"
+
+            && request.resource.data.ownershipStatus
+              == "claimed"
+
+            && request.resource.data.claimedOwnerUserId
+              == request.auth.uid
+          )
+        )
+
+        && request.resource.data.keys().hasOnly([
+          "id",
+
+          "submittedByUserId",
+          "submissionRelationship",
+          "claimedOwnerUserId",
+          "ownershipStatus",
+
+          "listingTypeId",
+          "platformKey",
+          "targetKind",
+          "externalTargetId",
+
+          "categoryId",
+          "subcategoryId",
+
+          "title",
+          "slug",
+
+          "handle",
+          "platformUrl",
+
+          "shortDescription",
+
+          "externalUrl",
+          "websiteUrl",
+          "downloadUrl",
+          "launchDate",
+	  "featuredImageUrl",
+	  "featuredImagePath",
+
+          "status",
+
+          "externalClicks",
+          "currentBoostTotalMinor",
+
+          "createdAt",
+          "updatedAt"
+        ]);
+
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    match /boardPeriods/{periodId} {
+      allow read: if true;
+      allow create, update, delete: if false;
+    }
+
+    match /boosts/{boostId} {
+      allow read, create, update, delete: if false;
+    }
+
+    match /users/{userId} {
+      allow read: if request.auth != null
+                  && request.auth.uid == userId;
+
+      allow create: if request.auth != null
+                    && request.auth.uid == userId
+                    && request.resource.data.uid == userId
+                    && request.resource.data.role == "supporter";
+
+      allow update: if request.auth != null
+                    && request.auth.uid == userId
+                    && request.resource.data.uid == resource.data.uid
+                    && request.resource.data.role == resource.data.role;
+
+      allow delete: if false;
+    }
+    
+    match /auditEvents/{auditId} {
+
+    allow read: if false;
+
+    allow create:
+        if request.auth != null
+
+        && request.resource.data.type
+          == "listing_created"
+
+        && request.resource.data.actorUserId
+          == request.auth.uid
+
+        && request.resource.data.id
+          == auditId
+
+        && auditId
+          == "listing_created_"
+              + request.resource.data.listingId
+
+        && request.resource.data.keys().hasOnly([
+          "id",
+          "type",
+          "listingId",
+          "actorUserId",
+          "createdAt",
+          "metadata"
+        ]);
+
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}

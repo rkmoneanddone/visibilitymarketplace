@@ -1,5 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  AccountControl,
+} from "../features/auth/AccountControl";
+import {
+  ListingLauncher,
+} from "../features/listings/ListingLauncher";
+
+import {
+  formatPlatformHandle,
+} from "../lib/marketplace/platformDisplay";
+
+import {
   ArrowUp,
   BarChart3,
   Eye,
@@ -35,42 +46,43 @@ import type { Listing } from "../types/marketplace";
 
 export function HomePage() {
   const [selectedType, setSelectedType] = useState("All");
-const [listings, setListings] = useState<Listing[]>([]);
-const [listingsLoading, setListingsLoading] = useState(true);
-const [listingsError, setListingsError] = useState<string | null>(null);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [listingsLoading, setListingsLoading] = useState(true);
+  const [listingsError, setListingsError] = useState<string | null>(null);
 
-useEffect(() => {
-  let active = true;
 
-  async function loadListings() {
-    try {
-      setListingsLoading(true);
-      setListingsError(null);
+  useEffect(() => {
+    let active = true;
 
-      const publishedListings = await getPublishedListings();
+    async function loadListings() {
+      try {
+        setListingsLoading(true);
+        setListingsError(null);
 
-      if (active) {
-        setListings(publishedListings);
-      }
-    } catch (error) {
-      console.error("Failed to load marketplace listings:", error);
+        const publishedListings = await getPublishedListings();
 
-      if (active) {
-        setListingsError("Unable to load listings right now.");
-      }
-    } finally {
-      if (active) {
-        setListingsLoading(false);
+        if (active) {
+          setListings(publishedListings);
+        }
+      } catch (error) {
+        console.error("Failed to load marketplace listings:", error);
+
+        if (active) {
+          setListingsError("Unable to load listings right now.");
+        }
+      } finally {
+        if (active) {
+          setListingsLoading(false);
+        }
       }
     }
-  }
 
-  void loadListings();
+    void loadListings();
 
-  return () => {
-    active = false;
-  };
-}, []);
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const enabledTypes = useMemo(
     () =>
@@ -81,24 +93,26 @@ useEffect(() => {
   );
 
   const visibleListings =
-  selectedType === "All"
-    ? listings
-    : listings.filter(
+    selectedType === "All"
+      ? listings
+      : listings.filter(
         (listing) =>
           getListingTypeName(listing.listingTypeId) === selectedType,
       );
 
   const boardStats = {
-  listed: visibleListings.length,
+    listed: visibleListings.length,
 
-  today: demoBoardStats.newToday,
+    today: demoBoardStats.newToday,
 
-  pushedMinor: visibleListings.reduce(
-    (total, listing) =>
-      total + listing.currentBoostTotalMinor,
-    0,
-  ),
-};
+    pushedMinor: visibleListings.reduce(
+      (total, listing) =>
+        total + listing.currentBoostTotalMinor,
+      0,
+    ),
+  };
+
+
 
   return (
     <>
@@ -113,11 +127,23 @@ useEffect(() => {
         <nav className="main-nav">
           <a href="#board">Explore</a>
           <a href="#how">How it works</a>
-          <a className="add-link" href="#add-listing">
-            <ListPlus size={15} />
-            Add Listing
-          </a>
-          <a href="#signin">Sign in</a>
+          <ListingLauncher
+            onCreated={
+              handleListingCreated
+            }
+          >
+            {(openListing) => (
+              <button
+                type="button"
+                className="add-link"
+                onClick={openListing}
+              >
+                <ListPlus size={15} />
+                Add Listing
+              </button>
+            )}
+          </ListingLauncher>
+          <AccountControl />
         </nav>
       </header>
 
@@ -132,12 +158,12 @@ useEffect(() => {
             <h1>{marketplaceConfig.homepage.headline}</h1>
 
             <div className="intro-side">
-  <p>{marketplaceConfig.homepage.description}</p>
+              <p>{marketplaceConfig.homepage.description}</p>
 
-  <a href="#add-listing">
-    {marketplaceConfig.homepage.listingCta}
-  </a>
-</div>
+              <a href="#add-listing">
+                {marketplaceConfig.homepage.listingCta}
+              </a>
+            </div>
           </div>
         </section>
 
@@ -242,113 +268,142 @@ useEffect(() => {
             </div>
 
             <div className="board-list">
-  {listingsLoading ? (
-    <div className="empty-board">Loading listings...</div>
-  ) : listingsError ? (
-    <div className="empty-board">{listingsError}</div>
-  ) : visibleListings.length > 0 ? (
-    visibleListings.map((listing, index) => {
-      const typeName = getListingTypeName(listing.listingTypeId);
-      const categoryName = getCategoryName(listing.categoryId);
-      const subcategoryName = getSubcategoryName(
-        listing.categoryId,
-        listing.subcategoryId,
-      );
+              {listingsLoading ? (
+                <div className="empty-board">Loading listings...</div>
+              ) : listingsError ? (
+                <div className="empty-board">{listingsError}</div>
+              ) : visibleListings.length > 0 ? (
+                visibleListings.map((listing, index) => {
+                  const typeName = getListingTypeName(listing.listingTypeId);
+                  const categoryName = getCategoryName(listing.categoryId);
+                  const subcategoryName = getSubcategoryName(
+                    listing.categoryId,
+                    listing.subcategoryId,
+                  );
 
-      const rank = listing.currentBoardRank ?? index + 1;
+                  const rank = listing.currentBoardRank ?? index + 1;
 
-      return (
-        <article className="board-row" key={listing.id}>
-          <div className="rank">
-            {String(rank).padStart(2, "0")}
-          </div>
+                  return (
+                    <article className="board-row" key={listing.id}>
+                      <div className="rank">
+                        {String(rank).padStart(2, "0")}
+                      </div>
 
-          <div
-            className={`listing-mark listing-mark-${typeName
-              .toLowerCase()
-              .replace(/\s+/g, "-")}`}
-          >
-            {listing.title.charAt(0)}
-          </div>
+                      <div
+                        className={`listing-mark listing-mark-${typeName
+                          .toLowerCase()
+                          .replace(/\s+/g, "-")}`}
+                      >
+                        {listing.title.charAt(0)}
+                      </div>
 
-          <div className="listing-content">
-            <div className="listing-title-line">
-              <h3>{listing.title}</h3>
+                      <div className="listing-content">
+                        <div className="listing-title-line">
+                          <h3>{listing.title}</h3>
 
-              {rank === 1 && (
-                <span className="rank-badge badge-top">
-                  TOP
-                </span>
+                          {rank === 1 && (
+                            <span className="rank-badge badge-top">
+                              TOP
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="listing-meta">
+                          {typeName}
+                          {" · "}
+                          {categoryName}
+
+                          {subcategoryName && (
+                            <>
+                              {" · "}
+                              {subcategoryName}
+                            </>
+                          )}
+
+                          {listing.handle && (
+                            <>
+                              <span className="meta-separator">
+                                ·
+                              </span>
+
+                              {listing.platformUrl ? (
+                                <a
+                                  className="listing-platform-link"
+                                  href={listing.platformUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  title={`Open ${typeName}`}
+                                >
+                                  {getTypeIcon(typeName)}
+
+                                  <span>
+                                    {formatPlatformHandle(
+                                      listing.handle,
+                                    )}
+                                  </span>
+                                </a>
+                              ) : (
+                                <span className="listing-platform-link no-link">
+                                  {getTypeIcon(typeName)}
+
+                                  <span>
+                                    {formatPlatformHandle(
+                                      listing.handle,
+                                    )}
+                                  </span>
+                                </span>
+                              )}
+                            </>
+                          )}
+
+                          {listing.ownerDisplayName && (
+                            <span className="meta-owner">
+                              {" · "}
+                              {listing.ownerDisplayName}
+                            </span>
+                          )}
+                        </p>
+
+                        <p className="listing-description">
+                          {listing.shortDescription}
+                        </p>
+                      </div>
+
+                      <div className="listing-score">
+                        <strong>
+                          {formatMoneyMinor(listing.currentBoostTotalMinor)}
+                        </strong>
+
+                        <span>
+                          <Users size={12} />
+                          0
+                        </span>
+                      </div>
+
+                      <div className="listing-actions">
+                        <a
+                          className="visit-button"
+                          href={listing.externalUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Visit ↗
+                        </a>
+
+                        <button className="push-button" type="button">
+                          <ArrowUp size={14} strokeWidth={2.5} />
+                          {marketplaceConfig.terminology.pushAction}
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })
+              ) : (
+                <div className="empty-board">
+                  No published listings in this type yet.
+                </div>
               )}
             </div>
-
-            <p className="listing-meta">
-              {typeName}
-              {" · "}
-              {categoryName}
-
-              {subcategoryName && (
-                <>
-                  {" · "}
-                  {subcategoryName}
-                </>
-              )}
-
-              {listing.handle && (
-                <>
-                  <span className="meta-separator"> · </span>
-                  <strong>{listing.handle}</strong>
-                </>
-              )}
-
-              {listing.ownerDisplayName && (
-                <span className="meta-owner">
-                  {" · "}
-                  {listing.ownerDisplayName}
-                </span>
-              )}
-            </p>
-
-            <p className="listing-description">
-              {listing.shortDescription}
-            </p>
-          </div>
-
-          <div className="listing-score">
-            <strong>
-              {formatMoneyMinor(listing.currentBoostTotalMinor)}
-            </strong>
-
-            <span>
-              <Users size={12} />
-              0
-            </span>
-          </div>
-
-          <div className="listing-actions">
-            <a
-              className="visit-button"
-              href={listing.externalUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Visit ↗
-            </a>
-
-            <button className="push-button" type="button">
-              <ArrowUp size={14} strokeWidth={2.5} />
-              {marketplaceConfig.terminology.pushAction}
-            </button>
-          </div>
-        </article>
-      );
-    })
-  ) : (
-    <div className="empty-board">
-      No published listings in this type yet.
-    </div>
-  )}
-</div>
 
             <div className="board-bottom">
               <span>Ranking is based on paid pushes this board period.</span>
@@ -471,6 +526,18 @@ useEffect(() => {
   );
 }
 
+
+
+
+function handleListingCreated(
+  listing: Listing,
+) {
+  console.log(
+    "Listing submitted:",
+    listing.id,
+  );
+}
+
 function VisibilityCard() {
   return (
     <section className="visibility-cta" id="add-listing">
@@ -489,10 +556,21 @@ function VisibilityCard() {
         Put your channel, app, website or startup on the public board.
       </p>
 
-      <button type="button">
-        <ListPlus size={15} />
-        Add your listing
-      </button>
+      <ListingLauncher
+        onCreated={
+          handleListingCreated
+        }
+      >
+        {(openListing) => (
+          <button
+            type="button"
+            onClick={openListing}
+          >
+            <ListPlus size={15} />
+            Add your listing
+          </button>
+        )}
+      </ListingLauncher>
     </section>
   );
 }

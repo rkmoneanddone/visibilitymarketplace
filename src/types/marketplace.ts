@@ -40,18 +40,57 @@ export interface Subcategory {
   sortOrder: number;
 }
 
+export type PromotionTargetKind =
+  | "channel"
+  | "video"
+  | "profile"
+  | "app"
+  | "website"
+  | "startup"
+  | "other";
+
+export type ListingSubmissionRelationship =
+  | "owner"
+  | "supporter";
+
+export type OwnershipStatus =
+  | "unclaimed"
+  | "claim_pending"
+  | "claimed"
+  | "verified"
+  | "claim_rejected";
+
 export interface Listing {
   id: string;
-  ownerId: string;
+
+  submittedByUserId: string;
+
+  submissionRelationship:
+  ListingSubmissionRelationship;
+
+  claimedOwnerUserId?: string;
+
+  ownershipStatus: OwnershipStatus;
+
+  claimRequestedByUserId?: string;
+  claimRequestedAt?: string;
+
+  ownershipVerifiedAt?: string;
 
   listingTypeId: string;
+  platformKey?: string;
+  targetKind: PromotionTargetKind;
+  externalTargetId?: string;
+
   categoryId: string;
   subcategoryId?: string;
 
   title: string;
   slug: string;
-handle?: string;
-ownerDisplayName?: string;
+
+  handle?: string;
+  ownerDisplayName?: string;
+
   shortDescription: string;
   description?: string;
 
@@ -70,9 +109,17 @@ ownerDisplayName?: string;
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;
+  websiteUrl?: string;
+  downloadUrl?: string;
+  launchDate?: string;
+  platformUrl?: string;
+
+  featuredImageUrl?: string;
 }
 
-export type BoostSource = "owner" | "visitor";
+export type BoostSource =
+  | "owner"
+  | "supporter";
 
 export type BoostStatus =
   | "pending"
@@ -95,6 +142,8 @@ export interface Boost {
   status: BoostStatus;
 
   createdAt: string;
+  featuredImageUrl?: string;
+featuredImagePath?: string;
 }
 
 export interface BoardPeriod {

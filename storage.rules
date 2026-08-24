@@ -1,0 +1,33 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    match /listings/{listingId}/{userId}/featured.webp {
+
+      // Listing images are public once their URL is used on the board.
+      allow read: if true;
+
+      // Only the signed-in uploader can create the optimized image.
+      allow create:
+        if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.contentType == "image/webp"
+        && request.resource.size <= 180 * 1024;
+
+      // Do not allow arbitrary replacement yet.
+      // Image editing will get its own controlled flow.
+      allow update: if false;
+
+      // Needed for rollback if Firestore transaction fails.
+      allow delete:
+        if request.auth != null
+        && request.auth.uid == userId;
+    }
+
+    // Everything else blocked.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

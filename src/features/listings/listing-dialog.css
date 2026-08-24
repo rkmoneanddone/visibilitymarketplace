@@ -1,0 +1,438 @@
+.listing-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+
+  display: grid;
+  place-items: center;
+
+  padding: 14px;
+
+  background: rgba(15, 23, 42, 0.24);
+}
+
+.listing-dialog {
+  width: min(620px, 100%);
+  max-height: calc(100vh - 28px);
+  overflow-y: auto;
+
+  padding: 16px;
+
+  border: 1px solid #d8e0eb;
+  border-radius: 12px;
+
+  background: #fff;
+
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.1);
+}
+
+.listing-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.listing-dialog-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.listing-dialog-heading h2 {
+  margin: 1px 0 0;
+  font-size: 19px;
+  line-height: 1.15;
+}
+
+.listing-dialog-heading .eyebrow {
+  margin: 0;
+  font-size: 10px;
+}
+
+.listing-heading-icon {
+  display: grid;
+  place-items: center;
+
+  width: 31px;
+  height: 31px;
+
+  flex: 0 0 auto;
+
+  border-radius: 8px;
+
+  background: #e6f0ff;
+  color: #2563eb;
+}
+
+.listing-dialog-close {
+  width: 28px;
+  height: 28px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: transparent;
+
+  font-size: 22px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.listing-dialog-close:hover {
+  background: #f3f5f8;
+}
+
+.listing-status-strip {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  min-height: 34px;
+
+  margin-bottom: 11px;
+  padding: 6px 8px;
+
+  border: 1px solid #c8d9f4;
+  border-radius: 8px;
+
+  background: #f4f8ff;
+
+  font-size: 11px;
+}
+
+.listing-status-badge {
+  padding: 3px 6px;
+
+  border-radius: 999px;
+
+  white-space: nowrap;
+
+  font-size: 10px;
+}
+
+.listing-status-badge.free {
+  background: #dff5e7;
+  color: #267446;
+}
+
+.listing-status-badge.paid {
+  background: #fff0cc;
+  color: #86621e;
+}
+
+.listing-status-copy {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  color: #52667e;
+}
+
+.listing-push-note {
+  margin-left: auto;
+
+  white-space: nowrap;
+
+  color: #315d9a;
+}
+
+.listing-form {
+  display: grid;
+  gap: 9px;
+}
+
+.listing-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  gap: 9px;
+}
+
+.listing-form label {
+  display: grid;
+  gap: 4px;
+
+  min-width: 0;
+
+  font-size: 12px;
+  color: #3f4a5a;
+}
+
+.listing-form input,
+.listing-form select {
+  width: 100%;
+  height: 36px;
+
+  padding: 6px 9px;
+
+  border: 1px solid #ccd5e1;
+  border-radius: 7px;
+
+  background: #fff;
+
+  font: inherit;
+  color: #222b38;
+
+  outline: none;
+}
+
+.listing-form input:focus,
+.listing-form select:focus {
+  border-color: #8ab2ef;
+}
+
+.listing-form select:disabled {
+  background: #f6f7f9;
+  color: #9098a5;
+}
+
+.listing-owner-line {
+  display: flex;
+  align-items: center;
+
+  gap: 15px;
+
+  min-height: 30px;
+
+  padding: 3px 1px;
+
+  font-size: 12px;
+}
+
+.listing-owner-line > span {
+  color: #596579;
+}
+
+.listing-owner-line label {
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  cursor: pointer;
+}
+
+.listing-owner-line input {
+  width: auto;
+  height: auto;
+  margin: 0;
+}
+
+.listing-file-control {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  height: 36px;
+
+  padding: 6px 9px;
+
+  overflow: hidden;
+
+  border: 1px dashed #b8c5d6;
+  border-radius: 7px;
+
+  background: #fafcff;
+
+  color: #62748b;
+
+  cursor: pointer;
+}
+
+.listing-file-control span {
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.listing-file-control input {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  opacity: 0;
+
+  cursor: pointer;
+}
+
+.listing-last-row {
+  grid-template-columns: 0.72fr 1.28fr;
+}
+
+.listing-form-error {
+  margin: 0;
+
+  padding: 6px 8px;
+
+  border-radius: 6px;
+
+  background: #fff2f0;
+
+  color: #b42318;
+
+  font-size: 11px;
+}
+
+.listing-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  padding-top: 3px;
+}
+
+.listing-form-actions > div {
+  display: flex;
+  gap: 7px;
+}
+
+.listing-form-actions button {
+  min-height: 35px;
+
+  padding: 6px 12px;
+
+  border-radius: 7px;
+
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+.listing-submit-note {
+  font-size: 10px;
+  color: #7a8494;
+}
+
+.listing-cancel-button {
+  border: 1px solid #d6dde7;
+  background: #fff;
+}
+
+.listing-form-primary {
+  border: 1px solid #2563eb;
+
+  background: #2563eb;
+  color: #fff;
+}
+
+.listing-form-primary:disabled,
+.listing-cancel-button:disabled,
+.listing-dialog-close:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+@media (max-width: 640px) {
+  .listing-dialog-overlay {
+    align-items: end;
+
+    padding: 0;
+
+    background: rgba(15, 23, 42, 0.26);
+  }
+
+  .listing-dialog {
+    width: 100%;
+    max-height: 94vh;
+
+    padding: 13px;
+
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+
+    border-radius: 14px 14px 0 0;
+  }
+
+  .listing-dialog-header {
+    margin-bottom: 8px;
+  }
+
+  .listing-dialog-heading h2 {
+    font-size: 17px;
+  }
+
+  .listing-heading-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .listing-status-strip {
+    flex-wrap: wrap;
+
+    gap: 5px 7px;
+
+    margin-bottom: 9px;
+  }
+
+  .listing-push-note {
+    margin-left: 0;
+  }
+
+  .listing-form {
+    gap: 8px;
+  }
+
+  .listing-form-row,
+  .listing-last-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .listing-owner-line {
+    flex-wrap: wrap;
+
+    gap: 6px 12px;
+
+    padding: 2px 0;
+  }
+
+  .listing-owner-line > span {
+    width: 100%;
+  }
+
+  .listing-form input,
+  .listing-form select,
+  .listing-file-control {
+    height: 38px;
+  }
+
+  .listing-form-actions {
+    position: sticky;
+    bottom: -13px;
+
+    margin: 2px -13px -13px;
+    padding: 9px 13px;
+
+    border-top: 1px solid #e8ecf1;
+
+    background: #fff;
+  }
+
+  .listing-submit-note {
+    display: none;
+  }
+
+  .listing-form-actions > div {
+    width: 100%;
+  }
+
+  .listing-form-actions button {
+    flex: 1;
+  }
+}

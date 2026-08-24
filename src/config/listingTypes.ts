@@ -35,6 +35,19 @@ export const initialListingTypes: ListingType[] = [
     sortOrder: 3,
   },
   {
+  id: "x",
+  key: "x",
+  name: "X",
+  enabled: true,
+
+  freeListingAllowance: 1,
+  listingFeeMinor: 100,
+  minimumBoostMinor: 100,
+
+  boostingEnabled: true,
+  sortOrder: 4,
+},
+  {
     id: "app",
     key: "app",
     name: "App",

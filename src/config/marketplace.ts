@@ -22,4 +22,9 @@ export const marketplaceConfig = {
       "Channels, apps, websites and startups compete for visibility. Support the ones you want more people to discover.",
     listingCta: "List yours →",
   },
+  promotion: {
+    allowThirdPartySubmissions: true,
+    allowOwnerSubmissions: true,
+    allowListingClaims: true,
+  },
 } as const;
