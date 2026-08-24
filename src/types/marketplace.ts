@@ -50,6 +50,8 @@ export interface Listing {
 
   title: string;
   slug: string;
+handle?: string;
+ownerDisplayName?: string;
   shortDescription: string;
   description?: string;
 
