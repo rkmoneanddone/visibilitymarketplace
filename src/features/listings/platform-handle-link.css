@@ -1,0 +1,23 @@
+.platform-handle-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  color: #3568a8;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.platform-handle-link:hover {
+  text-decoration: underline;
+}
+
+.platform-handle-link svg {
+  flex: 0 0 auto;
+}
+
+.platform-handle-link.no-link {
+  color: inherit;
+  cursor: default;
+  text-decoration: none;
+}

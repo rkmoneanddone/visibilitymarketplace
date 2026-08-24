@@ -143,7 +143,11 @@ export interface Boost {
 
   createdAt: string;
   featuredImageUrl?: string;
-featuredImagePath?: string;
+  featuredImagePath?: string;
+  publishedAt?: string;
+
+  rejectedAt?: string;
+  rejectionReason?: string;
 }
 
 export interface BoardPeriod {

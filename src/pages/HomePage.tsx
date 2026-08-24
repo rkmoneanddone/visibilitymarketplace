@@ -7,8 +7,8 @@ import {
 } from "../features/listings/ListingLauncher";
 
 import {
-  formatPlatformHandle,
-} from "../lib/marketplace/platformDisplay";
+  PlatformHandleLink,
+} from "../features/listings/PlatformHandleLink";
 
 import {
   ArrowUp,
@@ -294,7 +294,15 @@ export function HomePage() {
                           .toLowerCase()
                           .replace(/\s+/g, "-")}`}
                       >
-                        {listing.title.charAt(0)}
+                        {listing.featuredImageUrl ? (
+                          <img
+                            src={listing.featuredImageUrl}
+                            alt=""
+                            loading="lazy"
+                          />
+                        ) : (
+                          listing.title.charAt(0)
+                        )}
                       </div>
 
                       <div className="listing-content">
@@ -326,33 +334,13 @@ export function HomePage() {
                                 ·
                               </span>
 
-                              {listing.platformUrl ? (
-                                <a
-                                  className="listing-platform-link"
-                                  href={listing.platformUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  title={`Open ${typeName}`}
-                                >
-                                  {getTypeIcon(typeName)}
-
-                                  <span>
-                                    {formatPlatformHandle(
-                                      listing.handle,
-                                    )}
-                                  </span>
-                                </a>
-                              ) : (
-                                <span className="listing-platform-link no-link">
-                                  {getTypeIcon(typeName)}
-
-                                  <span>
-                                    {formatPlatformHandle(
-                                      listing.handle,
-                                    )}
-                                  </span>
-                                </span>
-                              )}
+                              <PlatformHandleLink
+                                typeName={typeName}
+                                handle={listing.handle}
+                                platformUrl={
+                                  listing.platformUrl
+                                }
+                              />
                             </>
                           )}
 

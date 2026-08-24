@@ -43,7 +43,7 @@ function extractHandle(
     return "";
   }
 
-  // Plain:
+  // Plain handle:
   // rohit
   // @rohit
   if (!looksLikeUrl(raw)) {
@@ -93,32 +93,28 @@ export function resolvePlatformIdentity(
       return {
         platformKey,
         handle,
-        url:
-          `https://www.youtube.com/@${handle}`,
+        url: `https://www.youtube.com/@${handle}`,
       };
 
     case "instagram":
       return {
         platformKey,
         handle,
-        url:
-          `https://www.instagram.com/${handle}/`,
+        url: `https://www.instagram.com/${handle}/`,
       };
 
     case "facebook":
       return {
         platformKey,
         handle,
-        url:
-          `https://www.facebook.com/${handle}`,
+        url: `https://www.facebook.com/${handle}`,
       };
 
     case "x":
       return {
         platformKey,
         handle,
-        url:
-          `https://x.com/${handle}`,
+        url: `https://x.com/${handle}`,
       };
   }
 }
