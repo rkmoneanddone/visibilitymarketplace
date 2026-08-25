@@ -191,6 +191,16 @@ export function AccountControl() {
 
           <button
             type="button"
+            onClick={() => {
+              setMenuOpen(false);
+              navigate("/boards/request");
+            }}
+          >
+            Request board
+          </button>
+
+          <button
+            type="button"
             disabled
           >
             Payments

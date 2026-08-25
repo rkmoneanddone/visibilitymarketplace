@@ -43,6 +43,12 @@ async function assertAdmin(
   }
 }
 
+function normalizeString(
+  value: unknown,
+): string {
+  return String(value ?? "").trim();
+}
+
 function canManageListing(
   listing: FirebaseFirestore.DocumentData,
   uid: string,
@@ -62,6 +68,281 @@ function canManageListing(
 
   return false;
 }
+
+export const requestBoard =
+  onCall(
+    {
+      region: "asia-south1",
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Authentication required.",
+        );
+      }
+
+      const name =
+        normalizeString(
+          request.data?.name,
+        );
+
+      const shortDescription =
+        normalizeString(
+          request.data?.shortDescription,
+        );
+
+      const startsAt =
+        normalizeString(
+          request.data?.startsAt,
+        );
+
+      const entryClosesAt =
+        normalizeString(
+          request.data?.entryClosesAt,
+        );
+
+      const endsAt =
+        normalizeString(
+          request.data?.endsAt,
+        );
+
+      const currency =
+        normalizeString(
+          request.data?.currency ||
+          "USD",
+        ).toUpperCase();
+
+      const eligibleListingTypeIds =
+        Array.isArray(
+          request.data
+            ?.eligibleListingTypeIds,
+        )
+          ? request.data
+            .eligibleListingTypeIds
+            .map((value: unknown) =>
+              normalizeString(value),
+            )
+            .filter(Boolean)
+          : [];
+
+      const categoryId =
+        normalizeString(
+          request.data?.categoryId,
+        );
+
+      const subcategoryId =
+        normalizeString(
+          request.data?.subcategoryId,
+        );
+
+      const entryFeeMinor =
+        Number(
+          request.data
+            ?.entryFeeMinor,
+        );
+
+      const minimumBoostMinor =
+        Number(
+          request.data
+            ?.minimumBoostMinor,
+        );
+
+      if (!name) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Board name is required.",
+        );
+      }
+
+      if (!shortDescription) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Short description is required.",
+        );
+      }
+
+      if (
+        eligibleListingTypeIds
+          .length === 0
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "At least one eligible listing type is required.",
+        );
+      }
+
+      if (
+        !Number.isInteger(
+          entryFeeMinor,
+        ) ||
+        entryFeeMinor < 100
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Entry fee must be at least $1.",
+        );
+      }
+
+      if (
+        !Number.isInteger(
+          minimumBoostMinor,
+        ) ||
+        minimumBoostMinor < 1 ||
+        minimumBoostMinor > 10000
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Minimum boost amount is invalid.",
+        );
+      }
+
+      if (
+        !startsAt ||
+        !entryClosesAt ||
+        !endsAt
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Board dates are required.",
+        );
+      }
+
+      const startsDate =
+        new Date(startsAt);
+
+      const entryClosesDate =
+        new Date(entryClosesAt);
+
+      const endsDate =
+        new Date(endsAt);
+
+      if (
+        Number.isNaN(
+          startsDate.getTime(),
+        ) ||
+        Number.isNaN(
+          entryClosesDate.getTime(),
+        ) ||
+        Number.isNaN(
+          endsDate.getTime(),
+        )
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Invalid board dates.",
+        );
+      }
+
+      if (
+        entryClosesDate.getTime() <
+        startsDate.getTime() ||
+        endsDate.getTime() <=
+        startsDate.getTime()
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Board dates are not valid.",
+        );
+      }
+
+      const boardRef =
+        db
+          .collection("boards")
+          .doc();
+
+      const auditRef =
+        db
+          .collection("auditEvents")
+          .doc(
+            `board_requested_${boardRef.id}`,
+          );
+
+      await db.runTransaction(
+        async (transaction) => {
+          const now =
+            FieldValue.serverTimestamp();
+
+          transaction.set(
+            boardRef,
+            {
+              id: boardRef.id,
+
+              name,
+
+              slug:
+                name
+                  .toLowerCase()
+                  .replace(
+                    /[^a-z0-9]+/g,
+                    "-",
+                  )
+                  .replace(
+                    /^-+|-+$/g,
+                    "",
+                  ),
+
+              shortDescription,
+
+              createdByUserId:
+                request.auth!.uid,
+
+              status:
+                "requested",
+
+              eligibleListingTypeIds,
+
+              ...(categoryId
+                ? { categoryId }
+                : {}),
+
+              ...(subcategoryId
+                ? { subcategoryId }
+                : {}),
+
+              startsAt,
+              entryClosesAt,
+              endsAt,
+
+              entryFeeMinor,
+              minimumBoostMinor,
+
+              currency,
+
+              createdAt: now,
+              updatedAt: now,
+            },
+          );
+
+          transaction.set(
+            auditRef,
+            {
+              id:
+                auditRef.id,
+
+              type:
+                "board_requested",
+
+              boardId:
+                boardRef.id,
+
+              actorUserId:
+                request.auth!.uid,
+
+              createdAt: now,
+
+              metadata: {},
+            },
+          );
+        },
+      );
+
+      return {
+        success: true,
+        boardId: boardRef.id,
+      };
+    },
+  );
 
 export const archiveListing =
   onCall(

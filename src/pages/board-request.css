@@ -1,0 +1,150 @@
+.board-request-page {
+  width: 80%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 0 48px;
+}
+
+.board-request-header {
+  margin-bottom: 22px;
+}
+
+.board-request-header h1 {
+  margin: 0;
+  color: #151515;
+  font-size: 34px;
+  letter-spacing: -0.03em;
+}
+
+.board-request-header > p:last-child {
+  max-width: 680px;
+  margin: 8px 0 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.board-request-form {
+  display: grid;
+  gap: 18px;
+}
+
+.board-request-form label,
+.board-request-form fieldset {
+  display: grid;
+  gap: 7px;
+}
+
+.board-request-form label > span,
+.board-request-form legend {
+  color: #333;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.board-request-form small {
+  color: #999;
+  font-weight: 400;
+}
+
+.board-request-form input,
+.board-request-form textarea,
+.board-request-form select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  background: #fff;
+  padding: 10px 11px;
+  color: #333;
+  outline: none;
+}
+
+.board-request-form textarea {
+  resize: vertical;
+}
+
+.board-request-form input:focus,
+.board-request-form textarea:focus,
+.board-request-form select:focus {
+  border-color: #91a9e8;
+}
+
+.board-request-form fieldset {
+  margin: 0;
+  border: 1px solid #e5e5e5;
+  border-radius: 9px;
+  padding: 14px;
+}
+
+.board-type-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.board-type-options label {
+  display: inline-flex;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #dfe5ee;
+  border-radius: 7px;
+  padding: 7px 10px;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.board-type-options input {
+  width: auto;
+}
+
+.board-request-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.board-request-error {
+  padding: 10px 12px;
+  border: 1px solid #efcaca;
+  border-radius: 8px;
+  background: #fff6f6;
+  color: #9a3434;
+  font-size: 13px;
+}
+
+.board-request-submit {
+  width: fit-content;
+  border: 1px solid #2455db;
+  border-radius: 8px;
+  background: #2455db;
+  color: #fff;
+  padding: 10px 15px;
+  font-weight: 600;
+}
+
+.board-request-submit:hover:not(:disabled) {
+  background: #1945bd;
+}
+
+.board-request-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.board-request-state {
+  padding: 18px;
+  border: 1px solid #e5e5e5;
+  border-radius: 9px;
+  background: #fafafa;
+}
+
+@media (max-width: 760px) {
+  .board-request-page {
+    width: 92%;
+  }
+
+  .board-request-grid {
+    grid-template-columns: 1fr;
+  }
+}

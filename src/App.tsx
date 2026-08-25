@@ -7,6 +7,10 @@ import {
 } from "react-router-dom";
 
 import {
+  BoardRequestPage,
+} from "./pages/BoardRequestPage";
+
+import {
   HomePage,
 } from "./pages/HomePage";
 
@@ -30,6 +34,10 @@ function App() {
           <Route
             path="/"
             element={<HomePage />}
+          />
+          <Route
+            path="/boards/request"
+            element={<BoardRequestPage />}
           />
 
           <Route
