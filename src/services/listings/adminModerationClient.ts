@@ -13,6 +13,7 @@ const functions =
     "asia-south1",
   );
 
+
 type PublishListingInput = {
   listingId: string;
 };
@@ -31,6 +32,35 @@ type RejectListingResult = {
   success: boolean;
   listingId: string;
 };
+
+type ArchiveListingInput = {
+  listingId: string;
+};
+
+type ArchiveListingResult = {
+  success: boolean;
+  listingId: string;
+};
+
+const archiveListingCallable =
+  httpsCallable<
+    ArchiveListingInput,
+    ArchiveListingResult
+  >(
+    functions,
+    "archiveListing",
+  );
+
+export async function archiveListingAsOwner(
+  listingId: string,
+): Promise<ArchiveListingResult> {
+  const result =
+    await archiveListingCallable({
+      listingId,
+    });
+
+  return result.data;
+}
 
 const rejectListingCallable =
   httpsCallable<

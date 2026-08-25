@@ -5,6 +5,10 @@ import {
 } from "react";
 
 import {
+  useNavigate,
+} from "react-router-dom";
+
+import {
   Menu,
 } from "lucide-react";
 
@@ -26,6 +30,9 @@ export function AccountControl() {
     profile,
     initializing,
   } = useAuth();
+
+  const navigate =
+    useNavigate();
 
   const [authOpen, setAuthOpen] =
     useState(false);
@@ -167,7 +174,10 @@ export function AccountControl() {
 
           <button
             type="button"
-            disabled
+            onClick={() => {
+              setMenuOpen(false);
+              navigate("/dashboard");
+            }}
           >
             My listings
           </button>

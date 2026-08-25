@@ -421,7 +421,7 @@ export function AdminModerationPage() {
 
                       {processingListingId ===
                         listing.id
-                        ? "Working..."
+                        ? "Rejecting..."
                         : "Reject"}
                     </button>
 

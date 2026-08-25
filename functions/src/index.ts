@@ -43,6 +43,152 @@ async function assertAdmin(
   }
 }
 
+function canManageListing(
+  listing: FirebaseFirestore.DocumentData,
+  uid: string,
+): boolean {
+  if (
+    listing.claimedOwnerUserId === uid
+  ) {
+    return true;
+  }
+
+  if (
+    listing.submittedByUserId === uid &&
+    listing.ownershipStatus !== "verified"
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+export const archiveListing =
+  onCall(
+    {
+      region: "asia-south1",
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Authentication required.",
+        );
+      }
+
+      const listingId =
+        String(
+          request.data?.listingId ??
+          "",
+        ).trim();
+
+      if (!listingId) {
+        throw new HttpsError(
+          "invalid-argument",
+          "listingId is required.",
+        );
+      }
+
+      const listingRef =
+        db
+          .collection("listings")
+          .doc(listingId);
+
+      const auditRef =
+        db
+          .collection("auditEvents")
+          .doc(
+            `listing_archived_${listingId}`,
+          );
+
+      await db.runTransaction(
+        async (transaction) => {
+          const listingSnap =
+            await transaction.get(
+              listingRef,
+            );
+
+          if (!listingSnap.exists) {
+            throw new HttpsError(
+              "not-found",
+              "Listing not found.",
+            );
+          }
+
+          const listing =
+            listingSnap.data();
+
+          if (!listing) {
+            throw new HttpsError(
+              "not-found",
+              "Listing data not found.",
+            );
+          }
+
+          if (
+            !canManageListing(
+              listing,
+              request.auth!.uid,
+            )
+          ) {
+            throw new HttpsError(
+              "permission-denied",
+              "You cannot manage this listing.",
+            );
+          }
+
+          if (
+            listing.status ===
+            "archived"
+          ) {
+            return;
+          }
+
+          if (
+            listing.status !==
+            "published"
+          ) {
+            throw new HttpsError(
+              "failed-precondition",
+              `Listing cannot be archived from status: ${listing.status}`,
+            );
+          }
+
+          const now =
+            FieldValue.serverTimestamp();
+
+          transaction.update(
+            listingRef,
+            {
+              status: "archived",
+              archivedAt: now,
+              updatedAt: now,
+            },
+          );
+
+          transaction.set(
+            auditRef,
+            {
+              id: auditRef.id,
+              type:
+                "listing_archived",
+              listingId,
+              actorUserId:
+                request.auth!.uid,
+              createdAt: now,
+              metadata: {},
+            },
+          );
+        },
+      );
+
+      return {
+        success: true,
+        listingId,
+      };
+    },
+  );
+
 export const publishListing =
   onCall(
     {
@@ -59,7 +205,7 @@ export const publishListing =
       const listingId =
         String(
           request.data?.listingId ??
-            "",
+          "",
         ).trim();
 
       if (!listingId) {
@@ -116,7 +262,7 @@ export const publishListing =
           if (
             status !== "submitted" &&
             status !==
-              "under_review"
+            "under_review"
           ) {
             throw new HttpsError(
               "failed-precondition",
@@ -177,13 +323,13 @@ export const rejectListing =
       const listingId =
         String(
           request.data?.listingId ??
-            "",
+          "",
         ).trim();
 
       const reason =
         String(
           request.data?.reason ??
-            "",
+          "",
         ).trim();
 
       if (!listingId) {
@@ -247,7 +393,7 @@ export const rejectListing =
           if (
             status !== "submitted" &&
             status !==
-              "under_review"
+            "under_review"
           ) {
             throw new HttpsError(
               "failed-precondition",

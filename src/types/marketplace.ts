@@ -109,6 +109,9 @@ export interface Listing {
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;
+  rejectedAt?: string;
+  rejectionReason?: string;
+  archivedAt?: string;
   websiteUrl?: string;
   downloadUrl?: string;
   launchDate?: string;
@@ -145,9 +148,6 @@ export interface Boost {
   featuredImageUrl?: string;
   featuredImagePath?: string;
   publishedAt?: string;
-
-  rejectedAt?: string;
-  rejectionReason?: string;
 }
 
 export interface BoardPeriod {

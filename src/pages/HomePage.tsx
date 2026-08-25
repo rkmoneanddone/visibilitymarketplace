@@ -116,36 +116,7 @@ export function HomePage() {
 
   return (
     <>
-      <header className="site-header">
-        <a className="brand" href="/">
-          <span className="brand-icon">
-            <TrendingUp size={18} strokeWidth={2.5} />
-          </span>
-          {siteConfig.name}
-        </a>
-
-        <nav className="main-nav">
-          <a href="#board">Explore</a>
-          <a href="#how">How it works</a>
-          <ListingLauncher
-            onCreated={
-              handleListingCreated
-            }
-          >
-            {(openListing) => (
-              <button
-                type="button"
-                className="add-link"
-                onClick={openListing}
-              >
-                <ListPlus size={15} />
-                Add Listing
-              </button>
-            )}
-          </ListingLauncher>
-          <AccountControl />
-        </nav>
-      </header>
+      
 
       <main className="page-shell">
         <section className="compact-intro">
