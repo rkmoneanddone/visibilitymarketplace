@@ -1,50 +1,127 @@
 import {
   Link,
+  useLocation,
 } from "react-router-dom";
+
+import {
+  useAuth,
+} from "../../features/auth/AuthProvider";
 
 import "./page-breadcrumb.css";
 
-type BreadcrumbItem = {
-  label: string;
-  to?: string;
+const routeLabels: Record<
+  string,
+  string
+> = {
+  dashboard: "My listings",
+  boards: "Boards",
+  admin: "Admin",
+  moderation: "Moderation",
 };
 
-type PageBreadcrumbProps = {
-  items: BreadcrumbItem[];
-};
+export function PageBreadcrumb() {
+  const location =
+    useLocation();
 
-export function PageBreadcrumb({
-  items,
-}: PageBreadcrumbProps) {
+  const {
+    profile,
+  } = useAuth();
+
+  const segments =
+    location.pathname
+      .split("/")
+      .filter(Boolean);
+
+  const isAdmin =
+    profile?.role === "admin";
+
+  if (
+    segments.length === 0 &&
+    !isAdmin
+  ) {
+    return null;
+  }
+
   return (
     <nav
       className="page-breadcrumb"
       aria-label="Breadcrumb"
     >
-      {items.map(
-        (item, index) => (
-          <span
-            className="page-breadcrumb-item"
-            key={`${item.label}-${index}`}
-          >
-            {index > 0 && (
-              <span className="page-breadcrumb-separator">
-                ›
-              </span>
-            )}
-
-            {item.to ? (
-              <Link to={item.to}>
-                {item.label}
+      <div className="page-breadcrumb-path">
+        {segments.length > 0 && (
+          <>
+            <span className="page-breadcrumb-item">
+              <Link to="/">
+                Home
               </Link>
-            ) : (
-              <span className="page-breadcrumb-current">
-                {item.label}
-              </span>
+            </span>
+
+            {segments.map(
+              (segment, index) => {
+                const path =
+                  "/" +
+                  segments
+                    .slice(
+                      0,
+                      index + 1,
+                    )
+                    .join("/");
+
+                const label =
+                  routeLabels[
+                  segment
+                  ] ??
+                  segment
+                    .replace(
+                      /-/g,
+                      " ",
+                    )
+                    .replace(
+                      /\b\w/g,
+                      (value) =>
+                        value.toUpperCase(),
+                    );
+
+                const isLast =
+                  index ===
+                  segments.length - 1;
+
+                return (
+                  <span
+                    className="page-breadcrumb-item"
+                    key={path}
+                  >
+                    <span className="page-breadcrumb-separator">
+                      ›
+                    </span>
+
+                    {isLast ? (
+                      <span className="page-breadcrumb-current">
+                        {label}
+                      </span>
+                    ) : (
+                      <Link to={path}>
+                        {label}
+                      </Link>
+                    )}
+                  </span>
+                );
+              },
             )}
-          </span>
-        ),
-      )}
+          </>
+        )}
+      </div>
+
+      {isAdmin &&
+        location.pathname !==
+        "/admin/moderation" && (
+          <Link
+            className="page-breadcrumb-admin"
+            to="/admin/moderation"
+          >
+            Moderation
+          </Link>
+        )}
     </nav>
   );
 }

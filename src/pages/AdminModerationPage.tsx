@@ -10,6 +10,19 @@ import {
   X,
 } from "lucide-react";
 
+import type {
+  Board,
+} from "../types/board";
+
+import {
+  getRequestedBoards,
+} from "../services/boards/adminBoards";
+
+import {
+  approveBoardAsAdmin,
+  rejectBoardAsAdmin,
+} from "../services/boards/adminBoardModerationClient";
+
 import {
   PlatformHandleLink,
 } from "../features/listings/PlatformHandleLink";
@@ -47,6 +60,8 @@ import {
 
 import "./admin-moderation.css";
 
+
+
 export function AdminModerationPage() {
   const {
     profile,
@@ -68,6 +83,71 @@ export function AdminModerationPage() {
   ] = useState<string | null>(
     null,
   );
+
+  const [
+    activeTab,
+    setActiveTab,
+  ] = useState<
+    "listings" | "boards"
+  >("listings");
+
+  const [boards, setBoards] =
+    useState<Board[]>([]);
+
+  const [
+    processingBoardId,
+    setProcessingBoardId,
+  ] = useState<string | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (
+      initializing ||
+      !profile ||
+      activeTab !== "boards"
+    ) {
+      return;
+    }
+
+    try {
+      assertAdminAccess(
+        profile,
+      );
+    } catch {
+      return;
+    }
+
+    let active = true;
+
+    async function loadBoards() {
+      try {
+        const result =
+          await getRequestedBoards(
+            25,
+          );
+
+        if (active) {
+          setBoards(result);
+        }
+      } catch (error) {
+        console.error(
+          "Failed to load board requests:",
+          error,
+        );
+      }
+    }
+
+    void loadBoards();
+
+    return () => {
+      active = false;
+    };
+  }, [
+    activeTab,
+    profile,
+    initializing,
+  ]);
 
   useEffect(() => {
     if (initializing) {
@@ -139,6 +219,94 @@ export function AdminModerationPage() {
     profile,
     initializing,
   ]);
+
+  async function handleApproveBoard(
+    boardId: string,
+  ) {
+    if (processingBoardId) {
+      return;
+    }
+
+    try {
+      setProcessingBoardId(
+        boardId,
+      );
+
+      await approveBoardAsAdmin(
+        boardId,
+      );
+
+      setBoards(
+        (current) =>
+          current.filter(
+            (board) =>
+              board.id !== boardId,
+          ),
+      );
+    } catch (error) {
+      console.error(
+        "Board approval failed:",
+        error,
+      );
+
+      window.alert(
+        "Unable to approve board.",
+      );
+    } finally {
+      setProcessingBoardId(
+        null,
+      );
+    }
+  }
+
+  async function handleRejectBoard(
+    boardId: string,
+  ) {
+    if (processingBoardId) {
+      return;
+    }
+
+    const reason =
+      window.prompt(
+        "Reason for rejection:",
+      )?.trim();
+
+    if (!reason) {
+      return;
+    }
+
+    try {
+      setProcessingBoardId(
+        boardId,
+      );
+
+      await rejectBoardAsAdmin(
+        boardId,
+        reason,
+      );
+
+      setBoards(
+        (current) =>
+          current.filter(
+            (board) =>
+              board.id !== boardId,
+          ),
+      );
+    } catch (error) {
+      console.error(
+        "Board rejection failed:",
+        error,
+      );
+
+      window.alert(
+        "Unable to reject board.",
+      );
+    } finally {
+      setProcessingBoardId(
+        null,
+      );
+    }
+  }
 
   async function handlePublish(
     listingId: string,
@@ -232,6 +400,7 @@ export function AdminModerationPage() {
   if (initializing) {
     return (
       <main className="admin-page">
+
         <div className="admin-state">
           Loading...
         </div>
@@ -269,189 +438,349 @@ export function AdminModerationPage() {
         </span>
       </header>
 
-      {loading ? (
-        <div className="admin-state">
-          Loading submissions...
-        </div>
-      ) : listings.length === 0 ? (
-        <div className="admin-state">
-          No pending listings.
-        </div>
-      ) : (
-        <div className="admin-list">
-          {listings.map(
-            (listing) => {
-              const typeName =
-                getListingTypeName(
-                  listing.listingTypeId,
-                );
+      <div className="admin-tabs">
+        <button
+          type="button"
+          className={
+            activeTab === "listings"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setActiveTab(
+              "listings",
+            )
+          }
+        >
+          Listings
+        </button>
 
-              const categoryName =
-                getCategoryName(
-                  listing.categoryId,
-                );
+        <button
+          type="button"
+          className={
+            activeTab === "boards"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setActiveTab(
+              "boards",
+            )
+          }
+        >
+          Board requests
+        </button>
+      </div>
 
-              const subcategoryName =
-                getSubcategoryName(
-                  listing.categoryId,
-                  listing.subcategoryId,
-                );
+      {activeTab === "listings" && (
+        <>
+          {loading ? (
+            <div className="admin-state">
+              Loading submissions...
+            </div>
+          ) : listings.length === 0 ? (
+            <div className="admin-state">
+              No pending listings.
+            </div>
+          ) : (
+            <div className="admin-list">
+              {listings.map(
+                (listing) => {
+                  const typeName =
+                    getListingTypeName(
+                      listing.listingTypeId,
+                    );
 
-              return (
-                <article
-                  className="admin-listing"
-                  key={listing.id}
-                >
-                  <div className="admin-listing-main">
-                    <div className="admin-listing-image">
-                      {listing.featuredImageUrl ? (
-                        <img
-                          src={
-                            listing.featuredImageUrl
-                          }
-                          alt=""
-                        />
-                      ) : (
-                        getTypeIcon(
-                          typeName,
-                        )
-                      )}
-                    </div>
+                  const categoryName =
+                    getCategoryName(
+                      listing.categoryId,
+                    );
 
-                    <div className="admin-listing-content">
-                      <div className="admin-listing-title">
-                        <h2>
-                          {
-                            listing.title
-                          }
-                        </h2>
+                  const subcategoryName =
+                    getSubcategoryName(
+                      listing.categoryId,
+                      listing.subcategoryId,
+                    );
 
-                        <span>
-                          {
-                            listing.status
-                          }
-                        </span>
-                      </div>
-
-                      <p className="admin-listing-meta">
-                        <span>
-                          {getTypeIcon(
-                            typeName,
+                  return (
+                    <article
+                      className="admin-listing"
+                      key={listing.id}
+                    >
+                      <div className="admin-listing-main">
+                        <div className="admin-listing-image">
+                          {listing.featuredImageUrl ? (
+                            <img
+                              src={
+                                listing.featuredImageUrl
+                              }
+                              alt=""
+                            />
+                          ) : (
+                            getTypeIcon(
+                              typeName,
+                            )
                           )}
-                          {typeName}
-                        </span>
+                        </div>
 
-                        <span>
-                          {categoryName}
-                        </span>
+                        <div className="admin-listing-content">
+                          <div className="admin-listing-title">
+                            <h2>
+                              {listing.title}
+                            </h2>
 
-                        {subcategoryName && (
-                          <span>
+                            <span>
+                              {listing.status}
+                            </span>
+                          </div>
+
+                          <p className="admin-listing-meta">
+                            <span>
+                              {getTypeIcon(
+                                typeName,
+                              )}
+                              {typeName}
+                            </span>
+
+                            <span>
+                              {categoryName}
+                            </span>
+
+                            {subcategoryName && (
+                              <span>
+                                {
+                                  subcategoryName
+                                }
+                              </span>
+                            )}
+
+                            {listing.handle && (
+                              <PlatformHandleLink
+                                typeName={
+                                  typeName
+                                }
+                                handle={
+                                  listing.handle
+                                }
+                                platformUrl={
+                                  listing.platformUrl
+                                }
+                              />
+                            )}
+                          </p>
+
+                          <p className="admin-listing-description">
                             {
-                              subcategoryName
+                              listing.shortDescription
                             }
-                          </span>
-                        )}
+                          </p>
 
-                        {listing.handle && (
-                          <PlatformHandleLink
-                            typeName={typeName}
-                            handle={listing.handle}
-                            platformUrl={
-                              listing.platformUrl
-                            }
-                          />
-                        )}
-                      </p>
-
-                      <p className="admin-listing-description">
-                        {
-                          listing.shortDescription
-                        }
-                      </p>
-
-                      <div className="admin-listing-links">
-                        <a
-                          href={
-                            listing.externalUrl
-                          }
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Open listing
-                          <ExternalLink
-                            size={13}
-                          />
-                        </a>
-
-                        {listing.platformUrl &&
-                          listing.platformUrl !==
-                          listing.externalUrl && (
+                          <div className="admin-listing-links">
                             <a
                               href={
-                                listing.platformUrl
+                                listing.externalUrl
                               }
                               target="_blank"
                               rel="noreferrer"
                             >
-                              Platform profile
+                              Open listing
+
                               <ExternalLink
                                 size={13}
                               />
                             </a>
-                          )}
+
+                            {listing.platformUrl &&
+                              listing.platformUrl !==
+                              listing.externalUrl && (
+                                <a
+                                  href={
+                                    listing.platformUrl
+                                  }
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  Platform profile
+
+                                  <ExternalLink
+                                    size={13}
+                                  />
+                                </a>
+                              )}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
 
-                  <div className="admin-listing-actions">
-                    <button
-                      type="button"
-                      className="admin-reject-button"
-                      disabled={
-                        processingListingId !== null
-                      }
-                      onClick={() =>
-                        void handleReject(
-                          listing.id,
-                        )
-                      }
-                    >
-                      <X size={14} />
+                      <div className="admin-listing-actions">
+                        <button
+                          type="button"
+                          className="admin-reject-button"
+                          disabled={
+                            processingListingId !==
+                            null
+                          }
+                          onClick={() =>
+                            void handleReject(
+                              listing.id,
+                            )
+                          }
+                        >
+                          <X size={14} />
 
-                      {processingListingId ===
-                        listing.id
-                        ? "Rejecting..."
-                        : "Reject"}
-                    </button>
+                          {processingListingId ===
+                            listing.id
+                            ? "Rejecting..."
+                            : "Reject"}
+                        </button>
 
-                    <button
-                      type="button"
-                      className="admin-publish-button"
-                      disabled={
-                        processingListingId !==
-                        null
-                      }
-                      onClick={() =>
-                        void handlePublish(
-                          listing.id,
-                        )
-                      }
-                    >
-                      <Check size={14} />
+                        <button
+                          type="button"
+                          className="admin-publish-button"
+                          disabled={
+                            processingListingId !==
+                            null
+                          }
+                          onClick={() =>
+                            void handlePublish(
+                              listing.id,
+                            )
+                          }
+                        >
+                          <Check size={14} />
 
-                      {processingListingId ===
-                        listing.id
-                        ? "Publishing..."
-                        : "Publish"}
-                    </button>
-                  </div>
-                </article>
-              );
-            },
+                          {processingListingId ===
+                            listing.id
+                            ? "Publishing..."
+                            : "Publish"}
+                        </button>
+                      </div>
+                    </article>
+                  );
+                },
+              )}
+            </div>
           )}
-        </div>
+        </>
       )}
-    </main>
+      {
+        activeTab === "boards" && (
+          <>
+            {boards.length === 0 ? (
+              <div className="admin-state">
+                No pending board requests.
+              </div>
+            ) : (
+              <div className="admin-list">
+                {boards.map(
+                  (board) => (
+                    <article
+                      className="admin-listing"
+                      key={board.id}
+                    >
+                      <div className="admin-listing-main">
+                        <div className="admin-listing-content">
+                          <div className="admin-listing-title">
+                            <h2>
+                              {board.name}
+                            </h2>
+
+                            <span>
+                              {board.status}
+                            </span>
+                          </div>
+
+                          <p className="admin-listing-description">
+                            {
+                              board.shortDescription
+                            }
+                          </p>
+
+                          <p className="admin-listing-meta">
+                            <span>
+                              {
+                                board
+                                  .eligibleListingTypeIds
+                                  .length
+                              }{" "}
+                              eligible types
+                            </span>
+
+                            <span>
+                              Entry fee:{" "}
+                              {
+                                board.entryFeeMinor /
+                                100
+                              }{" "}
+                              {
+                                board.currency
+                              }
+                            </span>
+
+                            <span>
+                              Min Push Up:{" "}
+                              {
+                                board.minimumBoostMinor /
+                                100
+                              }{" "}
+                              {
+                                board.currency
+                              }
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="admin-listing-actions">
+                        <button
+                          type="button"
+                          className="admin-reject-button"
+                          disabled={
+                            processingBoardId !==
+                            null
+                          }
+                          onClick={() =>
+                            void handleRejectBoard(
+                              board.id,
+                            )
+                          }
+                        >
+                          <X size={14} />
+
+                          {processingBoardId ===
+                            board.id
+                            ? "Rejecting..."
+                            : "Reject"}
+                        </button>
+
+                        <button
+                          type="button"
+                          className="admin-publish-button"
+                          disabled={
+                            processingBoardId !==
+                            null
+                          }
+                          onClick={() =>
+                            void handleApproveBoard(
+                              board.id,
+                            )
+                          }
+                        >
+                          <Check size={14} />
+
+                          {processingBoardId ===
+                            board.id
+                            ? "Approving..."
+                            : "Approve"}
+                        </button>
+                      </div>
+                    </article>
+                  ),
+                )}
+              </div>
+            )}
+          </>
+        )
+      }
+    </main >
   );
 }

@@ -7,8 +7,8 @@ import {
 } from "react-router-dom";
 
 import {
-  BoardRequestPage,
-} from "./pages/BoardRequestPage";
+  BoardsPage,
+} from "./pages/BoardsPage";
 
 import {
   HomePage,
@@ -36,8 +36,8 @@ function App() {
             element={<HomePage />}
           />
           <Route
-            path="/boards/request"
-            element={<BoardRequestPage />}
+            path="/boards"
+            element={<BoardsPage />}
           />
 
           <Route

@@ -17,7 +17,7 @@
   font-size: 24px;
 }
 
-.admin-page-header > span {
+.admin-page-header>span {
   font-size: 12px;
   color: #697386;
 }
@@ -87,7 +87,7 @@
   font-size: 15px;
 }
 
-.admin-listing-title > span {
+.admin-listing-title>span {
   padding: 2px 6px;
   border-radius: 999px;
   background: #fff3cf;
@@ -220,4 +220,31 @@
     flex: 1;
     justify-content: center;
   }
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 6px;
+
+  margin: 0 0 16px;
+}
+
+.admin-tabs button {
+  border: 1px solid #d8dce3;
+  border-radius: 7px;
+
+  background: #fff;
+  color: #555;
+
+  padding: 7px 11px;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-tabs button.active {
+  border-color: #2455db;
+
+  background: #edf3ff;
+  color: #2455db;
 }

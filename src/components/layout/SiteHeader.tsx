@@ -57,10 +57,14 @@ export function SiteHeader({
           How it works
         </Link>
 
+        <Link to="/boards">
+          Boards
+        </Link>
+
         <ListingLauncher
           onCreated={
             onListingCreated ??
-            (() => {})
+            (() => { })
           }
         >
           {(openListing) => (

@@ -344,6 +344,275 @@ export const requestBoard =
     },
   );
 
+export const rejectBoard =
+  onCall(
+    {
+      region: "asia-south1",
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Authentication required.",
+        );
+      }
+
+      const boardId =
+        String(
+          request.data?.boardId ?? "",
+        ).trim();
+
+      const reason =
+        String(
+          request.data?.reason ?? "",
+        ).trim();
+
+      if (!boardId) {
+        throw new HttpsError(
+          "invalid-argument",
+          "boardId is required.",
+        );
+      }
+
+      if (!reason) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Rejection reason is required.",
+        );
+      }
+
+      await assertAdmin(
+        request.auth.uid,
+      );
+
+      const boardRef =
+        db
+          .collection("boards")
+          .doc(boardId);
+
+      const auditRef =
+        db
+          .collection("auditEvents")
+          .doc(
+            `board_rejected_${boardId}`,
+          );
+
+      await db.runTransaction(
+        async (transaction) => {
+          const boardSnap =
+            await transaction.get(
+              boardRef,
+            );
+
+          if (!boardSnap.exists) {
+            throw new HttpsError(
+              "not-found",
+              "Board not found.",
+            );
+          }
+
+          const board =
+            boardSnap.data();
+
+          if (!board) {
+            throw new HttpsError(
+              "not-found",
+              "Board data not found.",
+            );
+          }
+
+          if (
+            board.status ===
+            "rejected"
+          ) {
+            return;
+          }
+
+          if (
+            board.status !==
+            "requested"
+          ) {
+            throw new HttpsError(
+              "failed-precondition",
+              `Board cannot be rejected from status: ${board.status}`,
+            );
+          }
+
+          const now =
+            FieldValue.serverTimestamp();
+
+          transaction.update(
+            boardRef,
+            {
+              status: "rejected",
+
+              rejectedAt: now,
+
+              rejectionReason:
+                reason,
+
+              updatedAt: now,
+            },
+          );
+
+          transaction.set(
+            auditRef,
+            {
+              id: auditRef.id,
+
+              type:
+                "board_rejected",
+
+              boardId,
+
+              actorUserId:
+                request.auth!.uid,
+
+              createdAt: now,
+
+              metadata: {
+                reason,
+              },
+            },
+          );
+        },
+      );
+
+      return {
+        success: true,
+        boardId,
+      };
+    },
+  );
+
+export const approveBoard =
+  onCall(
+    {
+      region: "asia-south1",
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Authentication required.",
+        );
+      }
+
+      const boardId =
+        String(
+          request.data?.boardId ?? "",
+        ).trim();
+
+      if (!boardId) {
+        throw new HttpsError(
+          "invalid-argument",
+          "boardId is required.",
+        );
+      }
+
+      await assertAdmin(
+        request.auth.uid,
+      );
+
+      const boardRef =
+        db
+          .collection("boards")
+          .doc(boardId);
+
+      const auditRef =
+        db
+          .collection("auditEvents")
+          .doc(
+            `board_approved_${boardId}`,
+          );
+
+      await db.runTransaction(
+        async (transaction) => {
+          const boardSnap =
+            await transaction.get(
+              boardRef,
+            );
+
+          if (!boardSnap.exists) {
+            throw new HttpsError(
+              "not-found",
+              "Board not found.",
+            );
+          }
+
+          const board =
+            boardSnap.data();
+
+          if (!board) {
+            throw new HttpsError(
+              "not-found",
+              "Board data not found.",
+            );
+          }
+
+          if (
+            board.status ===
+            "approved" ||
+            board.status ===
+            "entry_open"
+          ) {
+            return;
+          }
+
+          if (
+            board.status !==
+            "requested"
+          ) {
+            throw new HttpsError(
+              "failed-precondition",
+              `Board cannot be approved from status: ${board.status}`,
+            );
+          }
+
+          const now =
+            FieldValue.serverTimestamp();
+
+          transaction.update(
+            boardRef,
+            {
+              status: "approved",
+
+              approvedByAdminUserId:
+                request.auth!.uid,
+
+              approvedAt: now,
+              updatedAt: now,
+            },
+          );
+
+          transaction.set(
+            auditRef,
+            {
+              id: auditRef.id,
+
+              type:
+                "board_approved",
+
+              boardId,
+
+              actorUserId:
+                request.auth!.uid,
+
+              createdAt: now,
+
+              metadata: {},
+            },
+          );
+        },
+      );
+
+      return {
+        success: true,
+        boardId,
+      };
+    },
+  );
+
 export const archiveListing =
   onCall(
     {

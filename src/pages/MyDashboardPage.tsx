@@ -289,17 +289,7 @@ export function MyDashboardPage() {
   return (
 
     <main className="dashboard-page">
-      <PageBreadcrumb
-        items={[
-          {
-            label: "Home",
-            to: "/",
-          },
-          {
-            label: "My listings",
-          },
-        ]}
-      />
+      <PageBreadcrumb />
       <header className="dashboard-header">
         <div>
           <p className="eyebrow">
