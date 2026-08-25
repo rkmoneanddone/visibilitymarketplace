@@ -171,5 +171,25 @@ service cloud.firestore {
       allow update: if false;
       allow delete: if false;
     }
+
+    match /boards/{boardId} {
+      allow read:
+        if resource.data.status in [
+          "approved",
+          "entry_open",
+          "active",
+          "expired",
+          "archived"
+        ]
+        ||
+        (
+          request.auth != null
+          && resource.data.createdByUserId == request.auth.uid
+        )
+        ||
+        isAdmin();
+
+      allow create, update, delete: if false;
+    }
   }
 }

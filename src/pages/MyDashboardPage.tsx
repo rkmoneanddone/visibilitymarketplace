@@ -19,10 +19,6 @@ import {
 } from "../features/auth/AuthProvider";
 
 import {
-  PageBreadcrumb,
-} from "../components/layout/PageBreadcrumb";
-
-import {
   PlatformHandleLink,
 } from "../features/listings/PlatformHandleLink";
 
@@ -289,7 +285,6 @@ export function MyDashboardPage() {
   return (
 
     <main className="dashboard-page">
-      <PageBreadcrumb />
       <header className="dashboard-header">
         <div>
           <p className="eyebrow">

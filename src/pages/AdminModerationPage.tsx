@@ -59,6 +59,9 @@ import {
 } from "../lib/marketplace/icons";
 
 import "./admin-moderation.css";
+import {
+  formatMoneyMinor,
+} from "../lib/marketplace/money";
 
 
 
@@ -429,12 +432,17 @@ export function AdminModerationPage() {
           </p>
 
           <h1>
-            Pending listings
+            {activeTab === "listings"
+              ? "Pending listings"
+              : "Board requests"}
           </h1>
         </div>
 
         <span>
-          {listings.length} pending
+          {activeTab === "listings"
+            ? listings.length
+            : boards.length}{" "}
+          pending
         </span>
       </header>
 
@@ -533,6 +541,7 @@ export function AdminModerationPage() {
                               {listing.status}
                             </span>
                           </div>
+
 
                           <p className="admin-listing-meta">
                             <span>
@@ -674,104 +683,172 @@ export function AdminModerationPage() {
                 {boards.map(
                   (board) => (
                     <article
-                      className="admin-listing"
+                      className="admin-board-card"
                       key={board.id}
                     >
-                      <div className="admin-listing-main">
-                        <div className="admin-listing-content">
-                          <div className="admin-listing-title">
-                            <h2>
-                              {board.name}
-                            </h2>
+                      <div className="admin-board-top">
+                        <div className="admin-board-heading">
+                          <h2>{board.name}</h2>
 
-                            <span>
-                              {board.status}
-                            </span>
-                          </div>
-
-                          <p className="admin-listing-description">
-                            {
-                              board.shortDescription
-                            }
-                          </p>
-
-                          <p className="admin-listing-meta">
-                            <span>
-                              {
-                                board
-                                  .eligibleListingTypeIds
-                                  .length
-                              }{" "}
-                              eligible types
-                            </span>
-
-                            <span>
-                              Entry fee:{" "}
-                              {
-                                board.entryFeeMinor /
-                                100
-                              }{" "}
-                              {
-                                board.currency
-                              }
-                            </span>
-
-                            <span>
-                              Min Push Up:{" "}
-                              {
-                                board.minimumBoostMinor /
-                                100
-                              }{" "}
-                              {
-                                board.currency
-                              }
-                            </span>
-                          </p>
+                          <span className="admin-board-type">
+                            {getListingTypeName(
+                              board.listingTypeId,
+                            )}
+                          </span>
                         </div>
+
+                        <span className="admin-board-status">
+                          {board.status}
+                        </span>
                       </div>
 
-                      <div className="admin-listing-actions">
-                        <button
-                          type="button"
-                          className="admin-reject-button"
-                          disabled={
-                            processingBoardId !==
-                            null
-                          }
-                          onClick={() =>
-                            void handleRejectBoard(
-                              board.id,
-                            )
-                          }
-                        >
-                          <X size={14} />
+                      <div className="admin-board-requester">
+                        <span>Requested by</span>
 
-                          {processingBoardId ===
-                            board.id
-                            ? "Rejecting..."
-                            : "Reject"}
-                        </button>
+                        <strong>
+                          {board.createdByDisplayName ||
+                            board.createdByEmail ||
+                            "Unknown user"}
+                        </strong>
 
-                        <button
-                          type="button"
-                          className="admin-publish-button"
-                          disabled={
-                            processingBoardId !==
-                            null
-                          }
-                          onClick={() =>
-                            void handleApproveBoard(
-                              board.id,
-                            )
-                          }
-                        >
-                          <Check size={14} />
+                        {board.createdByDisplayName &&
+                          board.createdByEmail && (
+                            <small>
+                              {board.createdByEmail}
+                            </small>
+                          )}
+                      </div>
 
-                          {processingBoardId ===
-                            board.id
-                            ? "Approving..."
-                            : "Approve"}
-                        </button>
+                      <div className="admin-board-schedule">
+                        <BoardInfo
+                          label="Starts"
+                          value={new Date(
+                            board.startsAt,
+                          ).toLocaleString(
+                            undefined,
+                            {
+                              day: "numeric",
+                              month: "short",
+                              hour: "numeric",
+                              minute: "2-digit",
+                            },
+                          )}
+                        />
+
+                        <BoardInfo
+                          label="Entry opens"
+                          value={new Date(
+                            board.entryStartsAt,
+                          ).toLocaleString(
+                            undefined,
+                            {
+                              day: "numeric",
+                              month: "short",
+                              hour: "numeric",
+                              minute: "2-digit",
+                            },
+                          )}
+                        />
+
+                        <BoardInfo
+                          label="Entry closes"
+                          value={new Date(
+                            board.entryClosesAt,
+                          ).toLocaleString(
+                            undefined,
+                            {
+                              day: "numeric",
+                              month: "short",
+                              hour: "numeric",
+                              minute: "2-digit",
+                            },
+                          )}
+                        />
+
+                        <BoardInfo
+                          label="Ends"
+                          value={new Date(
+                            board.endsAt,
+                          ).toLocaleString(
+                            undefined,
+                            {
+                              day: "numeric",
+                              month: "short",
+                              hour: "numeric",
+                              minute: "2-digit",
+                            },
+                          )}
+                        />
+                      </div>
+
+                      <div className="admin-board-bottom">
+                        <div className="admin-board-pricing">
+                          <span>
+                            Entry
+                            <strong>
+                              {formatMoneyMinor(
+                                board.entryFeeMinor,
+                                board.currency,
+                              )}
+                            </strong>
+                          </span>
+
+                          <span className="admin-board-dot">
+                            ·
+                          </span>
+
+                          <span>
+                            Min Push Up
+                            <strong>
+                              {formatMoneyMinor(
+                                board.minimumBoostMinor,
+                                board.currency,
+                              )}
+                            </strong>
+                          </span>
+                        </div>
+
+                        <div className="admin-board-actions">
+                          <button
+                            type="button"
+                            className="admin-reject-button"
+                            disabled={
+                              processingBoardId !== null
+                            }
+                            onClick={() =>
+                              void handleRejectBoard(
+                                board.id,
+                              )
+                            }
+                          >
+                            <X size={14} />
+
+                            {processingBoardId ===
+                              board.id
+                              ? "Rejecting..."
+                              : "Reject"}
+                          </button>
+
+                          <button
+                            type="button"
+                            className="admin-publish-button"
+                            disabled={
+                              processingBoardId !== null
+                            }
+                            onClick={() =>
+                              void handleApproveBoard(
+                                board.id,
+                              )
+                            }
+                          >
+                            <Check size={14} />
+
+                            {processingBoardId ===
+                              board.id
+                              ? "Approving..."
+                              : "Approve"}
+                          </button>
+                        </div>
                       </div>
                     </article>
                   ),
@@ -784,3 +861,18 @@ export function AdminModerationPage() {
     </main >
   );
 }
+function BoardInfo({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="admin-board-info">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+

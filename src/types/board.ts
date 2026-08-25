@@ -15,19 +15,18 @@ export interface Board {
 
     name: string;
     slug: string;
-    shortDescription: string;
 
     createdByUserId: string;
+    createdByDisplayName: string;
+    createdByEmail: string;
     approvedByAdminUserId?: string;
 
     status: BoardStatus;
 
-    eligibleListingTypeIds: string[];
-
-    categoryId?: string;
-    subcategoryId?: string;
+    listingTypeId: string;
 
     startsAt: string;
+    entryStartsAt: string;
     entryClosesAt: string;
     endsAt: string;
 

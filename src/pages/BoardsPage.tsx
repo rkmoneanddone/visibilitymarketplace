@@ -10,6 +10,10 @@ import {
 } from "lucide-react";
 
 import {
+  getListingTypeName,
+} from "../lib/marketplace/listing";
+
+import {
   getPublicBoards,
 } from "../services/boards/boards";
 
@@ -92,9 +96,6 @@ export function BoardsPage() {
         (board) =>
           board.name
             .toLowerCase()
-            .includes(query) ||
-          board.shortDescription
-            .toLowerCase()
             .includes(query),
       );
     }, [
@@ -135,7 +136,7 @@ export function BoardsPage() {
         </div>
       </header>
 
-      
+
 
       {loading ? (
         <div className="boards-state">
@@ -157,56 +158,129 @@ export function BoardsPage() {
                 className="board-card"
                 key={board.id}
               >
-                <div className="board-card-main">
-                  <h2>
-                    {board.name}
-                  </h2>
+                <div className="board-card-top">
+                  <div>
+                    <h2>
+                      {board.name}
+                    </h2>
 
-                  <p>
-                    {
-                      board.shortDescription
-                    }
-                  </p>
+                    <span className="board-card-type">
+                      {getListingTypeName(
+                        board.listingTypeId,
+                      )}
+                    </span>
+                  </div>
 
-                  <span>
-                    {board.eligibleListingTypeIds.length ===
-                      1
-                      ? "1 eligible listing type"
-                      : `${board.eligibleListingTypeIds.length} eligible listing types`}
+                  <span className="board-card-status">
+                    {board.status}
                   </span>
                 </div>
 
-                <div className="board-card-info">
-                  <span>
-                    Entry
+                <div className="board-card-schedule">
+                  <div>
+                    <span>Starts</span>
 
                     <strong>
-                      {formatMoneyMinor(
-                        board.entryFeeMinor,
-                        board.currency,
+                      {new Date(
+                        board.startsAt,
+                      ).toLocaleString(
+                        undefined,
+                        {
+                          day: "numeric",
+                          month: "short",
+                          hour: "numeric",
+                          minute: "2-digit",
+                        },
                       )}
                     </strong>
-                  </span>
+                  </div>
 
-                  <span>
-                    Min Push Up
+                  <div>
+                    <span>Entry opens</span>
 
                     <strong>
-                      {formatMoneyMinor(
-                        board.minimumBoostMinor,
-                        board.currency,
+                      {new Date(
+                        board.entryStartsAt,
+                      ).toLocaleString(
+                        undefined,
+                        {
+                          day: "numeric",
+                          month: "short",
+                          hour: "numeric",
+                          minute: "2-digit",
+                        },
                       )}
                     </strong>
-                  </span>
+                  </div>
+
+                  <div>
+                    <span>Entry closes</span>
+
+                    <strong>
+                      {new Date(
+                        board.entryClosesAt,
+                      ).toLocaleString(
+                        undefined,
+                        {
+                          day: "numeric",
+                          month: "short",
+                          hour: "numeric",
+                          minute: "2-digit",
+                        },
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Ends</span>
+
+                    <strong>
+                      {new Date(
+                        board.endsAt,
+                      ).toLocaleString(
+                        undefined,
+                        {
+                          day: "numeric",
+                          month: "short",
+                          hour: "numeric",
+                          minute: "2-digit",
+                        },
+                      )}
+                    </strong>
+                  </div>
                 </div>
 
-                <button
-                  type="button"
-                  disabled
-                  title="Board detail is the next step"
-                >
-                  View Board
-                </button>
+                <div className="board-card-bottom">
+                  <div className="board-card-pricing">
+                    <span>
+                      Entry
+                      <strong>
+                        {formatMoneyMinor(
+                          board.entryFeeMinor,
+                          board.currency,
+                        )}
+                      </strong>
+                    </span>
+
+                    <span>
+                      Min Push Up
+                      <strong>
+                        {formatMoneyMinor(
+                          board.minimumBoostMinor,
+                          board.currency,
+                        )}
+                      </strong>
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled
+                    title="Board detail is the next step"
+                  >
+                    View Board
+                  </button>
+                </div>
               </article>
             ),
           )}

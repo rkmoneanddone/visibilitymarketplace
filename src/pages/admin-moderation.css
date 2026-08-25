@@ -1,8 +1,10 @@
 .admin-page {
-  width: min(980px, calc(100% - 28px));
+  width: min(900px, calc(100% - 28px));
   margin: 0 auto;
-  padding: 24px 0 40px;
+  padding: 18px 0 32px;
 }
+
+
 
 .admin-page-header {
   display: flex;
@@ -14,7 +16,7 @@
 
 .admin-page-header h1 {
   margin: 2px 0 0;
-  font-size: 24px;
+  font-size: 22px;
 }
 
 .admin-page-header>span {
@@ -247,4 +249,235 @@
 
   background: #edf3ff;
   color: #2455db;
+}
+.admin-board-card {
+  padding: 12px 14px;
+
+  border: 1px solid #d8e0eb;
+  border-radius: 10px;
+
+  background: #fff;
+}
+
+.admin-board-top {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+}
+
+.admin-board-heading {
+  display: flex;
+  align-items: baseline;
+
+  gap: 9px;
+
+  min-width: 0;
+}
+
+.admin-board-heading h2 {
+  margin: 0;
+
+  font-size: 15px;
+  line-height: 1.2;
+
+  color: #28313f;
+}
+
+.admin-board-type {
+  font-size: 11px;
+  color: #667085;
+}
+
+.admin-board-status {
+  margin-left: auto;
+
+  padding: 2px 7px;
+
+  border-radius: 999px;
+
+  background: #fff4d6;
+  color: #8a641d;
+
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.admin-board-requester {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+
+  gap: 4px 7px;
+
+  margin-top: 4px;
+
+  font-size: 11px;
+}
+
+.admin-board-requester span,
+.admin-board-requester small {
+  color: #7a8494;
+}
+
+.admin-board-requester strong {
+  color: #344054;
+  font-weight: 600;
+}
+
+.admin-board-requester small {
+  font-size: 10px;
+}
+
+.admin-board-schedule {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 12px;
+
+  margin-top: 11px;
+  padding-top: 9px;
+
+  border-top: 1px solid #edf0f4;
+}
+
+.admin-board-info {
+  display: grid;
+  gap: 2px;
+
+  min-width: 0;
+}
+
+.admin-board-info span {
+  font-size: 9px;
+  font-weight: 600;
+
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  color: #8992a1;
+}
+
+.admin-board-info strong {
+  font-size: 11px;
+  font-weight: 600;
+
+  white-space: nowrap;
+
+  color: #28313f;
+}
+
+.admin-board-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 14px;
+
+  margin-top: 10px;
+}
+
+.admin-board-pricing {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  font-size: 11px;
+  color: #697386;
+}
+
+.admin-board-pricing span {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 4px;
+}
+
+.admin-board-pricing strong {
+  color: #28313f;
+  font-weight: 700;
+}
+
+.admin-board-dot {
+  color: #b2b8c2;
+}
+
+.admin-board-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  flex: 0 0 auto;
+}
+
+.admin-board-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 4px;
+
+  min-height: 31px;
+
+  padding: 5px 10px;
+
+  border-radius: 6px;
+
+  font-size: 11px;
+}
+
+@media (max-width: 700px) {
+  .admin-board-schedule {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 9px 12px;
+  }
+
+  .admin-board-bottom {
+    align-items: stretch;
+    flex-direction: column;
+
+    gap: 9px;
+  }
+
+  .admin-board-actions {
+    display: grid;
+    grid-template-columns:
+      1fr 1fr;
+
+    width: 100%;
+  }
+
+  .admin-board-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 440px) {
+  .admin-board-card {
+    padding: 11px;
+  }
+
+  .admin-board-heading {
+    align-items: flex-start;
+    flex-direction: column;
+
+    gap: 2px;
+  }
+
+  .admin-board-schedule {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .admin-board-info strong {
+    white-space: normal;
+  }
+
+  .admin-board-pricing {
+    flex-wrap: wrap;
+  }
 }

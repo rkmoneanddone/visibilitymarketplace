@@ -1,5 +1,11 @@
 export const BOARD_MIN_ENTRY_FEE_MINOR =
-    100;
+  100;
+
+export const BOARD_MAX_ENTRY_FEE_MINOR =
+  10000;
+
+export const BOARD_MIN_BOOST_MINOR =
+  100;
 
 export const BOARD_MAX_SINGLE_BOOST_MINOR =
-    10000;
+  10000;

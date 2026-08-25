@@ -24,6 +24,10 @@ import {
   useAuth,
 } from "./AuthProvider";
 
+import {
+  RequestBoardDialog,
+} from "../boards/RequestBoardDialog";
+
 export function AccountControl() {
   const {
     firebaseUser,
@@ -42,6 +46,11 @@ export function AccountControl() {
 
   const menuRef =
     useRef<HTMLDivElement | null>(null);
+
+  const [
+    boardRequestOpen,
+    setBoardRequestOpen,
+  ] = useState(false);
 
   useEffect(() => {
     if (!menuOpen) {
@@ -130,95 +139,130 @@ export function AccountControl() {
         : "Supporter";
 
   return (
-    <div
-      className="account-menu-wrap"
-      ref={menuRef}
-    >
-      <button
-        type="button"
-        className="account-trigger"
-        aria-label="Account menu"
-        aria-expanded={menuOpen}
-        onClick={() =>
-          setMenuOpen((current) => !current)
-        }
+    <>
+      <div
+        className="account-menu-wrap"
+        ref={menuRef}
       >
-        <span className="account-avatar">
-          {initial}
-        </span>
+        <button
+          type="button"
+          className="account-trigger"
+          aria-label="Account menu"
+          aria-expanded={menuOpen}
+          onClick={() =>
+            setMenuOpen(
+              (current) => !current,
+            )
+          }
+        >
+          <span className="account-avatar">
+            {initial}
+          </span>
 
-        <Menu size={18} />
-      </button>
+          <Menu size={18} />
+        </button>
 
-      {menuOpen && (
-        <div className="account-menu">
-          <div className="account-menu-profile">
-            <span className="account-menu-avatar">
-              {initial}
-            </span>
+        {menuOpen && (
+          <div className="account-menu">
+            <div className="account-menu-profile">
+              <span className="account-menu-avatar">
+                {initial}
+              </span>
 
-            <div>
-              <strong>{displayName}</strong>
+              <div>
+                <strong>
+                  {displayName}
+                </strong>
 
-              {email && (
-                <span>{email}</span>
-              )}
+                {email && (
+                  <span>
+                    {email}
+                  </span>
+                )}
+              </div>
             </div>
+
+            <div className="account-role">
+              {roleLabel}
+            </div>
+
+            <div className="account-menu-divider" />
+
+            <button
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                navigate(
+                  "/dashboard",
+                );
+              }}
+            >
+              My listings
+            </button>
+
+            {profile?.role ===
+              "admin" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+
+                    navigate(
+                      "/admin/moderation",
+                    );
+                  }}
+                >
+                  Moderation
+                </button>
+              )}
+
+            <button
+              type="button"
+              disabled
+            >
+              My promotions
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                setBoardRequestOpen(
+                  true,
+                );
+              }}
+            >
+              Request board
+            </button>
+
+            <button
+              type="button"
+              disabled
+            >
+              Payments
+            </button>
+
+            <div className="account-menu-divider" />
+
+            <button
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                void logout();
+              }}
+            >
+              Sign out
+            </button>
           </div>
+        )}
+      </div>
 
-          <div className="account-role">
-            {roleLabel}
-          </div>
-
-          <div className="account-menu-divider" />
-
-          <button
-            type="button"
-            onClick={() => {
-              setMenuOpen(false);
-              navigate("/dashboard");
-            }}
-          >
-            My listings
-          </button>
-
-          <button
-            type="button"
-            disabled
-          >
-            My promotions
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setMenuOpen(false);
-              navigate("/boards/request");
-            }}
-          >
-            Request board
-          </button>
-
-          <button
-            type="button"
-            disabled
-          >
-            Payments
-          </button>
-
-          <div className="account-menu-divider" />
-
-          <button
-            type="button"
-            onClick={() => {
-              setMenuOpen(false);
-              void logout();
-            }}
-          >
-            Sign out
-          </button>
-        </div>
-      )}
-    </div>
+      <RequestBoardDialog
+        open={boardRequestOpen}
+        onClose={() =>
+          setBoardRequestOpen(false)
+        }
+      />
+    </>
   );
 }

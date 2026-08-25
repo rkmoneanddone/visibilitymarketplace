@@ -87,9 +87,10 @@ export const requestBoard =
           request.data?.name,
         );
 
-      const shortDescription =
+      const listingTypeId =
         normalizeString(
-          request.data?.shortDescription,
+          request.data
+            ?.listingTypeId,
         );
 
       const startsAt =
@@ -97,9 +98,16 @@ export const requestBoard =
           request.data?.startsAt,
         );
 
+      const entryStartsAt =
+        normalizeString(
+          request.data
+            ?.entryStartsAt,
+        );
+
       const entryClosesAt =
         normalizeString(
-          request.data?.entryClosesAt,
+          request.data
+            ?.entryClosesAt,
         );
 
       const endsAt =
@@ -109,32 +117,10 @@ export const requestBoard =
 
       const currency =
         normalizeString(
-          request.data?.currency ||
+          request.data
+            ?.currency ||
           "USD",
         ).toUpperCase();
-
-      const eligibleListingTypeIds =
-        Array.isArray(
-          request.data
-            ?.eligibleListingTypeIds,
-        )
-          ? request.data
-            .eligibleListingTypeIds
-            .map((value: unknown) =>
-              normalizeString(value),
-            )
-            .filter(Boolean)
-          : [];
-
-      const categoryId =
-        normalizeString(
-          request.data?.categoryId,
-        );
-
-      const subcategoryId =
-        normalizeString(
-          request.data?.subcategoryId,
-        );
 
       const entryFeeMinor =
         Number(
@@ -148,71 +134,79 @@ export const requestBoard =
             ?.minimumBoostMinor,
         );
 
-      if (!name) {
-        throw new HttpsError(
-          "invalid-argument",
-          "Board name is required.",
-        );
-      }
-
-      if (!shortDescription) {
-        throw new HttpsError(
-          "invalid-argument",
-          "Short description is required.",
-        );
-      }
-
       if (
-        eligibleListingTypeIds
-          .length === 0
+        !name ||
+        name.length > 80
       ) {
         throw new HttpsError(
           "invalid-argument",
-          "At least one eligible listing type is required.",
+          "Board name is required and must be 80 characters or fewer.",
+        );
+      }
+
+      if (!listingTypeId) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Listing type is required.",
         );
       }
 
       if (
-        !Number.isInteger(
+        !Number.isSafeInteger(
           entryFeeMinor,
         ) ||
-        entryFeeMinor < 100
+        entryFeeMinor < 100 ||
+        entryFeeMinor > 10000 ||
+        entryFeeMinor % 100 !== 0
       ) {
         throw new HttpsError(
           "invalid-argument",
-          "Entry fee must be at least $1.",
+          "Entry fee must be a whole dollar amount between $1 and $100.",
         );
       }
 
       if (
-        !Number.isInteger(
+        !Number.isSafeInteger(
           minimumBoostMinor,
         ) ||
-        minimumBoostMinor < 1 ||
-        minimumBoostMinor > 10000
+        minimumBoostMinor <
+        100 ||
+        minimumBoostMinor >
+        10000 ||
+        minimumBoostMinor %
+        100 !==
+        0
       ) {
         throw new HttpsError(
           "invalid-argument",
-          "Minimum boost amount is invalid.",
+          "Minimum Push Up must be a whole dollar amount between $1 and $100.",
         );
       }
 
       if (
         !startsAt ||
+        !entryStartsAt ||
         !entryClosesAt ||
         !endsAt
       ) {
         throw new HttpsError(
           "invalid-argument",
-          "Board dates are required.",
+          "All board dates are required.",
         );
       }
 
       const startsDate =
         new Date(startsAt);
 
+      const entryStartsDate =
+        new Date(
+          entryStartsAt,
+        );
+
       const entryClosesDate =
-        new Date(entryClosesAt);
+        new Date(
+          entryClosesAt,
+        );
 
       const endsDate =
         new Date(endsAt);
@@ -220,6 +214,9 @@ export const requestBoard =
       if (
         Number.isNaN(
           startsDate.getTime(),
+        ) ||
+        Number.isNaN(
+          entryStartsDate.getTime(),
         ) ||
         Number.isNaN(
           entryClosesDate.getTime(),
@@ -235,16 +232,44 @@ export const requestBoard =
       }
 
       if (
-        entryClosesDate.getTime() <
-        startsDate.getTime() ||
-        endsDate.getTime() <=
-        startsDate.getTime()
+        !(
+          startsDate.getTime() <
+          entryStartsDate.getTime() &&
+          entryStartsDate.getTime() <
+          entryClosesDate.getTime() &&
+          entryClosesDate.getTime() <
+          endsDate.getTime()
+        )
       ) {
         throw new HttpsError(
           "invalid-argument",
-          "Board dates are not valid.",
+          "Dates must follow: Starts < Entry starts < Entry closes < Ends.",
         );
       }
+
+
+      const creatorSnap =
+        await db
+          .collection("users")
+          .doc(request.auth.uid)
+          .get();
+
+      const creatorData =
+        creatorSnap.data();
+
+      const createdByDisplayName =
+        normalizeString(
+          creatorData?.displayName ||
+          request.auth.token.name ||
+          "",
+        );
+
+      const createdByEmail =
+        normalizeString(
+          creatorData?.email ||
+          request.auth.token.email ||
+          "",
+        );
 
       const boardRef =
         db
@@ -253,7 +278,9 @@ export const requestBoard =
 
       const auditRef =
         db
-          .collection("auditEvents")
+          .collection(
+            "auditEvents",
+          )
           .doc(
             `board_requested_${boardRef.id}`,
           );
@@ -261,7 +288,8 @@ export const requestBoard =
       await db.runTransaction(
         async (transaction) => {
           const now =
-            FieldValue.serverTimestamp();
+            FieldValue
+              .serverTimestamp();
 
           transaction.set(
             boardRef,
@@ -282,25 +310,19 @@ export const requestBoard =
                     "",
                   ),
 
-              shortDescription,
-
               createdByUserId:
                 request.auth!.uid,
+
+              createdByDisplayName,
+              createdByEmail,
 
               status:
                 "requested",
 
-              eligibleListingTypeIds,
-
-              ...(categoryId
-                ? { categoryId }
-                : {}),
-
-              ...(subcategoryId
-                ? { subcategoryId }
-                : {}),
+              listingTypeId,
 
               startsAt,
+              entryStartsAt,
               entryClosesAt,
               endsAt,
 
@@ -331,7 +353,9 @@ export const requestBoard =
 
               createdAt: now,
 
-              metadata: {},
+              metadata: {
+                listingTypeId,
+              },
             },
           );
         },
@@ -339,7 +363,8 @@ export const requestBoard =
 
       return {
         success: true,
-        boardId: boardRef.id,
+        boardId:
+          boardRef.id,
       };
     },
   );

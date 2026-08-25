@@ -9,14 +9,11 @@ import {
 
 type RequestBoardInput = {
   name: string;
-  shortDescription: string;
 
-  eligibleListingTypeIds: string[];
-
-  categoryId?: string;
-  subcategoryId?: string;
+  listingTypeId: string;
 
   startsAt: string;
+  entryStartsAt: string;
   entryClosesAt: string;
   endsAt: string;
 

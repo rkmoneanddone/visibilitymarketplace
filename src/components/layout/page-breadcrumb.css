@@ -6,7 +6,6 @@
 
   display: flex;
   align-items: center;
-  justify-content: space-between;
 
   margin: 10px auto 0;
 
@@ -47,8 +46,12 @@
 }
 
 .page-breadcrumb-admin {
-  color: #2455db !important;
-  font-weight: 600;
+  color: #667085;
+  text-decoration: none;
+}
+
+.page-breadcrumb-admin:hover {
+  color: #2455db;
 }
 
 @media (max-width: 760px) {

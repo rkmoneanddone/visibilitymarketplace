@@ -1,0 +1,97 @@
+.request-board-textarea {
+  width: 100%;
+  min-height: 74px;
+
+  padding: 8px 9px;
+
+  resize: vertical;
+
+  border: 1px solid #ccd5e1;
+  border-radius: 7px;
+
+  background: #fff;
+
+  font: inherit;
+  color: #222b38;
+
+  outline: none;
+}
+
+.request-board-textarea:focus {
+  border-color: #8ab2ef;
+}
+
+.request-board-types {
+  margin: 0;
+  padding: 8px;
+
+  border: 1px solid #d8e0eb;
+  border-radius: 8px;
+}
+
+.request-board-types legend {
+  padding: 0 4px;
+
+  font-size: 12px;
+  color: #3f4a5a;
+}
+
+.request-board-type-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 6px 8px;
+}
+
+.request-board-type-grid label {
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  min-width: 0;
+
+  padding: 5px 6px;
+
+  border-radius: 6px;
+
+  background: #f7f9fc;
+
+  cursor: pointer;
+}
+
+.request-board-type-grid input {
+  width: auto;
+  height: auto;
+
+  margin: 0;
+
+  flex: 0 0 auto;
+}
+
+.request-board-type-grid span {
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.request-board-date-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 9px;
+}
+
+@media (max-width: 640px) {
+  .request-board-type-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .request-board-date-grid {
+    grid-template-columns: 1fr;
+  }
+}

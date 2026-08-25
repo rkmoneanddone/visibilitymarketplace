@@ -3,10 +3,6 @@ import {
   useLocation,
 } from "react-router-dom";
 
-import {
-  useAuth,
-} from "../../features/auth/AuthProvider";
-
 import "./page-breadcrumb.css";
 
 const routeLabels: Record<
@@ -23,22 +19,12 @@ export function PageBreadcrumb() {
   const location =
     useLocation();
 
-  const {
-    profile,
-  } = useAuth();
-
   const segments =
     location.pathname
       .split("/")
       .filter(Boolean);
 
-  const isAdmin =
-    profile?.role === "admin";
-
-  if (
-    segments.length === 0 &&
-    !isAdmin
-  ) {
+  if (segments.length === 0) {
     return null;
   }
 
@@ -48,80 +34,61 @@ export function PageBreadcrumb() {
       aria-label="Breadcrumb"
     >
       <div className="page-breadcrumb-path">
-        {segments.length > 0 && (
-          <>
-            <span className="page-breadcrumb-item">
-              <Link to="/">
-                Home
-              </Link>
-            </span>
+        <span className="page-breadcrumb-item">
+          <Link to="/">
+            Home
+          </Link>
+        </span>
 
-            {segments.map(
-              (segment, index) => {
-                const path =
-                  "/" +
-                  segments
-                    .slice(
-                      0,
-                      index + 1,
-                    )
-                    .join("/");
+        {segments.map(
+          (segment, index) => {
+            const path =
+              "/" +
+              segments
+                .slice(
+                  0,
+                  index + 1,
+                )
+                .join("/");
 
-                const label =
-                  routeLabels[
-                  segment
-                  ] ??
-                  segment
-                    .replace(
-                      /-/g,
-                      " ",
-                    )
-                    .replace(
-                      /\b\w/g,
-                      (value) =>
-                        value.toUpperCase(),
-                    );
-
-                const isLast =
-                  index ===
-                  segments.length - 1;
-
-                return (
-                  <span
-                    className="page-breadcrumb-item"
-                    key={path}
-                  >
-                    <span className="page-breadcrumb-separator">
-                      ›
-                    </span>
-
-                    {isLast ? (
-                      <span className="page-breadcrumb-current">
-                        {label}
-                      </span>
-                    ) : (
-                      <Link to={path}>
-                        {label}
-                      </Link>
-                    )}
-                  </span>
+            const label =
+              routeLabels[segment] ??
+              segment
+                .replace(/-/g, " ")
+                .replace(
+                  /\b\w/g,
+                  (value) =>
+                    value.toUpperCase(),
                 );
-              },
-            )}
-          </>
+
+            const isLast =
+              index ===
+              segments.length - 1;
+
+            return (
+              <span
+                className="page-breadcrumb-item"
+                key={path}
+              >
+                <span className="page-breadcrumb-separator">
+                  ›
+                </span>
+
+                {isLast ||
+                path === "/admin" ? (
+                  <span className="page-breadcrumb-current">
+                    {label}
+                  </span>
+                ) : (
+                  <Link to={path}>
+                    {label}
+                  </Link>
+                )}
+              </span>
+            );
+          },
         )}
       </div>
-
-      {isAdmin &&
-        location.pathname !==
-        "/admin/moderation" && (
-          <Link
-            className="page-breadcrumb-admin"
-            to="/admin/moderation"
-          >
-            Moderation
-          </Link>
-        )}
     </nav>
   );
 }
