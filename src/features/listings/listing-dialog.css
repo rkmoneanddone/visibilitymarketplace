@@ -436,3 +436,33 @@
     flex: 1;
   }
 }
+
+/* BEGIN MOBILE DIALOG POSITION V2 */
+
+@media (max-width: 640px) {
+  .listing-dialog-overlay {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    overflow-y: auto;
+
+    min-height: 100dvh;
+
+    padding:
+      max(46px, 7dvh)
+      10px
+      18px;
+  }
+
+  .listing-dialog {
+    width: min(100%, 620px);
+    max-height: calc(100dvh - 64px);
+
+    margin: 0;
+
+    overflow-y: auto;
+  }
+}
+
+/* END MOBILE DIALOG POSITION V2 */

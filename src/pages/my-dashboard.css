@@ -222,3 +222,41 @@
     justify-content: flex-end;
   }
 }
+
+/* BEGIN DASHBOARD MOBILE POLISH V4 */
+
+.dashboard-page {
+  min-height: calc(100vh - 112px);
+}
+
+.dashboard-tabs button {
+  font-size: 13px;
+}
+
+.dashboard-tabs button span {
+  font-size: 9px;
+}
+
+.dashboard-share-button {
+  color: #3568a8;
+}
+
+@media (max-width: 640px) {
+  .dashboard-page {
+    width: calc(100% - 16px);
+    padding: 12px 4px 34px;
+    border-radius: 10px;
+    background: #f8fafc;
+  }
+
+  .dashboard-tabs button {
+    padding: 6px 9px;
+    font-size: 12px;
+  }
+
+  .dashboard-tabs button span {
+    font-size: 9px;
+  }
+}
+
+/* END DASHBOARD MOBILE POLISH V4 */

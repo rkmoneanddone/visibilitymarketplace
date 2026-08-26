@@ -8,10 +8,14 @@ import {
 import {
   PageBreadcrumb,
 } from "./PageBreadcrumb";
+import {
+  HashScroll,
+} from "./HashScroll";
 
 export function AppLayout() {
   return (
     <>
+      <HashScroll />
       <SiteHeader />
       <PageBreadcrumb />
       <Outlet />

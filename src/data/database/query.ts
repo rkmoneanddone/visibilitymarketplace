@@ -1,5 +1,7 @@
 import {
   collection,
+  doc,
+  getDoc,
   getDocs,
   limit,
   orderBy,
@@ -15,6 +17,28 @@ export {
   orderBy,
   where,
 };
+
+export async function dbGetDocument<T>(
+  collectionName: string,
+  documentId: string,
+): Promise<T | null> {
+  const ref = doc(
+    db,
+    collectionName,
+    documentId,
+  );
+
+  const snapshot = await getDoc(ref);
+
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  return {
+    id: snapshot.id,
+    ...snapshot.data(),
+  } as T;
+}
 
 export async function dbQueryCollection<T>(
   collectionName: string,

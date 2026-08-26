@@ -5,9 +5,15 @@ import {
 } from "react";
 
 import {
+  ArrowRight,
   LayoutGrid,
   Search,
+  Share2,
 } from "lucide-react";
+
+import {
+  Link,
+} from "react-router-dom";
 
 import {
   getListingTypeName,
@@ -27,6 +33,63 @@ import {
 
 import "./boards.css";
 
+function formatBoardDate(value: string) {
+  return new Date(value).toLocaleString(
+    undefined,
+    {
+      day: "numeric",
+      month: "short",
+      hour: "numeric",
+      minute: "2-digit",
+    },
+  );
+}
+
+function getStatusLabel(status: Board["status"]) {
+  return status
+    .replace(/_/g, " ")
+    .replace(
+      /\b\w/g,
+      (value) => value.toUpperCase(),
+    );
+}
+
+async function shareBoard(board: Board) {
+  const boardUrl =
+    `${window.location.origin}/boards/${board.id}`;
+
+  const shareData = {
+    title: board.name,
+    text: `${board.name} on ViewBid`,
+    url: boardUrl,
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(
+        shareData,
+      );
+      return;
+    }
+
+    await navigator.clipboard.writeText(
+      boardUrl,
+    );
+  } catch (error) {
+    if (
+      error instanceof DOMException &&
+      error.name === "AbortError"
+    ) {
+      return;
+    }
+
+    console.error(
+      "Unable to share board:",
+      error,
+    );
+  }
+}
+
 export function BoardsPage() {
   const [boards, setBoards] =
     useState<Board[]>([]);
@@ -35,9 +98,7 @@ export function BoardsPage() {
     useState(true);
 
   const [error, setError] =
-    useState<string | null>(
-      null,
-    );
+    useState<string | null>(null);
 
   const [search, setSearch] =
     useState("");
@@ -105,24 +166,21 @@ export function BoardsPage() {
 
   return (
     <main className="boards-page">
-
       <header className="boards-header">
-        <div className="boards-heading-copy">
-          <div>
-            <p className="eyebrow">
-              <LayoutGrid size={14} />
-              BOARDS
-            </p>
+        <div className="boards-heading">
+          <p className="boards-kicker">
+            <LayoutGrid size={13} />
+            BOARDS
+          </p>
 
-            <h1>Find a board</h1>
-          </div>
+          <h1>Find a board</h1>
 
-          <p>
-            Discover focused boards and add your listing to the ones that fit.
+          <p className="boards-intro">
+            Join focused, time-limited visibility boards.
           </p>
         </div>
 
-        <div className="boards-search">
+        <label className="boards-search">
           <Search size={16} />
 
           <input
@@ -133,10 +191,8 @@ export function BoardsPage() {
             }
             placeholder="Search boards"
           />
-        </div>
+        </label>
       </header>
-
-
 
       {loading ? (
         <div className="boards-state">
@@ -158,102 +214,56 @@ export function BoardsPage() {
                 className="board-card"
                 key={board.id}
               >
-                <div className="board-card-top">
-                  <div>
+                <div className="board-card-row board-card-row-main">
+                  <div className="board-card-identity">
                     <h2>
                       {board.name}
                     </h2>
 
-                    <span className="board-card-type">
+                    <p>
                       {getListingTypeName(
                         board.listingTypeId,
                       )}
+                    </p>
+                  </div>
+
+                  <div className="board-card-dates">
+                    <span>
+                      Entry closes
+                      <strong>
+                        {formatBoardDate(
+                          board.entryClosesAt,
+                        )}
+                      </strong>
+                    </span>
+
+                    <span className="board-card-dot">
+                      {"\u00B7"}
+                    </span>
+
+                    <span>
+                      Ends
+                      <strong>
+                        {formatBoardDate(
+                          board.endsAt,
+                        )}
+                      </strong>
                     </span>
                   </div>
 
-                  <span className="board-card-status">
-                    {board.status}
+                  <span
+                    className={`board-status board-status-${board.status}`}
+                  >
+                    {getStatusLabel(
+                      board.status,
+                    )}
                   </span>
                 </div>
 
-                <div className="board-card-schedule">
-                  <div>
-                    <span>Starts</span>
-
-                    <strong>
-                      {new Date(
-                        board.startsAt,
-                      ).toLocaleString(
-                        undefined,
-                        {
-                          day: "numeric",
-                          month: "short",
-                          hour: "numeric",
-                          minute: "2-digit",
-                        },
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>Entry opens</span>
-
-                    <strong>
-                      {new Date(
-                        board.entryStartsAt,
-                      ).toLocaleString(
-                        undefined,
-                        {
-                          day: "numeric",
-                          month: "short",
-                          hour: "numeric",
-                          minute: "2-digit",
-                        },
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>Entry closes</span>
-
-                    <strong>
-                      {new Date(
-                        board.entryClosesAt,
-                      ).toLocaleString(
-                        undefined,
-                        {
-                          day: "numeric",
-                          month: "short",
-                          hour: "numeric",
-                          minute: "2-digit",
-                        },
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>Ends</span>
-
-                    <strong>
-                      {new Date(
-                        board.endsAt,
-                      ).toLocaleString(
-                        undefined,
-                        {
-                          day: "numeric",
-                          month: "short",
-                          hour: "numeric",
-                          minute: "2-digit",
-                        },
-                      )}
-                    </strong>
-                  </div>
-                </div>
-
-                <div className="board-card-bottom">
-                  <div className="board-card-pricing">
+                <div className="board-card-row board-card-row-action">
+                  <div className="board-card-stats">
                     <span>
-                      Entry
+                      <small>Entry</small>
                       <strong>
                         {formatMoneyMinor(
                           board.entryFeeMinor,
@@ -263,7 +273,9 @@ export function BoardsPage() {
                     </span>
 
                     <span>
-                      Min Push Up
+                      <small>
+                        Min Push Up
+                      </small>
                       <strong>
                         {formatMoneyMinor(
                           board.minimumBoostMinor,
@@ -273,13 +285,27 @@ export function BoardsPage() {
                     </span>
                   </div>
 
-                  <button
-                    type="button"
-                    disabled
-                    title="Board detail is the next step"
-                  >
-                    View Board
-                  </button>
+                  <div className="board-card-actions">
+                    <button
+                      className="board-share-button"
+                      type="button"
+                      onClick={() =>
+                        void shareBoard(board)
+                      }
+                      aria-label={`Share ${board.name}`}
+                      title="Share Board"
+                    >
+                      <Share2 size={15} />
+                    </button>
+
+                    <Link
+                      className="board-card-link"
+                      to={`/boards/${board.id}`}
+                    >
+                      View Board
+                      <ArrowRight size={16} />
+                    </Link>
+                  </div>
                 </div>
               </article>
             ),

@@ -6,6 +6,13 @@ import {
   Routes,
 } from "react-router-dom";
 
+
+import {
+  HowItWorksPage,
+} from "./pages/HowItWorksPage";import {
+  BoardDetailPage,
+} from "./pages/BoardDetailPage";
+
 import {
   BoardsPage,
 } from "./pages/BoardsPage";
@@ -35,9 +42,19 @@ function App() {
             path="/"
             element={<HomePage />}
           />
+
           <Route
             path="/boards"
             element={<BoardsPage />}
+          />
+          <Route
+            path="/how-it-works"
+            element={<HowItWorksPage />}
+          />
+
+          <Route
+            path="/boards/:boardId"
+            element={<BoardDetailPage />}
           />
 
           <Route

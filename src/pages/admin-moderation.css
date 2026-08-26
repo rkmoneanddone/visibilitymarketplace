@@ -481,3 +481,20 @@
     flex-wrap: wrap;
   }
 }
+
+/* BEGIN ADMIN MOBILE SURFACE V3 */
+
+.admin-page {
+  min-height: calc(100vh - 112px);
+}
+
+@media (max-width: 640px) {
+  .admin-page {
+    width: calc(100% - 16px);
+    padding: 12px 4px 34px;
+    border-radius: 10px;
+    background: #f8fafc;
+  }
+}
+
+/* END ADMIN MOBILE SURFACE V3 */

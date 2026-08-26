@@ -1,4 +1,5 @@
 import {
+  dbGetDocument,
   dbQueryCollection,
   limit,
   orderBy,
@@ -8,6 +9,15 @@ import {
 import type {
   Board,
 } from "../../types/board";
+
+export async function getBoardById(
+  boardId: string,
+): Promise<Board | null> {
+  return dbGetDocument<Board>(
+    "boards",
+    boardId,
+  );
+}
 
 export async function getPublicBoards(): Promise<
   Board[]

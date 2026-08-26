@@ -1,5 +1,5 @@
 import {
-  useEffect,
+useEffect,
   useMemo,
   useState,
 } from "react";
@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   Plus,
   XCircle,
+  Share2,
 } from "lucide-react";
 
 import {
@@ -136,6 +137,51 @@ export function MyDashboardPage() {
     initializing,
   ]);
 
+  async function handleShareListing(
+    listing: Listing,
+  ) {
+    const url =
+      listing.externalUrl;
+
+    const shareData = {
+      title: listing.title,
+      text: `Check out ${listing.title}`,
+      url,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(
+          shareData,
+        );
+        return;
+      }
+
+      await navigator.clipboard.writeText(
+        url,
+      );
+
+      window.alert(
+        "Listing link copied.",
+      );
+    } catch (error) {
+      if (
+        error instanceof DOMException &&
+        error.name === "AbortError"
+      ) {
+        return;
+      }
+
+      console.error(
+        "Unable to share listing:",
+        error,
+      );
+
+      window.alert(
+        "Unable to share this listing.",
+      );
+    }
+  }
   async function handleArchive(
     listingId: string,
   ) {
@@ -498,7 +544,22 @@ export function MyDashboardPage() {
                       />
                     </a>
 
-                    {listing.status ===
+                                        {listing.status ===
+                      "published" && (
+                        <button
+                          type="button"
+                          className="dashboard-share-button"
+                          onClick={() =>
+                            void handleShareListing(
+                              listing,
+                            )
+                          }
+                        >
+                          <Share2 size={14} />
+                          Share
+                        </button>
+                      )}
+{listing.status ===
                       "published" && (
                         <button
                           type="button"

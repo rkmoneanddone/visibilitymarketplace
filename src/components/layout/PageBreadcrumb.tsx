@@ -51,15 +51,20 @@ export function PageBreadcrumb() {
                 )
                 .join("/");
 
+            const previousSegment =
+              segments[index - 1];
+
             const label =
-              routeLabels[segment] ??
-              segment
-                .replace(/-/g, " ")
-                .replace(
-                  /\b\w/g,
-                  (value) =>
-                    value.toUpperCase(),
-                );
+              previousSegment === "boards"
+                ? "Board"
+                : routeLabels[segment] ??
+                  segment
+                    .replace(/-/g, " ")
+                    .replace(
+                      /\b\w/g,
+                      (value) =>
+                        value.toUpperCase(),
+                    );
 
             const isLast =
               index ===
@@ -71,7 +76,7 @@ export function PageBreadcrumb() {
                 key={path}
               >
                 <span className="page-breadcrumb-separator">
-                  ›
+                  {"\u203A"}
                 </span>
 
                 {isLast ||

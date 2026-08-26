@@ -1,8 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  AccountControl,
-} from "../features/auth/AccountControl";
-import {
   ListingLauncher,
 } from "../features/listings/ListingLauncher";
 
@@ -37,7 +34,6 @@ import {
   demoBoardStats,
   newToday,
 } from "../data/demoMarketplace";
-import { initialCategories } from "../config/categories";
 import { initialListingTypes } from "../config/listingTypes";
 import { siteConfig } from "../config/site";
 import { getPublishedListings } from "../services/firestore/listings";
@@ -46,6 +42,8 @@ import type { Listing } from "../types/marketplace";
 
 export function HomePage() {
   const [selectedType, setSelectedType] = useState("All");
+  const [selectedPeriod, setSelectedPeriod] =
+    useState("this-week");
   const [listings, setListings] = useState<Listing[]>([]);
   const [listingsLoading, setListingsLoading] = useState(true);
   const [listingsError, setListingsError] = useState<string | null>(null);
@@ -130,10 +128,6 @@ export function HomePage() {
 
             <div className="intro-side">
               <p>{marketplaceConfig.homepage.description}</p>
-
-              <a href="#add-listing">
-                {marketplaceConfig.homepage.listingCta}
-              </a>
             </div>
           </div>
         </section>
@@ -190,25 +184,33 @@ export function HomePage() {
                 <h2>Rising this week</h2>
               </div>
 
-              <span className="board-period">
-                {marketplaceConfig.board.periodLabel}
-              </span>
+              <select
+                className="board-period-select"
+                value={selectedPeriod}
+                onChange={(event) =>
+                  setSelectedPeriod(event.target.value)
+                }
+                aria-label="Board period"
+              >
+                <option value="this-week">
+                  This week
+                </option>
+                <option value="week-1">
+                  1 week back
+                </option>
+                <option value="week-2">
+                  2 weeks back
+                </option>
+                <option value="week-3">
+                  3 weeks back
+                </option>
+                <option value="last-month">
+                  Last month
+                </option>
+              </select>
             </div>
 
-            <div className="filters">
-              <select defaultValue="">
-                <option value="">All categories</option>
-                {initialCategories
-                  .filter((category) => category.enabled)
-                  .map((category) => (
-                    <option key={category.id}>{category.name}</option>
-                  ))}
-              </select>
-
-              <select defaultValue="">
-                <option value="">All subcategories</option>
-              </select>
-
+            <div className="filters home-search-only">
               <div className="search-field">
                 <Search size={16} />
                 <input
@@ -219,27 +221,12 @@ export function HomePage() {
               </div>
             </div>
 
-            <div className="market-model-strip">
-              <div className="market-model-price">
-                <span className="free-pill">
-                  {marketplaceConfig.pricing.freeListingLabel}
-                </span>
-                <span className="model-or">OR</span>
-                <span className="vip-pill">
-                  <Zap size={13} />
-                  {marketplaceConfig.pricing.boardVisibilityLabel}
-                </span>
-              </div>
-
-              <p>
-                List for free. Get discovered. Support any listing to push it higher.
-              </p>
-
-              <a href="#how">How it works →</a>
-            </div>
-
-            <div className="board-list">
-              {listingsLoading ? (
+<div className="board-list">
+              {selectedPeriod !== "this-week" ? (
+                <div className="empty-board historical-board-note">
+                  Historical ranking for this period is not connected yet.
+                </div>
+              ) : listingsLoading ? (
                 <div className="empty-board">Loading listings...</div>
               ) : listingsError ? (
                 <div className="empty-board">{listingsError}</div>
@@ -364,6 +351,29 @@ export function HomePage() {
               )}
             </div>
 
+            <div className="market-model-strip">
+              <div className="market-model-price">
+                <span className="free-pill">
+                  {marketplaceConfig.pricing.freeListingLabel}
+                </span>
+                <span className="model-or">OR</span>
+                <span className="vip-pill">
+                  <Zap size={13} />
+                  {marketplaceConfig.pricing.boardVisibilityLabel}
+                </span>
+              </div>
+
+              <p>
+                List for free. Get discovered. Support any listing to push it higher.
+              </p>
+
+              <span className="market-refund-note">
+                Paid visibility is non-refundable after successful processing.
+              </span>
+
+              <a href="/how-it-works">How it works →</a>
+            </div>
+
             <div className="board-bottom">
               <span>Ranking is based on paid pushes this board period.</span>
               <button type="button">View all →</button>
@@ -464,7 +474,7 @@ export function HomePage() {
             <strong>For listings</strong>
             <a href="#add-listing">Add listing</a>
             <a href="#pricing">Pricing</a>
-            <a href="#how">How Push Up works</a>
+            <a href="/how-it-works">How Push Up works</a>
           </div>
 
           <div className="footer-column">

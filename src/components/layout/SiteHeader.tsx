@@ -53,11 +53,11 @@ export function SiteHeader({
           Explore
         </Link>
 
-        <Link to="/#how">
+        <Link to="/how-it-works">
           How it works
         </Link>
 
-        <Link to="/boards">
+        <Link className="boards-nav-link" to="/boards">
           Boards
         </Link>
 

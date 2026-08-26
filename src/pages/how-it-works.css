@@ -1,0 +1,304 @@
+.how-page {
+  width: min(92%, 920px);
+  min-height: calc(100vh - 118px);
+  margin: 0 auto;
+  padding: 18px 0 46px;
+}
+
+.how-hero {
+  padding: 18px 20px;
+  border: 1px solid #c9d5e2;
+  border-radius: 12px;
+  background: #f8fbff;
+}
+
+.how-kicker {
+  margin: 0 0 4px;
+  color: #58708b;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+.how-hero h1 {
+  margin: 0;
+  color: #19263a;
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+
+.how-hero > p:not(.how-kicker) {
+  max-width: 720px;
+  margin: 7px 0 0;
+  color: #526176;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.how-hero-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.how-primary-link,
+.how-secondary-link {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 11px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.how-primary-link {
+  border: 1px solid #2379ed;
+  background: #2379ed;
+  color: #fff;
+}
+
+.how-secondary-link {
+  border: 1px solid #bdc9d6;
+  background: #fff;
+  color: #344054;
+}
+
+.how-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 10px;
+}
+
+.how-step {
+  min-height: 156px;
+  padding: 14px;
+  border: 1px solid;
+  border-radius: 10px;
+}
+
+.how-step-blue {
+  border-color: #b8cee9;
+  background: #edf5ff;
+}
+
+.how-step-green {
+  border-color: #b9d8c3;
+  background: #eef8f1;
+}
+
+.how-step-yellow {
+  border-color: #dfcd91;
+  background: #fff9e7;
+}
+
+.how-step-purple {
+  border-color: #cdbbe8;
+  background: #f5effd;
+}
+
+.how-step-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.how-step-icon {
+  width: 31px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #49627e;
+}
+
+.how-step-number {
+  color: #748197;
+  font-size: 10px;
+}
+
+.how-step h2 {
+  margin: 10px 0 0;
+  color: #203047;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.how-step p {
+  margin: 5px 0 0;
+  color: #526176;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.how-note {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.how-note strong {
+  color: #26364b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.how-note p {
+  margin: 3px 0 0;
+  color: #66758a;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+@media (max-width: 700px) {
+  .how-page {
+    width: 94%;
+    padding-top: 8px;
+  }
+
+  .how-hero {
+    padding: 13px 14px;
+  }
+
+  .how-hero h1 {
+    font-size: 22px;
+  }
+
+  .how-hero > p:not(.how-kicker) {
+    font-size: 11.5px;
+  }
+
+  .how-grid {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .how-step {
+    min-height: 0;
+    padding: 11px;
+  }
+
+  .how-step h2 {
+    margin-top: 7px;
+    font-size: 14px;
+  }
+
+  .how-step p {
+    font-size: 11px;
+  }
+
+  .how-hero-actions {
+    margin-top: 10px;
+  }
+}
+
+/* BEGIN VISIBILITY MARKETPLACE READABILITY V1 */
+
+.how-kicker {
+  font-size: 11px;
+}
+
+.how-hero > p:not(.how-kicker) {
+  font-size: 14px;
+}
+
+.how-step-number {
+  font-size: 11px;
+}
+
+.how-step h2 {
+  font-size: 16px;
+}
+
+.how-step p {
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.how-note strong,
+.how-refund-note strong {
+  font-size: 13px;
+}
+
+.how-note p,
+.how-refund-note p {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.how-refund-note {
+  margin-top: 9px;
+  padding: 12px 14px;
+  border: 1px solid #e1c98e;
+  border-radius: 10px;
+  background: #fff8e8;
+}
+
+.how-refund-note strong {
+  color: #594718;
+  font-weight: 600;
+}
+
+.how-refund-note p {
+  margin: 4px 0 0;
+  color: #6d5b31;
+}
+
+@media (max-width: 700px) {
+  .how-hero > p:not(.how-kicker) {
+    font-size: 12.5px;
+  }
+
+  .how-step h2 {
+    font-size: 15px;
+  }
+
+  .how-step p {
+    font-size: 12px;
+  }
+
+  .how-note p,
+  .how-refund-note p {
+    font-size: 11.5px;
+  }
+}
+
+/* END VISIBILITY MARKETPLACE READABILITY V1 */
+
+/* BEGIN SMALL HOW FONT BUMP V2 */
+
+.how-kicker {
+  font-size: 12px;
+}
+
+.how-step-number {
+  font-size: 12px;
+}
+
+.how-step p {
+  font-size: 13.5px;
+}
+
+.how-note p,
+.how-refund-note p {
+  font-size: 13px;
+}
+
+@media (max-width: 700px) {
+  .how-step p {
+    font-size: 13px;
+  }
+
+  .how-note p,
+  .how-refund-note p {
+    font-size: 12.5px;
+  }
+}
+
+/* END SMALL HOW FONT BUMP V2 */

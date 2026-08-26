@@ -1,243 +1,681 @@
 .boards-page {
-  width: 80%;
-  max-width: 1180px;
+  width: min(92%, 920px);
+  min-height: calc(100vh - 118px);
   margin: 0 auto;
-  padding: 22px 0 48px;
+  padding: 6px 0 36px;
+  background: #edf1f6;
+  box-shadow: 0 0 0 100vmax #edf1f6;
+  clip-path: inset(0 -100vmax);
 }
 
 .boards-header {
-  display: grid;
-  grid-template-columns:
-    auto
-    minmax(180px, auto)
-    minmax(260px, 1fr)
-    280px;
-
-  align-items: center;
-  gap: 14px;
-
-  margin: 14px 0 16px;
+  position: relative;
+  min-height: 68px;
+  margin-bottom: 8px;
 }
 
-.boards-heading-copy {
-  display: contents;
+.boards-heading {
+  padding-top: 2px;
 }
 
-.boards-heading-copy > div {
-  display: contents;
-}
-
-.boards-heading-copy .eyebrow {
-  margin: 0;
-
+.boards-kicker {
+  margin: 0 0 1px;
   display: flex;
   align-items: center;
   gap: 5px;
-
-  color: #666;
-  font-size: 12px;
-  white-space: nowrap;
+  color: #566579;
+  font-size: 10px;
+  letter-spacing: 0.04em;
 }
 
-.boards-heading-copy h1 {
+.boards-header h1 {
   margin: 0;
-
-  color: #151515;
-
-  font-size: 30px;
-  letter-spacing: -0.03em;
-
-  white-space: nowrap;
+  color: #233044;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
 }
 
-.boards-heading-copy > p {
-  margin: 0;
-
-  color: #666;
-
-  font-size: 13px;
-  line-height: 1.35;
-
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.boards-intro {
+  margin: 2px 0 0;
+  color: #5c697b;
+  font-size: 11px;
+  line-height: 1.3;
 }
 
 .boards-search {
-  width: 100%;
+  position: absolute;
+  left: 50%;
+  top: 21px;
+  width: min(280px, 34%);
   height: 34px;
-
-  box-sizing: border-box;
-
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 7px;
-
+  gap: 8px;
+  box-sizing: border-box;
   padding: 0 10px;
-
-  border: 1px solid #d7dce3;
-  border-radius: 7px;
-
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
   background: #fff;
-  color: #8a919c;
-}
-
-.boards-search svg {
-  flex: 0 0 auto;
+  color: #8b98aa;
 }
 
 .boards-search input {
   width: 100%;
   height: 100%;
-
   border: 0;
   outline: 0;
-
   padding: 0;
-
   background: transparent;
-
-  color: #222;
-
-  font-size: 13px;
+  color: #233044;
+  font: inherit;
+  font-size: 11px;
 }
 
 .boards-search input::placeholder {
-  color: #9aa0aa;
-}
-
-.boards-state {
-  margin-top: 14px;
-
-  color: #555;
-
-  font-size: 13px;
+  color: #8b98aa;
 }
 
 .boards-list {
   display: grid;
-  gap: 9px;
+  gap: 8px;
+}
 
-  margin-top: 15px;
+.boards-state,
+.board-card {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(16 24 40 / 8%);
+}
+
+.boards-state {
+  padding: 14px;
+  color: #566579;
+  font-size: 12px;
 }
 
 .board-card {
-  display: grid;
-
-  grid-template-columns:
-    minmax(0, 1fr)
-    auto
-    auto;
-
-  gap: 22px;
-
-  align-items: center;
-
-  padding: 14px;
-
-  border: 1px solid #e2e2e2;
-  border-radius: 9px;
-
-  background: #fff;
+  overflow: hidden;
 }
 
-.board-card-main h2 {
-  margin: 0;
-
-  color: #151515;
-
-  font-size: 18px;
-}
-
-.board-card-main p {
-  margin: 5px 0;
-
-  color: #555;
-
-  font-size: 13px;
-}
-
-.board-card-main > span {
-  color: #777;
-
-  font-size: 11px;
-}
-
-.board-card-info {
+.board-card-row {
   display: flex;
-  gap: 18px;
+  align-items: center;
 }
 
-.board-card-info span {
-  display: grid;
-  gap: 2px;
+.board-card-row-main {
+  min-height: 54px;
+  gap: 20px;
+  padding: 9px 11px 8px;
+}
 
-  color: #888;
+.board-card-identity {
+  min-width: 170px;
+  flex: 0 0 auto;
+}
 
+.board-card-identity h2 {
+  margin: 0;
+  color: #101828;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.board-card-identity p {
+  margin: 2px 0 0;
+  color: #607086;
   font-size: 10px;
 }
 
-.board-card-info strong {
-  color: #333;
-
-  font-size: 13px;
+.board-card-dates {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  color: #607086;
+  font-size: 10px;
 }
 
-.board-card > button {
-  border: 1px solid #2455db;
+.board-card-dates span {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.board-card-dates strong {
+  color: #2c3c50;
+  font-weight: 500;
+}
+
+.board-card-dot {
+  color: #9aa6b5;
+}
+
+.board-status {
+  flex: 0 0 auto;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: #e5edf7;
+  color: #40536b;
+  font-size: 9px;
+  line-height: 1;
+}
+
+.board-status-entry_open,
+.board-status-active {
+  background: #dcecff;
+  color: #155eb5;
+}
+
+.board-card-row-action {
+  justify-content: space-between;
+  gap: 14px;
+  padding: 7px 8px 7px 11px;
+  border-top: 1px solid #d9e2ec;
+  background: #f5f8fb;
+}
+
+.board-card-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.board-card-stats span {
+  display: grid;
+  gap: 0;
+}
+
+.board-card-stats small {
+  color: #607086;
+  font-size: 9px;
+}
+
+.board-card-stats strong {
+  color: #101828;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.board-card-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 0 10px;
   border-radius: 7px;
-
-  background: #2455db;
+  background: #2379ed;
   color: #fff;
-
-  padding: 8px 11px;
+  font-size: 10px;
+  font-weight: 600;
+  text-decoration: none;
 }
 
-@media (max-width: 900px) {
+.board-card-link:hover {
+  background: #1768d7;
+}
+
+@media (max-width: 700px) {
+  .boards-page {
+    width: 94%;
+    min-height: calc(100vh - 92px);
+    padding-top: 2px;
+  }
+
   .boards-header {
-    grid-template-columns: 1fr;
-    gap: 7px;
+    min-height: 92px;
+    margin-bottom: 6px;
   }
 
-  .boards-heading-copy {
-    display: block;
+  .boards-heading {
+    padding-top: 0;
   }
 
-  .boards-heading-copy > div {
-    display: block;
+  .boards-header h1 {
+    font-size: 17px;
   }
 
-  .boards-heading-copy .eyebrow {
-    margin-bottom: 3px;
-  }
-
-  .boards-heading-copy h1 {
-    font-size: 28px;
-  }
-
-  .boards-heading-copy > p {
-    margin-top: 4px;
-
-    white-space: normal;
-    overflow: visible;
+  .boards-intro {
+    font-size: 11px;
   }
 
   .boards-search {
+    top: 51px;
+    left: 0;
     width: 100%;
+    height: 32px;
+    transform: none;
+  }
+
+  .board-card-row-main {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 5px 8px;
+    padding: 9px 10px 7px;
+  }
+
+  .board-card-identity {
+    min-width: 0;
+  }
+
+  .board-card-identity h2 {
+    font-size: 15px;
+  }
+
+  .board-card-identity p {
+    font-size: 10px;
+  }
+
+  .board-status {
+    align-self: start;
+  }
+
+  .board-card-dates {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    gap: 3px;
+    font-size: 10px;
+  }
+
+  .board-card-row-action {
+    padding: 7px 8px 7px 10px;
+  }
+
+  .board-card-stats {
+    gap: 18px;
+  }
+
+  .board-card-link {
+    min-height: 30px;
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 420px) {
+  .board-card-dates {
+    line-height: 1.25;
+  }
+
+  .board-card-row-action {
+    align-items: center;
+  }
+}
+
+/* BEGIN VIEWBID BOARDS DATE + MOBILE HEADER TUNE */
+
+/* Desktop: spread the two date groups and increase readability */
+.board-card-dates {
+  justify-content: space-between;
+  gap: 28px;
+  font-size: 12px;
+}
+
+.board-card-dates span {
+  gap: 5px;
+}
+
+.board-card-dates strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.board-card-dot {
+  display: none;
+}
+
+/* Give the date area more usable width on desktop */
+.board-card-row-main {
+  gap: 26px;
+}
+
+.board-card-identity {
+  min-width: 190px;
+}
+
+.board-card-dates {
+  padding: 0 18px;
+}
+
+/* Mobile: loosen only the heading/search block */
+@media (max-width: 700px) {
+  .boards-header {
+    min-height: 102px;
+    margin-bottom: 8px;
+  }
+
+  .boards-heading {
+    padding-top: 2px;
+  }
+
+  .boards-kicker {
+    margin-bottom: 2px;
+  }
+
+  .boards-header h1 {
+    font-size: 18px;
+    line-height: 1.25;
+  }
+
+  .boards-intro {
+    margin-top: 3px;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .boards-search {
+    top: 60px;
+    height: 34px;
+  }
+
+  .board-card-dates {
+    padding: 0;
+    justify-content: flex-start;
+    gap: 8px 14px;
+    font-size: 11px;
+  }
+
+  .board-card-dates strong {
+    font-size: 11px;
+  }
+}
+
+/* END VIEWBID BOARDS DATE + MOBILE HEADER TUNE */
+
+/* BEGIN VIEWBID BOARDS MOBILE COMPACT V4 */
+
+@media (max-width: 700px) {
   .boards-page {
-    width: 92%;
+    padding-top: 0;
+  }
+
+  .boards-header {
+    min-height: 88px;
+    margin-bottom: 5px;
+    margin-top: 8px;
+  }
+
+  .boards-heading {
+    padding-top: 0;
+  }
+
+  .boards-kicker {
+    margin-bottom: 0;
+    font-size: 9px;
+  }
+
+  .boards-header h1 {
+    font-size: 16px;
+    line-height: 1.15;
+  }
+
+  .boards-intro {
+    margin-top: 1px;
+    font-size: 10.5px;
+    line-height: 1.2;
+  }
+
+  .boards-search {
+    top: 48px;
+    height: 31px;
+  }
+
+  .boards-list {
+    gap: 6px;
   }
 
   .board-card {
-    grid-template-columns: 1fr;
-    gap: 10px;
+    border-radius: 9px;
   }
 
-  .board-card-info {
-    gap: 24px;
+  .board-card-row-main {
+    grid-template-columns: 1fr auto;
+    gap: 3px 8px;
+    padding: 8px 9px 6px;
+  }
+
+  .board-card-identity h2 {
+    font-size: 14px;
+    line-height: 1.15;
+  }
+
+  .board-card-identity p {
+    margin-top: 1px;
+    font-size: 9.5px;
+  }
+
+  .board-status {
+    width: auto !important;
+    min-width: 0 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    justify-self: end;
+    align-self: start;
+    padding: 3px 7px;
+    font-size: 9px;
+    line-height: 1;
+  }
+
+  .board-card-dates {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 4px 10px;
+    padding: 0;
+    margin-top: 2px;
+    overflow: hidden;
+    font-size: 9.5px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .board-card-dates span {
+    gap: 3px;
+  }
+
+  .board-card-dates strong {
+    font-size: 9.5px;
+  }
+
+  .board-card-row-action {
+    padding: 6px 8px 6px 9px;
+  }
+
+  .board-card-stats {
+    gap: 16px;
+  }
+
+  .board-card-stats small {
+    font-size: 9px;
+  }
+
+  .board-card-stats strong {
+    font-size: 13px;
+  }
+
+  .board-card-link {
+    min-height: 29px;
+    padding: 0 9px;
+    font-size: 9.5px;
   }
 }
+
+/* END VIEWBID BOARDS MOBILE COMPACT V4 */
+
+/* BEGIN VIEWBID BOARD SHARE ACTION V1 */
+
+.board-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.board-share-button {
+  width: 31px;
+  height: 31px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #bfcbd8;
+  border-radius: 7px;
+  background: #fff;
+  color: #4e6076;
+}
+
+.board-share-button:hover {
+  border-color: #9bb4d1;
+  background: #eef5fd;
+  color: #1769d2;
+}
+
+@media (max-width: 700px) {
+  .board-share-button {
+    width: 29px;
+    height: 29px;
+  }
+}
+
+/* END VIEWBID BOARD SHARE ACTION V1 */
+
+/* BEGIN VISIBILITY MARKETPLACE BOARDS READABILITY V1 */
+
+.boards-kicker {
+  font-size: 11px;
+}
+
+.boards-header h1 {
+  font-size: 19px;
+}
+
+.boards-intro {
+  font-size: 12px;
+}
+
+.boards-search input {
+  font-size: 12px;
+}
+
+.board-card-identity h2 {
+  font-size: 16px;
+}
+
+.board-card-identity p {
+  font-size: 11px;
+}
+
+.board-card-dates,
+.board-card-dates strong {
+  font-size: 12px;
+}
+
+.board-status {
+  font-size: 10px;
+}
+
+.board-card-stats small {
+  font-size: 10px;
+}
+
+.board-card-stats strong {
+  font-size: 15px;
+}
+
+.board-card-link {
+  font-size: 11px;
+}
+
+@media (max-width: 700px) {
+  .boards-header h1 {
+    font-size: 17px;
+  }
+
+  .boards-intro {
+    font-size: 11.5px;
+  }
+
+  .board-card-identity h2 {
+    font-size: 15px;
+  }
+
+  .board-card-identity p {
+    font-size: 10.5px;
+  }
+
+  .board-card-dates,
+  .board-card-dates strong {
+    font-size: 10.5px;
+  }
+
+  .board-card-stats strong {
+    font-size: 14px;
+  }
+
+  .board-card-link {
+    font-size: 10.5px;
+  }
+}
+
+/* END VISIBILITY MARKETPLACE BOARDS READABILITY V1 */
+
+/* BEGIN SMALL BOARDS FONT BUMP V2 */
+
+.boards-kicker {
+  font-size: 12px;
+}
+
+.boards-intro {
+  font-size: 13px;
+}
+
+.boards-search input {
+  font-size: 13px;
+}
+
+.board-card-identity p {
+  font-size: 12px;
+}
+
+.board-card-dates,
+.board-card-dates strong {
+  font-size: 13px;
+}
+
+.board-status {
+  font-size: 11px;
+}
+
+.board-card-stats small {
+  font-size: 11px;
+}
+
+.board-card-link {
+  font-size: 12px;
+}
+
+@media (max-width: 700px) {
+  .boards-intro {
+    font-size: 12.5px;
+  }
+
+  .board-card-identity p {
+    font-size: 11.5px;
+  }
+
+  .board-card-dates,
+  .board-card-dates strong {
+    font-size: 11.5px;
+  }
+
+  .board-card-link {
+    font-size: 11.5px;
+  }
+}
+
+/* END SMALL BOARDS FONT BUMP V2 */

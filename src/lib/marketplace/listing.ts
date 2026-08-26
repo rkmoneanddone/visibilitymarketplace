@@ -1,4 +1,4 @@
-import { initialCategories } from "../../config/categories";
+import { initialCategories, initialSubcategories } from "../../config/categories";
 import { initialListingTypes } from "../../config/listingTypes";
 
 export function getListingTypeName(listingTypeId: string) {
@@ -23,14 +23,11 @@ export function getSubcategoryName(
   if (!subcategoryId) {
     return "";
   }
-
-  const category = initialCategories.find(
-    (item) => item.id === categoryId,
-  );
-
-  return (
-    category?.subcategories?.find(
-      (subcategory) => subcategory.id === subcategoryId,
+return (
+    initialSubcategories.find(
+      (subcategory) =>
+        subcategory.categoryId === categoryId &&
+        subcategory.id === subcategoryId,
     )?.name ?? subcategoryId
   );
 }

@@ -1,0 +1,685 @@
+.board-detail-page {
+  width: min(92%, 920px);
+  min-height: calc(100vh - 118px);
+  margin: 0 auto;
+  padding: 6px 0 36px;
+  background: #edf1f6;
+  box-shadow: 0 0 0 100vmax #edf1f6;
+  clip-path: inset(0 -100vmax);
+}
+
+.board-detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 0 7px;
+  color: #506176;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.board-detail-card,
+.board-detail-state {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(16 24 40 / 8%);
+}
+
+.board-detail-state {
+  padding: 14px;
+  color: #566579;
+  font-size: 13px;
+}
+
+.board-summary {
+  overflow: hidden;
+  border-color: #b9cbe0;
+}
+
+.board-summary-row {
+  display: flex;
+  align-items: center;
+}
+
+.board-summary-row-main {
+  gap: 24px;
+  padding: 13px 14px 11px;
+  background: #f8fbff;
+}
+
+.board-summary-identity {
+  min-width: 260px;
+  flex: 1 1 auto;
+}
+
+.board-detail-kicker {
+  margin: 0 0 2px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #58708b;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.board-summary h1 {
+  margin: 0;
+  color: #1f2b3d;
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.board-summary-meta {
+  display: flex;
+  gap: 6px;
+  margin: 4px 0 0;
+  color: #53657b;
+  font-size: 12px;
+}
+
+.board-summary-status {
+  display: grid;
+  gap: 2px;
+  margin-left: auto;
+  text-align: right;
+}
+
+.board-summary-status strong {
+  color: #24496f;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.board-summary-status small {
+  color: #60758c;
+  font-size: 11px;
+}
+
+.board-summary-row-main button {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 7px;
+  background: #2379ed;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.board-summary-row-main button:disabled {
+  background: #9fc4f4;
+  color: #fff;
+}
+
+.board-summary-row-action {
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 14px;
+  border-top: 1px solid #cfe0f1;
+  background: #eaf3fc;
+}
+
+.board-summary-prices {
+  display: flex;
+  gap: 28px;
+}
+
+.board-summary-prices span {
+  display: grid;
+  gap: 1px;
+}
+
+.board-summary-prices small {
+  color: #4f6780;
+  font-size: 11px;
+}
+
+.board-summary-prices strong {
+  color: #17304d;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.board-summary-note {
+  color: #58708a;
+  font-size: 11px;
+}
+
+.board-schedule-card {
+  margin-top: 8px;
+  padding: 12px 14px;
+  border-color: #dfcf98;
+  background: #fff9eb;
+}
+
+.board-section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #735d2c;
+}
+
+.board-section-title h2 {
+  margin: 0;
+  color: #3d3420;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.board-schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin: 10px 0 0;
+}
+
+.board-schedule-grid div {
+  display: grid;
+  gap: 2px;
+}
+
+.board-schedule-grid dt {
+  color: #7b6b47;
+  font-size: 11px;
+}
+
+.board-schedule-grid dd {
+  margin: 0;
+  color: #2f2a1f;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.board-entries-card {
+  margin-top: 8px;
+  padding: 12px 14px;
+  border-color: #bfd2c6;
+  background: #f4faf6;
+}
+
+.board-entries-heading span {
+  color: #2d7a50;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.board-entries-heading h2 {
+  margin: 2px 0 0;
+  color: #263d2e;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.board-empty-row {
+  margin-top: 9px;
+  padding: 11px 12px;
+  border-radius: 8px;
+  background: #e8f3eb;
+}
+
+.board-empty-row strong {
+  color: #2d4936;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.board-empty-row p {
+  margin: 3px 0 0;
+  color: #536b5b;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+@media (max-width: 700px) {
+  .board-detail-page {
+    width: 94%;
+    min-height: calc(100vh - 92px);
+    padding-top: 2px;
+  }
+
+  .board-summary-row-main {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 7px 10px;
+    padding: 10px 11px 9px;
+  }
+
+  .board-summary-identity {
+    min-width: 0;
+  }
+
+  .board-summary h1 {
+    font-size: 20px;
+  }
+
+  .board-summary-meta {
+    font-size: 12px;
+  }
+
+  .board-summary-status {
+    grid-column: 1 / 2;
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .board-summary-row-main button {
+    grid-column: 2 / 3;
+    grid-row: 1 / 3;
+    align-self: end;
+  }
+
+  .board-summary-row-action {
+    padding: 8px 11px;
+  }
+
+  .board-summary-prices {
+    gap: 22px;
+  }
+
+  .board-summary-prices small {
+    font-size: 10px;
+  }
+
+  .board-summary-prices strong {
+    font-size: 16px;
+  }
+
+  .board-summary-note {
+    display: none;
+  }
+
+  .board-schedule-card,
+  .board-entries-card {
+    padding: 10px 11px;
+  }
+
+  .board-schedule-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px 14px;
+    margin-top: 8px;
+  }
+
+  .board-schedule-grid dt {
+    font-size: 10px;
+  }
+
+  .board-schedule-grid dd {
+    font-size: 12px;
+  }
+
+  .board-empty-row {
+    padding: 9px 10px;
+  }
+}
+
+/* BEGIN VIEWBID BOARD DETAIL PRICE POSITION V1 */
+
+.board-summary-prices-top {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.board-summary-row-main {
+  gap: 30px;
+}
+
+.board-summary-status {
+  margin-left: 0;
+}
+
+.board-summary-row-action {
+  min-height: 28px;
+  justify-content: flex-end;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.board-summary-note {
+  font-size: 10px;
+}
+
+@media (max-width: 700px) {
+  .board-summary-row-main {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 10px;
+  }
+
+  .board-summary-identity {
+    grid-column: 1 / -1;
+  }
+
+  .board-summary-prices-top {
+    grid-column: 1;
+    grid-row: 2;
+    margin-left: 0;
+  }
+
+  .board-summary-status {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .board-summary-row-main button {
+    grid-column: 2;
+    grid-row: 2 / 4;
+    align-self: center;
+  }
+
+  .board-summary-row-action {
+    display: none;
+  }
+}
+
+/* END VIEWBID BOARD DETAIL PRICE POSITION V1 */
+
+/* BEGIN VIEWBID BOARD DETAIL PRICE STATUS TUNE V2 */
+
+/* Desktop: bring prices up into the same visual line as title */
+.board-summary-row-main {
+  align-items: flex-start;
+}
+
+.board-summary-prices-top {
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.board-summary-status {
+  align-self: flex-start;
+  margin-top: 3px;
+}
+
+.board-summary-status small {
+  display: block;
+  color: #60758c;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.board-summary-row-main button {
+  align-self: flex-start;
+  margin-top: 1px;
+}
+
+/* Mobile: keep compact vertical flow without repeating the label */
+@media (max-width: 700px) {
+  .board-summary-row-main {
+    align-items: start;
+  }
+
+  .board-summary-prices-top {
+    margin-top: 2px;
+  }
+
+  .board-summary-status {
+    margin-top: 2px;
+  }
+
+  .board-summary-status small {
+    font-size: 10.5px;
+  }
+
+  .board-summary-row-main button {
+    align-self: center;
+    margin-top: 0;
+  }
+}
+
+/* END VIEWBID BOARD DETAIL PRICE STATUS TUNE V2 */
+
+/* BEGIN VIEWBID BOARD DETAIL PRICE LINK V3 */
+
+/* Desktop: prices occupy the upper-right area beside the title */
+.board-summary-row-main {
+  display: grid;
+  grid-template-columns:
+    minmax(260px, 1fr)
+    auto
+    auto;
+  align-items: start;
+  gap: 24px;
+}
+
+.board-summary-identity {
+  min-width: 0;
+}
+
+.board-summary-prices-top {
+  margin: 3px 0 0;
+  align-self: start;
+}
+
+.board-entry-link {
+  align-self: center;
+  margin-top: 5px;
+  color: #1769d2;
+  font-size: 11px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.board-entry-link:hover {
+  text-decoration: underline;
+}
+
+.board-summary-row-action {
+  min-height: 0;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+/* Mobile: title left, prices move into the upper-right zone.
+   Entry timing becomes a small text link below. */
+@media (max-width: 700px) {
+  .board-summary-row-main {
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto;
+    gap: 6px 14px;
+  }
+
+  .board-summary-identity {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .board-summary-prices-top {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 22px;
+    gap: 14px;
+  }
+
+  .board-summary-prices-top small {
+    font-size: 9px;
+  }
+
+  .board-summary-prices-top strong {
+    font-size: 15px;
+  }
+
+  .board-entry-link {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-top: 1px;
+    align-self: start;
+    font-size: 10.5px;
+  }
+}
+
+@media (max-width: 390px) {
+  .board-summary-row-main {
+    grid-template-columns: 1fr;
+  }
+
+  .board-summary-identity,
+  .board-summary-prices-top,
+  .board-entry-link {
+    grid-column: 1;
+  }
+
+  .board-summary-prices-top {
+    grid-row: 2;
+    margin-top: 2px;
+  }
+
+  .board-entry-link {
+    grid-row: 3;
+  }
+}
+
+/* END VIEWBID BOARD DETAIL PRICE LINK V3 */
+
+/* BEGIN VISIBILITY MARKETPLACE DETAIL READABILITY V1 */
+
+.board-detail-back {
+  font-size: 13px;
+}
+
+.board-detail-kicker {
+  font-size: 12px;
+}
+
+.board-summary-meta {
+  font-size: 13px;
+}
+
+.board-summary-prices small {
+  font-size: 12px;
+}
+
+.board-summary-prices strong {
+  font-size: 18px;
+}
+
+.board-entry-link {
+  font-size: 12px;
+}
+
+.board-summary-note {
+  font-size: 11px;
+}
+
+.board-section-title h2,
+.board-entries-heading h2 {
+  font-size: 16px;
+}
+
+.board-schedule-grid dt {
+  font-size: 12px;
+}
+
+.board-schedule-grid dd {
+  font-size: 14px;
+}
+
+.board-empty-row strong {
+  font-size: 14px;
+}
+
+.board-empty-row p {
+  font-size: 13px;
+}
+
+@media (max-width: 700px) {
+  .board-detail-kicker {
+    font-size: 11px;
+  }
+
+  .board-summary-meta {
+    font-size: 12.5px;
+  }
+
+  .board-summary-prices small {
+    font-size: 10px;
+  }
+
+  .board-summary-prices strong {
+    font-size: 16px;
+  }
+
+  .board-entry-link {
+    font-size: 11px;
+  }
+
+  .board-schedule-grid dt {
+    font-size: 11px;
+  }
+
+  .board-schedule-grid dd {
+    font-size: 13px;
+  }
+
+  .board-empty-row p {
+    font-size: 12px;
+  }
+}
+
+/* END VISIBILITY MARKETPLACE DETAIL READABILITY V1 */
+
+/* BEGIN SMALL DETAIL FONT BUMP V2 */
+
+.board-detail-back {
+  font-size: 14px;
+}
+
+.board-detail-kicker {
+  font-size: 13px;
+}
+
+.board-summary-meta {
+  font-size: 14px;
+}
+
+.board-summary-prices small {
+  font-size: 13px;
+}
+
+.board-entry-link {
+  font-size: 13px;
+}
+
+.board-summary-note {
+  font-size: 12px;
+}
+
+.board-schedule-grid dt {
+  font-size: 13px;
+}
+
+.board-empty-row p {
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .board-detail-kicker {
+    font-size: 12px;
+  }
+
+  .board-summary-meta {
+    font-size: 13.5px;
+  }
+
+  .board-summary-prices small {
+    font-size: 11px;
+  }
+
+  .board-entry-link {
+    font-size: 12px;
+  }
+
+  .board-schedule-grid dt {
+    font-size: 12px;
+  }
+
+  .board-empty-row p {
+    font-size: 13px;
+  }
+}
+
+/* END SMALL DETAIL FONT BUMP V2 */

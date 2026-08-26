@@ -125,36 +125,6 @@ export function RequestBoardDialog({
     onClose();
   }
 
-  function handleWholeDollarChange(
-    value: string,
-    setter: (
-      value: string,
-    ) => void,
-  ) {
-    if (value === "") {
-      setter("");
-      return;
-    }
-
-    if (!/^\d+$/.test(value)) {
-      return;
-    }
-
-    const amount =
-      Number(value);
-
-    if (
-      !Number.isSafeInteger(
-        amount,
-      ) ||
-      amount < 1 ||
-      amount > 100
-    ) {
-      return;
-    }
-
-    setter(value);
-  }
 
   async function handleSubmit(
     event: FormEvent,
