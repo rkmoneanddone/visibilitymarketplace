@@ -1,0 +1,24 @@
+#!/bin/sh
+
+while read local_ref local_sha remote_ref remote_sha
+do
+  case "$remote_ref" in
+    refs/heads/main|refs/heads/master)
+      echo ""
+      echo "BLOCKED: direct push to $remote_ref is not allowed."
+      echo "Use chatgpt-dev/feature branch and merge through Pull Request."
+      echo ""
+      exit 1
+      ;;
+  esac
+
+  if [ "$local_sha" = "0000000000000000000000000000000000000000" ]
+  then
+    echo ""
+    echo "BLOCKED: remote branch deletion is disabled by project safety policy."
+    echo ""
+    exit 1
+  fi
+done
+
+exit 0

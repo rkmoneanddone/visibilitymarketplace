@@ -1,0 +1,45 @@
+#!/bin/sh
+
+branch="$(git rev-parse --abbrev-ref HEAD)"
+
+if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then
+  echo ""
+  echo "BLOCKED: commits directly on $branch are not allowed."
+  echo "Switch to chatgpt-dev or a feature branch."
+  echo ""
+  exit 1
+fi
+
+changed="$(git diff --cached --name-status)"
+
+if echo "$changed" | grep -E '^[D][[:space:]]+(firebase\.json|\.firebaserc|firestore\.rules|storage\.rules)$' >/dev/null 2>&1
+then
+  echo ""
+  echo "BLOCKED: deletion of critical Firebase configuration/rules detected."
+  echo ""
+  exit 1
+fi
+
+# Scan staged executable/source/config changes only.
+# Ignore documentation and the safety hooks themselves.
+diff="$(
+  git diff --cached --unified=0 -- \
+    '*.ts' '*.tsx' '*.js' '*.jsx' '*.cjs' '*.mjs' \
+    '*.json' '*.ps1' '*.sh' \
+    ':!AGENTS.md' \
+    ':!VIEWBID_DEVELOPMENT_SAFETY_GUIDELINES.md' \
+    ':!.githooks/*'
+)"
+
+if echo "$diff" | grep -Ei \
+'firebase[[:space:]]+firestore:delete|gcloud[[:space:]]+firestore[[:space:]]+databases[[:space:]]+delete|recursiveDelete|deleteDatabase\(|firebase[[:space:]]+projects:delete' \
+>/dev/null 2>&1
+then
+  echo ""
+  echo "BLOCKED: potentially destructive Firebase/Firestore operation detected."
+  echo "Review it manually before proceeding."
+  echo ""
+  exit 1
+fi
+
+exit 0
