@@ -65,12 +65,11 @@ export interface Listing {
 
   submittedByUserId: string;
 
-  submissionRelationship:
-  ListingSubmissionRelationship;
+  submissionRelationship?: ListingSubmissionRelationship;
 
   claimedOwnerUserId?: string;
 
-  ownershipStatus: OwnershipStatus;
+  ownershipStatus?: OwnershipStatus;
 
   claimRequestedByUserId?: string;
   claimRequestedAt?: string;

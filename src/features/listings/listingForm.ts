@@ -1,16 +1,11 @@
 import type {
-  ListingSubmissionRelationship,
   PromotionTargetKind,
 } from "../../types/marketplace";
 
 export interface ListingFormData {
   listingTypeId: string;
   targetKind: PromotionTargetKind;
-
-  submissionRelationship:
-  ListingSubmissionRelationship;
-
-  categoryId: string;
+categoryId: string;
   subcategoryId?: string;
 
   title: string;
@@ -32,10 +27,7 @@ export interface ListingFormData {
 export const emptyListingForm: ListingFormData = {
   listingTypeId: "youtube",
   targetKind: "channel",
-
-  submissionRelationship: "owner",
-
-  categoryId: "",
+categoryId: "",
   subcategoryId: "",
 
   title: "",

@@ -17,15 +17,10 @@ import {
   Search,
   Sparkles,
   TrendingUp,
-  Users,
   Zap,
 } from "lucide-react";
 import { marketplaceConfig } from "../config/marketplace";
-import {
-  getCategoryName,
-  getListingTypeName,
-  getSubcategoryName,
-} from "../lib/marketplace/listing";
+import { getListingTypeName } from "../lib/marketplace/listing";
 
 import { formatMoneyMinor } from "../lib/marketplace/money";
 
@@ -38,6 +33,7 @@ import { initialListingTypes } from "../config/listingTypes";
 import { siteConfig } from "../config/site";
 import { getPublishedListings } from "../services/firestore/listings";
 import type { Listing } from "../types/marketplace";
+import { PushUpLauncher } from "../features/push-up/PushUpLauncher";
 
 
 export function HomePage() {
@@ -114,7 +110,7 @@ export function HomePage() {
 
   return (
     <>
-      
+
 
       <main className="page-shell">
         <section className="compact-intro">
@@ -134,6 +130,17 @@ export function HomePage() {
 
         <div className="market-layout">
           <section className="board-section" id="board">
+            <div
+              className="market-visitor-strip"
+              aria-hidden="true"
+              title="Visitor totals will appear here after real analytics data is connected."
+            >
+              <span>Total visitors</span>
+              <strong>�</strong>
+              <span>Live</span>
+              <strong>�</strong>
+            </div>
+
             <div className="type-strip">
               <button
                 className={`type-link ${selectedType === "All" ? "active" : ""}`}
@@ -181,7 +188,7 @@ export function HomePage() {
                     ? "TOP BOARD"
                     : `${selectedType.toUpperCase()} BOARD`}
                 </p>
-                <h2>Rising this week</h2>
+                <h2>Move a listing higher</h2>
               </div>
 
               <select
@@ -233,18 +240,16 @@ export function HomePage() {
               ) : visibleListings.length > 0 ? (
                 visibleListings.map((listing, index) => {
                   const typeName = getListingTypeName(listing.listingTypeId);
-                  const categoryName = getCategoryName(listing.categoryId);
-                  const subcategoryName = getSubcategoryName(
-                    listing.categoryId,
-                    listing.subcategoryId,
-                  );
 
                   const rank = listing.currentBoardRank ?? index + 1;
 
                   return (
-                    <article className="board-row" key={listing.id}>
+                    <article
+                      className={`board-row rank-${Math.min(rank, 4)}`}
+                      key={listing.id}
+                    >
                       <div className="rank">
-                        {String(rank).padStart(2, "0")}
+                        #{rank}
                       </div>
 
                       <div
@@ -269,46 +274,20 @@ export function HomePage() {
 
                           {rank === 1 && (
                             <span className="rank-badge badge-top">
-                              TOP
+                              #1
                             </span>
                           )}
                         </div>
 
-                        <p className="listing-meta">
-                          {typeName}
-                          {" · "}
-                          {categoryName}
-
-                          {subcategoryName && (
-                            <>
-                              {" · "}
-                              {subcategoryName}
-                            </>
-                          )}
-
-                          {listing.handle && (
-                            <>
-                              <span className="meta-separator">
-                                ·
-                              </span>
-
-                              <PlatformHandleLink
-                                typeName={typeName}
-                                handle={listing.handle}
-                                platformUrl={
-                                  listing.platformUrl
-                                }
-                              />
-                            </>
-                          )}
-
-                          {listing.ownerDisplayName && (
-                            <span className="meta-owner">
-                              {" · "}
-                              {listing.ownerDisplayName}
-                            </span>
-                          )}
-                        </p>
+                        {listing.handle && (
+                          <p className="listing-meta">
+                            <PlatformHandleLink
+                              typeName={typeName}
+                              handle={listing.handle}
+                              platformUrl={listing.platformUrl}
+                            />
+                          </p>
+                        )}
 
                         <p className="listing-description">
                           {listing.shortDescription}
@@ -317,13 +296,11 @@ export function HomePage() {
 
                       <div className="listing-score">
                         <strong>
-                          {formatMoneyMinor(listing.currentBoostTotalMinor)}
+                          {formatMoneyMinor(
+                            listing.currentBoostTotalMinor,
+                          )}
                         </strong>
-
-                        <span>
-                          <Users size={12} />
-                          0
-                        </span>
+                        <span>pushed</span>
                       </div>
 
                       <div className="listing-actions">
@@ -333,13 +310,25 @@ export function HomePage() {
                           target="_blank"
                           rel="noreferrer"
                         >
-                          Visit ↗
+                          Visit
                         </a>
 
-                        <button className="push-button" type="button">
-                          <ArrowUp size={14} strokeWidth={2.5} />
-                          {marketplaceConfig.terminology.pushAction}
-                        </button>
+                        <PushUpLauncher
+                          listings={visibleListings}
+                          initialListingId={listing.id}
+                          contextLabel={`${selectedType} ranking`}
+                        >
+                          {(openPushUp) => (
+                            <button
+                              className="push-button"
+                              type="button"
+                              onClick={openPushUp}
+                            >
+                              <ArrowUp size={14} strokeWidth={2.5} />
+                              Push Up
+                            </button>
+                          )}
+                        </PushUpLauncher>
                       </div>
                     </article>
                   );

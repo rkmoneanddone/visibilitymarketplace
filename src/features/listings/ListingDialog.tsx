@@ -112,11 +112,7 @@ export function ListingDialog({
 
         targetKind:
           listing.targetKind,
-
-        submissionRelationship:
-          listing.submissionRelationship,
-
-        categoryId:
+categoryId:
           listing.categoryId,
 
         subcategoryId:
@@ -559,54 +555,7 @@ export function ListingDialog({
               </select>
             </label>
           </div>
-
-          {mode === "create" && (
-            <div className="listing-owner-line">
-              <span>
-                Is this yours?
-              </span>
-
-              <label>
-                <input
-                  type="radio"
-                  name="relationship"
-                  checked={
-                    form.submissionRelationship ===
-                    "owner"
-                  }
-                  onChange={() =>
-                    updateField(
-                      "submissionRelationship",
-                      "owner",
-                    )
-                  }
-                />
-
-                Yes, mine
-              </label>
-
-              <label>
-                <input
-                  type="radio"
-                  name="relationship"
-                  checked={
-                    form.submissionRelationship ===
-                    "supporter"
-                  }
-                  onChange={() =>
-                    updateField(
-                      "submissionRelationship",
-                      "supporter",
-                    )
-                  }
-                />
-
-                Promoting someone else's
-              </label>
-            </div>
-          )}
-
-          <label>
+<label>
             {mainLinkLabel} *
 
             <input

@@ -192,20 +192,6 @@
   background: #f6f7f9;
   color: #9098a5;
 }
-
-.listing-owner-line {
-  display: flex;
-  align-items: center;
-
-  gap: 15px;
-
-  min-height: 30px;
-
-  padding: 3px 1px;
-
-  font-size: 12px;
-}
-
 .listing-owner-line > span {
   color: #596579;
 }
@@ -393,50 +379,6 @@
     grid-template-columns: 1fr;
     gap: 8px;
   }
-
-  .listing-owner-line {
-    flex-wrap: wrap;
-
-    gap: 6px 12px;
-
-    padding: 2px 0;
-  }
-
-  .listing-owner-line > span {
-    width: 100%;
-  }
-
-  .listing-form input,
-  .listing-form select,
-  .listing-file-control {
-    height: 38px;
-  }
-
-  .listing-form-actions {
-    position: sticky;
-    bottom: -13px;
-
-    margin: 2px -13px -13px;
-    padding: 9px 13px;
-
-    border-top: 1px solid #e8ecf1;
-
-    background: #fff;
-  }
-
-  .listing-submit-note {
-    display: none;
-  }
-
-  .listing-form-actions > div {
-    width: 100%;
-  }
-
-  .listing-form-actions button {
-    flex: 1;
-  }
-}
-
 /* BEGIN MOBILE DIALOG POSITION V2 */
 
 @media (max-width: 640px) {
@@ -466,3 +408,78 @@
 }
 
 /* END MOBILE DIALOG POSITION V2 */
+
+/* BEGIN VIEWBID POPUP LABEL BUMP V1 */
+
+/* Popup labels +1pt */
+.listing-form > label,
+.listing-form-row > label,
+.listing-image-field,
+.listing-dialog label {
+  font-size: calc(1em + 1pt);
+}
+
+/* Keep form controls themselves balanced; this changes labels, not the whole form. */
+.listing-dialog input,
+.listing-dialog select,
+.listing-dialog textarea,
+.listing-dialog button {
+  font-size: inherit;
+}
+
+/* END VIEWBID POPUP LABEL BUMP V1 */
+
+/* BEGIN VIEWBID MOBILE POPUP -1PT V1 */
+
+@media (max-width: 700px) {
+  .listing-dialog {
+    font-size: calc(1em - 1pt);
+  }
+}
+
+/* END VIEWBID MOBILE POPUP -1PT V1 */
+
+/* BEGIN VIEWBID MOBILE POPUP EXPLICIT -1PT V2 */
+
+@media (max-width: 700px) {
+  .listing-dialog-heading h2 {
+    font-size: 15.67px !important;
+  }
+
+  .listing-dialog-heading .eyebrow {
+    font-size: 8.67px !important;
+  }
+
+  .listing-status-strip {
+    font-size: 9.67px !important;
+  }
+
+  .listing-status-badge {
+    font-size: 8.67px !important;
+  }
+
+  .listing-form label {
+    font-size: 10.67px !important;
+  }
+
+  .listing-form input,
+  .listing-form select,
+  .listing-file-control,
+  .request-board-textarea {
+    font-size: 10.67px !important;
+  }
+
+  .listing-form-error {
+    font-size: 9.67px !important;
+  }
+
+  .listing-form-actions button {
+    font-size: 10.67px !important;
+  }
+
+  .listing-submit-note {
+    font-size: 8.67px !important;
+  }
+}
+
+/* END VIEWBID MOBILE POPUP EXPLICIT -1PT V2 */

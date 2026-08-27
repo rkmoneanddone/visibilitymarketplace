@@ -598,3 +598,72 @@
 }
 
 /* END ACCOUNT AVATAR ALIGNMENT V3 */
+
+/* BEGIN VIEWBID AUTH LABEL BUMP V1 */
+
+.auth-dialog label,
+.auth-form label {
+  font-size: calc(1em + 1pt);
+}
+
+/* END VIEWBID AUTH LABEL BUMP V1 */
+
+/* BEGIN VIEWBID AUTH MOBILE -1PT V1 */
+
+@media (max-width: 700px) {
+  .auth-dialog {
+    font-size: calc(1em - 1pt);
+  }
+}
+
+/* END VIEWBID AUTH MOBILE -1PT V1 */
+
+/* BEGIN VIEWBID AUTH EXPLICIT MOBILE -1PT V2 */
+
+@media (max-width: 700px) {
+  .auth-dialog-header h2 {
+    font-size: 19.67px !important;
+  }
+
+  .auth-kicker {
+    font-size: 10.67px !important;
+  }
+
+  .auth-subtitle {
+    font-size: 11.67px !important;
+  }
+
+  .auth-google,
+  .auth-primary {
+    font-size: 11.67px !important;
+  }
+
+  .auth-google-mark {
+    font-size: 9.67px !important;
+  }
+
+  .auth-divider span {
+    font-size: 10.67px !important;
+  }
+
+  .auth-dialog label {
+    font-size: 11.67px !important;
+  }
+
+  .auth-dialog input {
+    font-size: 12.67px !important;
+  }
+
+  .auth-forgot,
+  .auth-mode-switch {
+    font-size: 11.67px !important;
+  }
+
+  .auth-switch-row,
+  .auth-error,
+  .auth-notice {
+    font-size: 11.67px !important;
+  }
+}
+
+/* END VIEWBID AUTH EXPLICIT MOBILE -1PT V2 */

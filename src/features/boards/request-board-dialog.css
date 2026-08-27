@@ -95,3 +95,41 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* BEGIN VIEWBID REQUEST BOARD LABEL BUMP V1 */
+
+.request-board-dialog label,
+.request-board-form label {
+  font-size: calc(1em + 1pt);
+}
+
+/* END VIEWBID REQUEST BOARD LABEL BUMP V1 */
+
+/* BEGIN VIEWBID REQUEST BOARD MOBILE -1PT V1 */
+
+@media (max-width: 700px) {
+  .request-board-dialog {
+    font-size: calc(1em - 1pt);
+  }
+}
+
+/* END VIEWBID REQUEST BOARD MOBILE -1PT V1 */
+
+/* BEGIN VIEWBID REQUEST BOARD EXPLICIT -1PT V2 */
+
+@media (max-width: 700px) {
+  .request-board-types legend {
+    font-size: 10.67px !important;
+  }
+
+  .request-board-type-grid label,
+  .request-board-type-grid span {
+    font-size: 10.67px !important;
+  }
+
+  .request-board-textarea {
+    font-size: 10.67px !important;
+  }
+}
+
+/* END VIEWBID REQUEST BOARD EXPLICIT -1PT V2 */

@@ -271,18 +271,15 @@ export function BoardDetailPage() {
 
           <a
             className="board-entry-link"
-            href="#board-schedule"
+            href={entryState.canEnter ? "#board-entries" : "#board-schedule"}
           >
             {entryState.canEnter
-              ? "Entry open now"
+              ? `Enter Board · ${formatMoneyMinor(
+                  board.entryFeeMinor,
+                  board.currency,
+                )}`
               : entryState.detail}
           </a>
-        </div>
-
-        <div className="board-summary-row board-summary-row-action">
-          <span className="board-summary-note">
-            Entry fee gives an eligible listing access to this Board. It does not affect ranking.
-          </span>
         </div>
       </section>
 
@@ -333,7 +330,7 @@ export function BoardDetailPage() {
         </dl>
       </section>
 
-      <section className="board-detail-card board-entries-card">
+      <section id="board-entries" className="board-detail-card board-entries-card">
         <div className="board-entries-heading">
           <div>
             <span>TOP</span>

@@ -6,7 +6,6 @@ import {
 
 import {
   ArrowRight,
-  LayoutGrid,
   Search,
   Share2,
 } from "lucide-react";
@@ -45,7 +44,9 @@ function formatBoardDate(value: string) {
   );
 }
 
-function getStatusLabel(status: Board["status"]) {
+function getStatusLabel(
+  status: Board["status"],
+) {
   return status
     .replace(/_/g, " ")
     .replace(
@@ -54,13 +55,50 @@ function getStatusLabel(status: Board["status"]) {
     );
 }
 
+function isEntryOpen(board: Board) {
+  const now = Date.now();
+  const entryStarts =
+    new Date(
+      board.entryStartsAt,
+    ).getTime();
+  const entryCloses =
+    new Date(
+      board.entryClosesAt,
+    ).getTime();
+  const ends =
+    new Date(
+      board.endsAt,
+    ).getTime();
+
+  return (
+    now >= entryStarts &&
+    now < entryCloses &&
+    now < ends &&
+    board.status !== "archived" &&
+    board.status !== "expired"
+  );
+}
+
+function getBoardActionLabel(
+  board: Board,
+) {
+  if (isEntryOpen(board)) {
+    return `Enter Board · ${formatMoneyMinor(
+      board.entryFeeMinor,
+      board.currency,
+    )}`;
+  }
+
+  return "View Board";
+}
+
 async function shareBoard(board: Board) {
   const boardUrl =
     `${window.location.origin}/boards/${board.id}`;
 
   const shareData = {
     title: board.name,
-    text: `${board.name} on ViewBid`,
+    text: `${board.name} on Visibility Marketplace`,
     url: boardUrl,
   };
 
@@ -167,16 +205,15 @@ export function BoardsPage() {
   return (
     <main className="boards-page">
       <header className="boards-header">
-        <div className="boards-heading">
+        <div>
           <p className="boards-kicker">
-            <LayoutGrid size={13} />
             BOARDS
           </p>
 
           <h1>Find a board</h1>
 
           <p className="boards-intro">
-            Join focused, time-limited visibility boards.
+            Enter while open. Compete for visibility.
           </p>
         </div>
 
@@ -187,7 +224,9 @@ export function BoardsPage() {
             type="search"
             value={search}
             onChange={(event) =>
-              setSearch(event.target.value)
+              setSearch(
+                event.target.value,
+              )
             }
             placeholder="Search boards"
           />
@@ -214,8 +253,8 @@ export function BoardsPage() {
                 className="board-card"
                 key={board.id}
               >
-                <div className="board-card-row board-card-row-main">
-                  <div className="board-card-identity">
+                <div className="board-card-top">
+                  <div className="board-card-copy">
                     <h2>
                       {board.name}
                     </h2>
@@ -227,30 +266,6 @@ export function BoardsPage() {
                     </p>
                   </div>
 
-                  <div className="board-card-dates">
-                    <span>
-                      Entry closes
-                      <strong>
-                        {formatBoardDate(
-                          board.entryClosesAt,
-                        )}
-                      </strong>
-                    </span>
-
-                    <span className="board-card-dot">
-                      {"\u00B7"}
-                    </span>
-
-                    <span>
-                      Ends
-                      <strong>
-                        {formatBoardDate(
-                          board.endsAt,
-                        )}
-                      </strong>
-                    </span>
-                  </div>
-
                   <span
                     className={`board-status board-status-${board.status}`}
                   >
@@ -260,28 +275,50 @@ export function BoardsPage() {
                   </span>
                 </div>
 
-                <div className="board-card-row board-card-row-action">
-                  <div className="board-card-stats">
+                <div className="board-card-timing">
+                  <span>
+                    Entry closes{" "}
+                    <strong>
+                      {formatBoardDate(
+                        board.entryClosesAt,
+                      )}
+                    </strong>
+                  </span>
+
+                  <span className="board-card-separator">
+                    ·
+                  </span>
+
+                  <span>
+                    Ends{" "}
+                    <strong>
+                      {formatBoardDate(
+                        board.endsAt,
+                      )}
+                    </strong>
+                  </span>
+                </div>
+
+                <div className="board-card-bottom">
+                  <div className="board-card-pricing">
                     <span>
-                      <small>Entry</small>
                       <strong>
                         {formatMoneyMinor(
                           board.entryFeeMinor,
                           board.currency,
                         )}
                       </strong>
+                      <small>Entry</small>
                     </span>
 
                     <span>
-                      <small>
-                        Min Push Up
-                      </small>
                       <strong>
                         {formatMoneyMinor(
                           board.minimumBoostMinor,
                           board.currency,
                         )}
                       </strong>
+                      <small>Push from</small>
                     </span>
                   </div>
 
@@ -290,19 +327,26 @@ export function BoardsPage() {
                       className="board-share-button"
                       type="button"
                       onClick={() =>
-                        void shareBoard(board)
+                        void shareBoard(
+                          board,
+                        )
                       }
                       aria-label={`Share ${board.name}`}
-                      title="Share Board"
                     >
                       <Share2 size={15} />
                     </button>
 
                     <Link
-                      className="board-card-link"
+                      className={`board-card-link ${
+                        isEntryOpen(board)
+                          ? "entry-open"
+                          : ""
+                      }`}
                       to={`/boards/${board.id}`}
                     >
-                      View Board
+                      {getBoardActionLabel(
+                        board,
+                      )}
                       <ArrowRight size={16} />
                     </Link>
                   </div>

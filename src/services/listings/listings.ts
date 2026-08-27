@@ -4,7 +4,6 @@ import {
 
 import type {
   Listing,
-  OwnershipStatus,
 } from "../../types/marketplace";
 
 import type {
@@ -60,14 +59,7 @@ export async function createListing({
 
   const now =
     nowIso();
-
-  const ownershipStatus: OwnershipStatus =
-    form.submissionRelationship ===
-    "owner"
-      ? "claimed"
-      : "unclaimed";
-
-  let uploadedImage:
+let uploadedImage:
     | {
         path: string;
         url: string;
@@ -96,21 +88,7 @@ export async function createListing({
 
     submittedByUserId:
       userId,
-
-    submissionRelationship:
-      form.submissionRelationship,
-
-    ...(form.submissionRelationship ===
-    "owner"
-      ? {
-          claimedOwnerUserId:
-            userId,
-        }
-      : {}),
-
-    ownershipStatus,
-
-    listingTypeId:
+listingTypeId:
       form.listingTypeId,
 
     ...(form.platformKey
@@ -241,10 +219,7 @@ export async function createListing({
 
               targetKind:
                 form.targetKind,
-
-              submissionRelationship:
-                form.submissionRelationship,
-            },
+},
           },
         );
       },
