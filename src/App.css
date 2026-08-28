@@ -5633,3 +5633,62 @@ button.board-card-add-listing {
 }
 
 /* END VISIBILITY MARKETPLACE CRISP HEADER V1 */
+
+/* BEGIN VISIBILITY MARKETPLACE VISIBILITY CTA ALIGNMENT V1 */
+
+.visibility-cta {
+  --visibility-cta-icon-size: 32px;
+  --visibility-cta-gap: 9px;
+  --visibility-cta-text-offset:
+    calc(
+      var(--visibility-cta-icon-size) +
+      var(--visibility-cta-gap)
+    );
+}
+
+.visibility-cta .side-card-heading {
+  gap: var(--visibility-cta-gap) !important;
+}
+
+.visibility-cta .side-icon {
+  width: var(--visibility-cta-icon-size);
+  height: var(--visibility-cta-icon-size);
+}
+
+.visibility-cta > p:not(.eyebrow) {
+  margin-left:
+    var(--visibility-cta-text-offset) !important;
+  margin-right: 0 !important;
+  max-width: 34ch !important;
+}
+
+.visibility-cta > button,
+.visibility-cta > .listing-launcher > button {
+  margin-left:
+    var(--visibility-cta-text-offset);
+}
+
+.visibility-cta .dashboard-add-button,
+.visibility-cta .add-link {
+  margin-left:
+    var(--visibility-cta-text-offset);
+}
+
+@media (max-width: 700px) {
+  .visibility-cta {
+    --visibility-cta-icon-size: 32px;
+    --visibility-cta-gap: 9px;
+  }
+
+  .visibility-cta > p:not(.eyebrow) {
+    margin-left:
+      var(--visibility-cta-text-offset) !important;
+    max-width:
+      calc(
+        100% -
+        var(--visibility-cta-text-offset)
+      ) !important;
+  }
+}
+
+/* END VISIBILITY MARKETPLACE VISIBILITY CTA ALIGNMENT V1 */

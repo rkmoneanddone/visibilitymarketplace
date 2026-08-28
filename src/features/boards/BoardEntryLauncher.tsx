@@ -146,15 +146,6 @@ export function BoardEntryLauncher({
           constrainedData,
       });
 
-    if (
-      created.status !==
-      "published"
-    ) {
-      throw new Error(
-        "This listing must be published before it can enter the Board.",
-      );
-    }
-
     const result =
       await createBoardEntryIntent({
         boardId:
@@ -165,6 +156,17 @@ export function BoardEntryLauncher({
       });
 
     setListingOpen(false);
+
+    if (
+      result.status ===
+      "pending_review"
+    ) {
+      window.alert(
+        "Your listing was submitted for approval. Board entry payment will be available after the listing is approved.",
+      );
+
+      return;
+    }
 
     setPaymentRequest({
       purpose:

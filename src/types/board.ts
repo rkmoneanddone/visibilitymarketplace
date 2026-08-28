@@ -52,6 +52,7 @@ export interface Board {
 }
 
 export type BoardEntryStatus =
+    | "pending_review"
     | "pending_payment"
     | "entered"
     | "rejected"

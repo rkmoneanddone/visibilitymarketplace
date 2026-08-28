@@ -12,10 +12,12 @@ type CreateBoardEntryIntentInput = {
   listingId: string;
 };
 
-type CreateBoardEntryIntentResult = {
+export type CreateBoardEntryIntentResult = {
   success: boolean;
   boardEntryId: string;
-  status: "pending_payment";
+  status:
+    | "pending_review"
+    | "pending_payment";
   paymentRequired: boolean;
 };
 

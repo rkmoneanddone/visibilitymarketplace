@@ -1235,7 +1235,14 @@ export const createBoardEntryIntent =
       region: "asia-south1",
     },
     async (request) => {
-const boardId =
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Authentication required.",
+        );
+      }
+
+      const boardId =
         normalizeString(
           request.data?.boardId,
         );
@@ -1280,237 +1287,350 @@ const boardId =
             `board_entry_intent_${entryId}`,
           );
 
-      await db.runTransaction(
-        async (transaction) => {
-          const [
-            boardSnap,
-            listingSnap,
-            entrySnap,
-          ] =
-            await Promise.all([
-              transaction.get(boardRef),
-              transaction.get(listingRef),
-              transaction.get(entryRef),
-            ]);
+      const result =
+        await db.runTransaction(
+          async (transaction) => {
+            const boardSnap =
+              await transaction.get(
+                boardRef,
+              );
 
-          if (!boardSnap.exists) {
-            throw new HttpsError(
-              "not-found",
-              "Board not found.",
-            );
-          }
+            const listingSnap =
+              await transaction.get(
+                listingRef,
+              );
 
-          if (!listingSnap.exists) {
-            throw new HttpsError(
-              "not-found",
-              "Listing not found.",
-            );
-          }
+            const entrySnap =
+              await transaction.get(
+                entryRef,
+              );
 
-          const board =
-            boardSnap.data();
-
-          const listing =
-            listingSnap.data();
-
-          if (!board || !listing) {
-            throw new HttpsError(
-              "not-found",
-              "Board or Listing data not found.",
-            );
-          }
-
-          if (
-            ![
-              "approved",
-              "entry_open",
-              "active",
-            ].includes(
-              String(board.status),
-            )
-          ) {
-            throw new HttpsError(
-              "failed-precondition",
-              "This Board is not accepting entries.",
-            );
-          }
-
-          const nowMs =
-            Date.now();
-
-          const entryStartsMs =
-            new Date(
-              String(
-                board.entryStartsAt,
-              ),
-            ).getTime();
-
-          const entryClosesMs =
-            new Date(
-              String(
-                board.entryClosesAt,
-              ),
-            ).getTime();
-
-          const endsMs =
-            new Date(
-              String(
-                board.endsAt,
-              ),
-            ).getTime();
-
-          if (
-            Number.isNaN(entryStartsMs) ||
-            Number.isNaN(entryClosesMs) ||
-            Number.isNaN(endsMs) ||
-            nowMs < entryStartsMs ||
-            nowMs >= entryClosesMs ||
-            nowMs >= endsMs
-          ) {
-            throw new HttpsError(
-              "failed-precondition",
-              "The Board entry window is closed.",
-            );
-          }
-
-          if (
-            listing.status !==
-            "published"
-          ) {
-            throw new HttpsError(
-              "failed-precondition",
-              "Only published listings can enter a Board.",
-            );
-          }
-
-          if (
-            listing.submittedByUserId !==
-            request.auth!.uid
-          ) {
-            throw new HttpsError(
-              "permission-denied",
-              "You can only enter a listing from your account.",
-            );
-          }
-
-          if (
-            listing.listingTypeId !==
-            board.listingTypeId
-          ) {
-            throw new HttpsError(
-              "failed-precondition",
-              "This listing type is not eligible for this Board.",
-            );
-          }
-
-          if (entrySnap.exists) {
-            const existing =
-              entrySnap.data();
-
-            if (
-              existing?.status ===
-              "entered"
-            ) {
+            if (!boardSnap.exists) {
               throw new HttpsError(
-                "already-exists",
-                "This listing is already entered in the Board.",
+                "not-found",
+                "Board not found.",
+              );
+            }
+
+            if (!listingSnap.exists) {
+              throw new HttpsError(
+                "not-found",
+                "Listing not found.",
+              );
+            }
+
+            const board =
+              boardSnap.data();
+
+            const listing =
+              listingSnap.data();
+
+            if (!board || !listing) {
+              throw new HttpsError(
+                "not-found",
+                "Board or Listing data not found.",
               );
             }
 
             if (
-              existing?.status ===
-              "pending_payment"
+              ![
+                "approved",
+                "entry_open",
+                "active",
+              ].includes(
+                String(board.status),
+              )
             ) {
-              return;
+              throw new HttpsError(
+                "failed-precondition",
+                "This Board is not accepting entries.",
+              );
             }
 
-            throw new HttpsError(
-              "failed-precondition",
-              "This listing already has a Board entry record.",
-            );
-          }
+            const nowMs =
+              Date.now();
 
-          const now =
-            FieldValue.serverTimestamp();
-
-          transaction.set(
-            entryRef,
-            {
-              id: entryId,
-
-              boardId,
-              listingId,
-
-              submittedByUserId:
-                request.auth!.uid,
-
-              status:
-                "pending_payment",
-
-              entryFeeMinor:
-                Number(
-                  board.entryFeeMinor,
-                ),
-
-              currency:
+            const entryStartsMs =
+              new Date(
                 String(
-                  board.currency ||
-                  "USD",
+                  board.entryStartsAt,
                 ),
+              ).getTime();
 
-              entryPaymentId:
-                null,
+            const entryClosesMs =
+              new Date(
+                String(
+                  board.entryClosesAt,
+                ),
+              ).getTime();
 
-              boostTotalMinor: 0,
-              supporterCount: 0,
+            const endsMs =
+              new Date(
+                String(
+                  board.endsAt,
+                ),
+              ).getTime();
 
-              joinedAt: now,
-              updatedAt: now,
-            },
-          );
+            if (
+              Number.isNaN(entryStartsMs) ||
+              Number.isNaN(entryClosesMs) ||
+              Number.isNaN(endsMs) ||
+              nowMs < entryStartsMs ||
+              nowMs >= entryClosesMs ||
+              nowMs >= endsMs
+            ) {
+              throw new HttpsError(
+                "failed-precondition",
+                "The Board entry window is closed.",
+              );
+            }
 
-          transaction.set(
-            auditRef,
-            {
-              id: auditRef.id,
+            if (
+              listing.submittedByUserId !==
+              request.auth!.uid
+            ) {
+              throw new HttpsError(
+                "permission-denied",
+                "You can only enter a listing from your account.",
+              );
+            }
 
-              type:
-                "board_entry_intent_created",
+            if (
+              listing.listingTypeId !==
+              board.listingTypeId
+            ) {
+              throw new HttpsError(
+                "failed-precondition",
+                "This listing type is not eligible for this Board.",
+              );
+            }
 
-              boardId,
-              listingId,
-              boardEntryId:
-                entryId,
+            if (
+              board.categoryId &&
+              listing.categoryId !==
+                board.categoryId
+            ) {
+              throw new HttpsError(
+                "failed-precondition",
+                "This listing category is not eligible for this Board.",
+              );
+            }
 
-              actorUserId:
-                request.auth?.uid ??
-                null,
+            if (
+              board.subcategoryId &&
+              listing.subcategoryId !==
+                board.subcategoryId
+            ) {
+              throw new HttpsError(
+                "failed-precondition",
+                "This listing subcategory is not eligible for this Board.",
+              );
+            }
 
-              createdAt: now,
+            const listingStatus =
+              String(
+                listing.status || "",
+              );
 
-              metadata: {
+            if (
+              ![
+                "submitted",
+                "under_review",
+                "published",
+              ].includes(
+                listingStatus,
+              )
+            ) {
+              throw new HttpsError(
+                "failed-precondition",
+                "This listing cannot enter the Board from its current status.",
+              );
+            }
+
+            if (entrySnap.exists) {
+              const existing =
+                entrySnap.data();
+
+              if (
+                existing?.status ===
+                "entered"
+              ) {
+                throw new HttpsError(
+                  "already-exists",
+                  "This listing is already entered in the Board.",
+                );
+              }
+
+              if (
+                existing?.status ===
+                "pending_payment"
+              ) {
+                return {
+                  status:
+                    "pending_payment" as const,
+                  paymentRequired:
+                    true,
+                };
+              }
+
+              if (
+                existing?.status ===
+                "pending_review"
+              ) {
+                if (
+                  listingStatus ===
+                  "published"
+                ) {
+                  transaction.update(
+                    entryRef,
+                    {
+                      status:
+                        "pending_payment",
+                      updatedAt:
+                        FieldValue
+                          .serverTimestamp(),
+                    },
+                  );
+
+                  return {
+                    status:
+                      "pending_payment" as const,
+                    paymentRequired:
+                      true,
+                  };
+                }
+
+                return {
+                  status:
+                    "pending_review" as const,
+                  paymentRequired:
+                    false,
+                };
+              }
+
+              throw new HttpsError(
+                "failed-precondition",
+                "This listing already has a Board entry record.",
+              );
+            }
+
+            const initialStatus =
+              listingStatus ===
+              "published"
+                ? "pending_payment"
+                : "pending_review";
+
+            const now =
+              FieldValue
+                .serverTimestamp();
+
+            transaction.set(
+              entryRef,
+              {
+                id:
+                  entryId,
+
+                boardId,
+                listingId,
+
+                submittedByUserId:
+                  request.auth!.uid,
+
+                status:
+                  initialStatus,
+
                 entryFeeMinor:
                   Number(
                     board.entryFeeMinor,
                   ),
+
                 currency:
                   String(
                     board.currency ||
                     "USD",
                   ),
+
+                entryPaymentId:
+                  null,
+
+                boostTotalMinor:
+                  0,
+
+                supporterCount:
+                  0,
+
+                externalClicks:
+                  0,
+
+                joinedAt:
+                  now,
+
+                updatedAt:
+                  now,
               },
-            },
-          );
-        },
-      );
+            );
+
+            transaction.set(
+              auditRef,
+              {
+                id:
+                  auditRef.id,
+
+                type:
+                  "board_entry_intent_created",
+
+                boardId,
+                listingId,
+
+                boardEntryId:
+                  entryId,
+
+                actorUserId:
+                  request.auth!.uid,
+
+                createdAt:
+                  now,
+
+                metadata: {
+                  status:
+                    initialStatus,
+
+                  entryFeeMinor:
+                    Number(
+                      board.entryFeeMinor,
+                    ),
+
+                  currency:
+                    String(
+                      board.currency ||
+                      "USD",
+                    ),
+                },
+              },
+            );
+
+            return {
+              status:
+                initialStatus,
+              paymentRequired:
+                initialStatus ===
+                "pending_payment",
+            };
+          },
+        );
 
       return {
-        success: true,
+        success:
+          true,
+
         boardEntryId:
           entryId,
+
         status:
-          "pending_payment",
-        paymentRequired: true,
+          result.status,
+
+        paymentRequired:
+          result.paymentRequired,
       };
     },
   );
