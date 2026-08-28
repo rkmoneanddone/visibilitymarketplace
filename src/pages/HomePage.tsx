@@ -59,13 +59,88 @@ function listingTimestamp(
     : timestamp;
 }
 
+function currentUtcMonthKey(): string {
+  const now =
+    new Date();
+
+  return [
+    now.getUTCFullYear(),
+    String(
+      now.getUTCMonth() + 1,
+    ).padStart(2, "0"),
+  ].join("-");
+}
+
+function currentUtcWeekKey(): string {
+  const now =
+    new Date();
+
+  const day =
+    now.getUTCDay();
+
+  const daysFromMonday =
+    day === 0
+      ? 6
+      : day - 1;
+
+  const monday =
+    new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate() -
+          daysFromMonday,
+      ),
+    );
+
+  return [
+    monday.getUTCFullYear(),
+    String(
+      monday.getUTCMonth() + 1,
+    ).padStart(2, "0"),
+    String(
+      monday.getUTCDate(),
+    ).padStart(2, "0"),
+  ].join("-");
+}
+
+function listingPeriodBoost(
+  listing: Listing,
+  period:
+    | "this-week"
+    | "this-month",
+): number {
+  if (period === "this-month") {
+    return listing.monthlyBoostKey ===
+      currentUtcMonthKey()
+      ? listing.monthlyBoostTotalMinor ??
+          0
+      : 0;
+  }
+
+  return listing.weeklyBoostKey ===
+    currentUtcWeekKey()
+    ? listing.weeklyBoostTotalMinor ??
+        0
+    : 0;
+}
+
 function compareListingRank(
   a: Listing,
   b: Listing,
+  period:
+    | "this-week"
+    | "this-month",
 ): number {
   const boostDifference =
-    (b.currentBoostTotalMinor ?? 0) -
-    (a.currentBoostTotalMinor ?? 0);
+    listingPeriodBoost(
+      b,
+      period,
+    ) -
+    listingPeriodBoost(
+      a,
+      period,
+    );
 
   if (boostDifference !== 0) {
     return boostDifference;
@@ -116,7 +191,9 @@ export function HomePage() {
       return matchedType?.name ?? "All";
     });
   const [selectedPeriod, setSelectedPeriod] =
-    useState("this-week");
+    useState<"this-week" | "this-month">(
+      "this-week",
+    );
   const [searchQuery, setSearchQuery] =
     useState(() => {
       if (typeof window === "undefined") {
@@ -331,6 +408,7 @@ export function HomePage() {
         return compareListingRank(
           a,
           b,
+          selectedPeriod,
         );
       },
     );
@@ -421,7 +499,11 @@ export function HomePage() {
 
     pushedMinor: typeListings.reduce(
       (total, listing) =>
-        total + listing.currentBoostTotalMinor,
+        total +
+        listingPeriodBoost(
+          listing,
+          selectedPeriod,
+        ),
       0,
     ),
   };
@@ -516,30 +598,45 @@ export function HomePage() {
                 <h2>Move a listing higher</h2>
               </div>
 
-              <select
-                className="board-period-select"
-                value={selectedPeriod}
-                onChange={(event) =>
-                  setSelectedPeriod(event.target.value)
-                }
-                aria-label="Board period"
+              <div
+                className="market-ranking-periods"
+                role="group"
+                aria-label="Ranking period"
               >
-                <option value="this-week">
+                <button
+                  type="button"
+                  className={
+                    selectedPeriod ===
+                    "this-week"
+                      ? "active"
+                      : ""
+                  }
+                  onClick={() =>
+                    setSelectedPeriod(
+                      "this-week",
+                    )
+                  }
+                >
                   This week
-                </option>
-                <option value="week-1">
-                  1 week back
-                </option>
-                <option value="week-2">
-                  2 weeks back
-                </option>
-                <option value="week-3">
-                  3 weeks back
-                </option>
-                <option value="last-month">
-                  Last month
-                </option>
-              </select>
+                </button>
+
+                <button
+                  type="button"
+                  className={
+                    selectedPeriod ===
+                    "this-month"
+                      ? "active"
+                      : ""
+                  }
+                  onClick={() =>
+                    setSelectedPeriod(
+                      "this-month",
+                    )
+                  }
+                >
+                  This month
+                </button>
+              </div>
             </div>
 
             <div className="filters home-search-only">
@@ -568,11 +665,7 @@ export function HomePage() {
             </div>
 
 <div className="board-list marketplace-listing-list">
-              {selectedPeriod !== "this-week" ? (
-                <div className="empty-board historical-board-note">
-                  Historical ranking for this period is not connected yet.
-                </div>
-              ) : listingsLoading ? (
+              {listingsLoading ? (
                 <div className="empty-board">Loading listings...</div>
               ) : listingsError ? (
                 <div className="empty-board">{listingsError}</div>
@@ -652,7 +745,10 @@ export function HomePage() {
                       <div className="listing-score">
                         <strong>
                           {formatMoneyMinor(
-                            listing.currentBoostTotalMinor,
+                            listingPeriodBoost(
+                              listing,
+                              selectedPeriod,
+                            ),
                           )}
                         </strong>
                         <span>pushed</span>
@@ -731,7 +827,9 @@ export function HomePage() {
             </div>
 
             <div className="board-bottom">
-              <span>Ranking is based on paid pushes this board period.</span>
+              <span>
+                Ranking is based on verified paid pushes for the selected period.
+              </span>
               <button type="button">View all</button>
             </div>
 

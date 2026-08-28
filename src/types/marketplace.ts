@@ -102,7 +102,18 @@ export interface Listing {
   status: ListingStatus;
 
   externalClicks: number;
+
+  // Lifetime verified Push Up total.
   currentBoostTotalMinor: number;
+
+  // Current UTC Monday-Sunday ranking bucket.
+  weeklyBoostTotalMinor?: number;
+  weeklyBoostKey?: string;
+
+  // Current UTC calendar-month ranking bucket.
+  monthlyBoostTotalMinor?: number;
+  monthlyBoostKey?: string;
+
   currentBoardRank?: number;
 
   createdAt: string;

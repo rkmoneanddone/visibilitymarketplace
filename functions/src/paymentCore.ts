@@ -44,6 +44,49 @@ function normalizeString(
   ).trim();
 }
 
+function getUtcMonthKey(
+  date: Date,
+): string {
+  return [
+    date.getUTCFullYear(),
+    String(
+      date.getUTCMonth() + 1,
+    ).padStart(2, "0"),
+  ].join("-");
+}
+
+function getUtcWeekKey(
+  date: Date,
+): string {
+  const day =
+    date.getUTCDay();
+
+  const daysFromMonday =
+    day === 0
+      ? 6
+      : day - 1;
+
+  const monday =
+    new Date(
+      Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate() -
+          daysFromMonday,
+      ),
+    );
+
+  return [
+    monday.getUTCFullYear(),
+    String(
+      monday.getUTCMonth() + 1,
+    ).padStart(2, "0"),
+    String(
+      monday.getUTCDate(),
+    ).padStart(2, "0"),
+  ].join("-");
+}
+
 function assertMoney(
   amountMinor: number,
 ) {
@@ -446,6 +489,51 @@ export async function fulfillVerifiedPayment(
             )
             .doc(targetId);
 
+        const listingSnap =
+          await transaction.get(
+            listingRef,
+          );
+
+        if (!listingSnap.exists) {
+          throw new Error(
+            "Listing not found during payment fulfillment.",
+          );
+        }
+
+        const listing =
+          listingSnap.data();
+
+        const now =
+          new Date();
+
+        const weekKey =
+          getUtcWeekKey(now);
+
+        const monthKey =
+          getUtcMonthKey(now);
+
+        const weeklyBoostTotalMinor =
+          String(
+            listing?.weeklyBoostKey ||
+            "",
+          ) === weekKey
+            ? Number(
+                listing?.weeklyBoostTotalMinor ||
+                0,
+              ) + amountMinor
+            : amountMinor;
+
+        const monthlyBoostTotalMinor =
+          String(
+            listing?.monthlyBoostKey ||
+            "",
+          ) === monthKey
+            ? Number(
+                listing?.monthlyBoostTotalMinor ||
+                0,
+              ) + amountMinor
+            : amountMinor;
+
         transaction.update(
           listingRef,
           {
@@ -453,6 +541,17 @@ export async function fulfillVerifiedPayment(
               FieldValue.increment(
                 amountMinor,
               ),
+
+            weeklyBoostKey:
+              weekKey,
+
+            weeklyBoostTotalMinor,
+
+            monthlyBoostKey:
+              monthKey,
+
+            monthlyBoostTotalMinor,
+
             updatedAt:
               FieldValue.serverTimestamp(),
           },
