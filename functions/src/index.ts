@@ -12,6 +12,9 @@ import {
   FieldValue,
 } from "firebase-admin/firestore";
 
+import {
+  validatePaymentRequest,
+} from "./paymentCore";
 initializeApp();
 
 const db = getFirestore();
@@ -54,14 +57,14 @@ function canManageListing(
   uid: string,
 ): boolean {
   if (
-    listing.claimedOwnerUserId === uid
+    listing.submittedByUserId === uid
   ) {
     return true;
   }
 
+  // Legacy compatibility only.
   if (
-    listing.submittedByUserId === uid &&
-    listing.ownershipStatus !== "verified"
+    listing.claimedOwnerUserId === uid
   ) {
     return true;
   }
@@ -148,6 +151,36 @@ export const requestBoard =
         throw new HttpsError(
           "invalid-argument",
           "Listing type is required.",
+        );
+      }
+
+      const allowedListingTypeIds =
+        new Set([
+          "youtube",
+          "facebook",
+          "instagram",
+          "x",
+          "app",
+          "startup",
+          "website",
+          "other",
+        ]);
+
+      if (
+        !allowedListingTypeIds.has(
+          listingTypeId,
+        )
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Unsupported Listing Type.",
+        );
+      }
+
+      if (currency !== "USD") {
+        throw new HttpsError(
+          "invalid-argument",
+          "Unsupported currency.",
         );
       }
 
@@ -1016,3 +1049,623 @@ export const rejectListing =
       };
     },
   );
+
+/* BEGIN VIEWBID CREATE PUSH UP INTENT V1 */
+
+export const createPushUpIntent =
+  onCall(
+    {
+      region: "asia-south1",
+    },
+    async (request) => {
+const listingId =
+        normalizeString(
+          request.data?.listingId,
+        );
+
+      const boardPeriodId =
+        normalizeString(
+          request.data?.boardPeriodId ||
+          "current",
+        );
+
+      const currency =
+        normalizeString(
+          request.data?.currency ||
+          "USD",
+        ).toUpperCase();
+
+      const amountMinor =
+        Number(
+          request.data?.amountMinor,
+        );
+
+      if (!listingId) {
+        throw new HttpsError(
+          "invalid-argument",
+          "listingId is required.",
+        );
+      }
+
+      if (
+        !Number.isSafeInteger(amountMinor) ||
+        ![
+          100,
+          500,
+          1000,
+          2500,
+        ].includes(amountMinor)
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Invalid Push Up amount.",
+        );
+      }
+
+      if (currency !== "USD") {
+        throw new HttpsError(
+          "invalid-argument",
+          "Unsupported currency.",
+        );
+      }
+
+      const listingRef =
+        db
+          .collection("listings")
+          .doc(listingId);
+
+      const boostRef =
+        db
+          .collection("boosts")
+          .doc();
+
+      const auditRef =
+        db
+          .collection("auditEvents")
+          .doc(
+            `push_up_intent_${boostRef.id}`,
+          );
+
+      await db.runTransaction(
+        async (transaction) => {
+          const listingSnap =
+            await transaction.get(
+              listingRef,
+            );
+
+          if (!listingSnap.exists) {
+            throw new HttpsError(
+              "not-found",
+              "Listing not found.",
+            );
+          }
+
+          const listing =
+            listingSnap.data();
+
+          if (
+            !listing ||
+            listing.status !==
+              "published"
+          ) {
+            throw new HttpsError(
+              "failed-precondition",
+              "Only published listings can be pushed.",
+            );
+          }
+
+          const now =
+            FieldValue.serverTimestamp();
+
+          transaction.set(
+            boostRef,
+            {
+              id: boostRef.id,
+              listingId,
+              boardPeriodId,
+
+              supporterUserId:
+                request.auth!.uid,
+
+              source:
+                listing.submittedByUserId ===
+                request.auth!.uid
+                  ? "owner"
+                  : "supporter",
+
+              amountMinor,
+              currency,
+
+              paymentId: null,
+              paymentProvider: null,
+
+              status: "pending",
+
+              createdAt: now,
+              updatedAt: now,
+            },
+          );
+
+          transaction.set(
+            auditRef,
+            {
+              id: auditRef.id,
+
+              type:
+                "push_up_intent_created",
+
+              listingId,
+              boostId:
+                boostRef.id,
+
+              actorUserId:
+                request.auth!.uid,
+
+              createdAt: now,
+
+              metadata: {
+                amountMinor,
+                currency,
+                boardPeriodId,
+              },
+            },
+          );
+        },
+      );
+
+      return {
+        success: true,
+        boostId:
+          boostRef.id,
+        status: "pending",
+        amountMinor,
+        currency,
+        paymentRequired: true,
+      };
+    },
+  );
+
+/* END VIEWBID CREATE PUSH UP INTENT V1 */
+
+/* BEGIN VIEWBID CREATE BOARD ENTRY INTENT V1 */
+
+export const createBoardEntryIntent =
+  onCall(
+    {
+      region: "asia-south1",
+    },
+    async (request) => {
+const boardId =
+        normalizeString(
+          request.data?.boardId,
+        );
+
+      const listingId =
+        normalizeString(
+          request.data?.listingId,
+        );
+
+      if (
+        !boardId ||
+        !listingId
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "boardId and listingId are required.",
+        );
+      }
+
+      const boardRef =
+        db
+          .collection("boards")
+          .doc(boardId);
+
+      const listingRef =
+        db
+          .collection("listings")
+          .doc(listingId);
+
+      const entryId =
+        `${boardId}_${listingId}`;
+
+      const entryRef =
+        db
+          .collection("boardEntries")
+          .doc(entryId);
+
+      const auditRef =
+        db
+          .collection("auditEvents")
+          .doc(
+            `board_entry_intent_${entryId}`,
+          );
+
+      await db.runTransaction(
+        async (transaction) => {
+          const [
+            boardSnap,
+            listingSnap,
+            entrySnap,
+          ] =
+            await Promise.all([
+              transaction.get(boardRef),
+              transaction.get(listingRef),
+              transaction.get(entryRef),
+            ]);
+
+          if (!boardSnap.exists) {
+            throw new HttpsError(
+              "not-found",
+              "Board not found.",
+            );
+          }
+
+          if (!listingSnap.exists) {
+            throw new HttpsError(
+              "not-found",
+              "Listing not found.",
+            );
+          }
+
+          const board =
+            boardSnap.data();
+
+          const listing =
+            listingSnap.data();
+
+          if (!board || !listing) {
+            throw new HttpsError(
+              "not-found",
+              "Board or Listing data not found.",
+            );
+          }
+
+          if (
+            ![
+              "approved",
+              "entry_open",
+              "active",
+            ].includes(
+              String(board.status),
+            )
+          ) {
+            throw new HttpsError(
+              "failed-precondition",
+              "This Board is not accepting entries.",
+            );
+          }
+
+          const nowMs =
+            Date.now();
+
+          const entryStartsMs =
+            new Date(
+              String(
+                board.entryStartsAt,
+              ),
+            ).getTime();
+
+          const entryClosesMs =
+            new Date(
+              String(
+                board.entryClosesAt,
+              ),
+            ).getTime();
+
+          const endsMs =
+            new Date(
+              String(
+                board.endsAt,
+              ),
+            ).getTime();
+
+          if (
+            Number.isNaN(entryStartsMs) ||
+            Number.isNaN(entryClosesMs) ||
+            Number.isNaN(endsMs) ||
+            nowMs < entryStartsMs ||
+            nowMs >= entryClosesMs ||
+            nowMs >= endsMs
+          ) {
+            throw new HttpsError(
+              "failed-precondition",
+              "The Board entry window is closed.",
+            );
+          }
+
+          if (
+            listing.status !==
+            "published"
+          ) {
+            throw new HttpsError(
+              "failed-precondition",
+              "Only published listings can enter a Board.",
+            );
+          }
+
+          if (
+            listing.submittedByUserId !==
+            request.auth!.uid
+          ) {
+            throw new HttpsError(
+              "permission-denied",
+              "You can only enter a listing from your account.",
+            );
+          }
+
+          if (
+            listing.listingTypeId !==
+            board.listingTypeId
+          ) {
+            throw new HttpsError(
+              "failed-precondition",
+              "This listing type is not eligible for this Board.",
+            );
+          }
+
+          if (entrySnap.exists) {
+            const existing =
+              entrySnap.data();
+
+            if (
+              existing?.status ===
+              "entered"
+            ) {
+              throw new HttpsError(
+                "already-exists",
+                "This listing is already entered in the Board.",
+              );
+            }
+
+            if (
+              existing?.status ===
+              "pending_payment"
+            ) {
+              return;
+            }
+
+            throw new HttpsError(
+              "failed-precondition",
+              "This listing already has a Board entry record.",
+            );
+          }
+
+          const now =
+            FieldValue.serverTimestamp();
+
+          transaction.set(
+            entryRef,
+            {
+              id: entryId,
+
+              boardId,
+              listingId,
+
+              submittedByUserId:
+                request.auth!.uid,
+
+              status:
+                "pending_payment",
+
+              entryFeeMinor:
+                Number(
+                  board.entryFeeMinor,
+                ),
+
+              currency:
+                String(
+                  board.currency ||
+                  "USD",
+                ),
+
+              entryPaymentId:
+                null,
+
+              boostTotalMinor: 0,
+              supporterCount: 0,
+
+              joinedAt: now,
+              updatedAt: now,
+            },
+          );
+
+          transaction.set(
+            auditRef,
+            {
+              id: auditRef.id,
+
+              type:
+                "board_entry_intent_created",
+
+              boardId,
+              listingId,
+              boardEntryId:
+                entryId,
+
+              actorUserId:
+                request.auth?.uid ??
+                null,
+
+              createdAt: now,
+
+              metadata: {
+                entryFeeMinor:
+                  Number(
+                    board.entryFeeMinor,
+                  ),
+                currency:
+                  String(
+                    board.currency ||
+                    "USD",
+                  ),
+              },
+            },
+          );
+        },
+      );
+
+      return {
+        success: true,
+        boardEntryId:
+          entryId,
+        status:
+          "pending_payment",
+        paymentRequired: true,
+      };
+    },
+  );
+
+/* END VIEWBID CREATE BOARD ENTRY INTENT V1 */
+
+/* BEGIN VIEWBID GENERIC PAYMENT INTENT V1 */
+
+export const createPaymentIntent =
+  onCall(
+    {
+      region: "asia-south1",
+    },
+    async (request) => {
+      const validated =
+        await validatePaymentRequest(
+          db,
+          request.data,
+        );
+
+      const paymentRef =
+        db
+          .collection(
+            "paymentIntents",
+          )
+          .doc();
+
+      const now =
+        FieldValue.serverTimestamp();
+
+      await paymentRef.set({
+        id:
+          paymentRef.id,
+
+        ...validated,
+
+        status:
+          "created",
+
+        provider:
+          "unconfigured",
+
+        providerPaymentId:
+          null,
+
+        createdByUserId:
+          request.auth?.uid ??
+          null,
+
+        createdAt:
+          now,
+
+        updatedAt:
+          now,
+
+        verifiedAt:
+          null,
+
+        fulfilledAt:
+          null,
+      });
+
+      return {
+        success: true,
+
+        paymentIntentId:
+          paymentRef.id,
+
+        status:
+          "created",
+
+        providerReady:
+          false,
+
+        checkoutUrl:
+          null,
+      };
+    },
+  );
+
+/* END VIEWBID GENERIC PAYMENT INTENT V1 */
+
+/* BEGIN VIEWBID CLICK TRACKING V1 */
+
+export const recordExternalClick =
+  onCall(
+    {
+      region: "asia-south1",
+    },
+    async (request) => {
+      const targetKind =
+        normalizeString(
+          request.data?.targetKind,
+        );
+
+      const targetId =
+        normalizeString(
+          request.data?.targetId,
+        );
+
+      if (
+        ![
+          "listing",
+          "board_entry",
+        ].includes(
+          targetKind,
+        )
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Unsupported click target.",
+        );
+      }
+
+      if (!targetId) {
+        throw new HttpsError(
+          "invalid-argument",
+          "targetId is required.",
+        );
+      }
+
+      const collectionName =
+        targetKind === "listing"
+          ? "listings"
+          : "boardEntries";
+
+      const targetRef =
+        db
+          .collection(
+            collectionName,
+          )
+          .doc(targetId);
+
+      const targetSnap =
+        await targetRef.get();
+
+      if (!targetSnap.exists) {
+        throw new HttpsError(
+          "not-found",
+          "Click target not found.",
+        );
+      }
+
+      await targetRef.update({
+        externalClicks:
+          FieldValue.increment(1),
+
+        updatedAt:
+          FieldValue.serverTimestamp(),
+      });
+
+      return {
+        success: true,
+      };
+    },
+  );
+
+/* END VIEWBID CLICK TRACKING V1 */

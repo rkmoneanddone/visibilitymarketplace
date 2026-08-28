@@ -11,100 +11,48 @@ service cloud.firestore {
     }
 
     match /listings/{listingId} {
-
-
-  	allow read:
-      if resource.data.status == "published"
-      || (
-        request.auth != null
-        && resource.data.submittedByUserId == request.auth.uid
-      )
-      || (
-        request.auth != null
-        && "claimedOwnerUserId" in resource.data
-        && resource.data.claimedOwnerUserId == request.auth.uid
-      )
-      || isAdmin();
+      allow read:
+        if resource.data.status == "published"
+        || (
+          request.auth != null
+          && resource.data.submittedByUserId == request.auth.uid
+        )
+        || (
+          request.auth != null
+          && "claimedOwnerUserId" in resource.data
+          && resource.data.claimedOwnerUserId == request.auth.uid
+        )
+        || isAdmin();
 
       allow create:
         if request.auth != null
-
-        && request.resource.data.submittedByUserId
-           == request.auth.uid
-
-        && request.resource.data.status
-           == "submitted"
-
-        && request.resource.data.externalClicks
-           == 0
-
-        && request.resource.data.currentBoostTotalMinor
-           == 0
-
-        && (
-          (
-            request.resource.data.submissionRelationship
-              == "supporter"
-
-            && request.resource.data.ownershipStatus
-              == "unclaimed"
-
-            && !(
-              "claimedOwnerUserId"
-              in request.resource.data
-            )
-          )
-
-          ||
-
-          (
-            request.resource.data.submissionRelationship
-              == "owner"
-
-            && request.resource.data.ownershipStatus
-              == "claimed"
-
-            && request.resource.data.claimedOwnerUserId
-              == request.auth.uid
-          )
-        )
-
+        && request.resource.data.submittedByUserId == request.auth.uid
+        && request.resource.data.status == "submitted"
+        && request.resource.data.externalClicks == 0
+        && request.resource.data.currentBoostTotalMinor == 0
         && request.resource.data.keys().hasOnly([
           "id",
-
           "submittedByUserId",
-          "submissionRelationship",
-          "claimedOwnerUserId",
-          "ownershipStatus",
-
           "listingTypeId",
           "platformKey",
           "targetKind",
           "externalTargetId",
-
           "categoryId",
           "subcategoryId",
-
           "title",
           "slug",
-
           "handle",
           "platformUrl",
-
           "shortDescription",
-
           "externalUrl",
           "websiteUrl",
           "downloadUrl",
           "launchDate",
-	  "featuredImageUrl",
-	  "featuredImagePath",
-
+          "featuredImageUrl",
+          "featuredImagePath",
           "status",
-
           "externalClicks",
           "currentBoostTotalMinor",
-
           "createdAt",
           "updatedAt"
         ]);
@@ -123,42 +71,36 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read: if request.auth != null
-                  && request.auth.uid == userId;
+      allow read:
+        if request.auth != null
+        && request.auth.uid == userId;
 
-      allow create: if request.auth != null
-                    && request.auth.uid == userId
-                    && request.resource.data.uid == userId
-                    && request.resource.data.role == "supporter";
+      allow create:
+        if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.uid == userId
+        && request.resource.data.role == "supporter";
 
-      allow update: if request.auth != null
-                    && request.auth.uid == userId
-                    && request.resource.data.uid == resource.data.uid
-                    && request.resource.data.role == resource.data.role;
+      allow update:
+        if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.role == resource.data.role;
 
       allow delete: if false;
     }
-    
+
     match /auditEvents/{auditId} {
+      allow read: if false;
 
-    allow read: if false;
-
-    allow create:
+      allow create:
         if request.auth != null
-
-        && request.resource.data.type
-          == "listing_created"
-
-        && request.resource.data.actorUserId
-          == request.auth.uid
-
-        && request.resource.data.id
-          == auditId
-
+        && request.resource.data.type == "listing_created"
+        && request.resource.data.actorUserId == request.auth.uid
+        && request.resource.data.id == auditId
         && auditId
           == "listing_created_"
-              + request.resource.data.listingId
-
+          + request.resource.data.listingId
         && request.resource.data.keys().hasOnly([
           "id",
           "type",
@@ -172,6 +114,17 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /boardEntries/{entryId} {
+      allow read:
+        if resource.data.status == "entered"
+        || (
+          request.auth != null
+          && resource.data.submittedByUserId == request.auth.uid
+        )
+        || isAdmin();
+
+      allow create, update, delete: if false;
+    }
     match /boards/{boardId} {
       allow read:
         if resource.data.status in [
@@ -181,15 +134,18 @@ service cloud.firestore {
           "expired",
           "archived"
         ]
-        ||
-        (
+        || (
           request.auth != null
           && resource.data.createdByUserId == request.auth.uid
         )
-        ||
-        isAdmin();
+        || isAdmin();
 
       allow create, update, delete: if false;
     }
   }
+
+    match /paymentIntents/{paymentIntentId} {
+      allow read, create, update, delete:
+        if false;
+    }
 }

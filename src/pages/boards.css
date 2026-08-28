@@ -611,3 +611,396 @@
 }
 
 /* END VIEWBID BRIGHT BOARD PALETTE V1 */
+
+/* BEGIN VIEWBID FLASHY BOARD CARDS V1 */
+
+.board-card {
+  position: relative;
+
+  overflow: hidden;
+
+  border-color: #cfe2e7 !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff 0%,
+      #f0fcff 68%,
+      #fff5d8 100%
+    ) !important;
+
+  box-shadow:
+    0 10px 28px rgb(29 101 117 / 8%) !important;
+}
+
+.board-card::after {
+  content: "";
+
+  position: absolute;
+
+  width: 130px;
+  height: 130px;
+
+  right: -50px;
+  top: -62px;
+
+  border-radius: 999px;
+
+  background:
+    radial-gradient(
+      circle,
+      rgb(255 189 41 / 22%),
+      transparent 70%
+    );
+
+  pointer-events: none;
+}
+
+.board-card h2 {
+  position: relative;
+  z-index: 1;
+
+  color: #173f50 !important;
+}
+
+.board-status-entry_open,
+.board-status-active,
+.board-status-approved {
+  position: relative;
+  z-index: 1;
+
+  border-color: #a6e1c5 !important;
+
+  background: #eafaf2 !important;
+
+  color: #168454 !important;
+}
+
+.board-card-link.entry-open {
+  position: relative;
+  z-index: 1;
+
+  border: 0 !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #18b4c7,
+      #0d91a9
+    ) !important;
+
+  color: #fff !important;
+
+  box-shadow:
+    0 6px 16px rgb(15 151 172 / 18%);
+}
+
+/* END VIEWBID FLASHY BOARD CARDS V1 */
+
+/* BEGIN VISIBILITY MARKETPLACE CRISP BOARD CARD V1 */
+
+.boards-list {
+  gap: 8px;
+}
+
+.board-card {
+  overflow: hidden;
+  border: 1px solid #dce7ea !important;
+  border-radius: 14px;
+  background: #fff !important;
+  box-shadow: 0 4px 14px rgb(32 78 90 / 5%) !important;
+}
+
+.board-card::after {
+  display: none;
+}
+
+.board-card-top {
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px 4px;
+  background: #fff !important;
+}
+
+.board-card-copy {
+  min-width: 0;
+}
+
+.board-card-copy h2 {
+  margin: 0;
+  overflow: hidden;
+  color: #234858 !important;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.board-card-copy p {
+  margin: 2px 0 0;
+  color: #82939b !important;
+  font-size: 11px;
+}
+
+.board-status {
+  padding: 3px 7px;
+  border: 1px solid #d7e8e1;
+  border-radius: 999px;
+  background: #eff8f4 !important;
+  color: #278060 !important;
+  font-size: 9.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  box-shadow: none !important;
+}
+
+.board-card-timing {
+  gap: 6px;
+  padding: 4px 13px 8px;
+  background: #fff !important;
+  color: #87969d !important;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.board-card-timing strong {
+  color: #536b76 !important;
+  font-weight: 500;
+}
+
+.board-card-separator {
+  color: #c3cdd1;
+}
+
+.board-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px 9px 13px;
+  border-top: 1px solid #edf2f3;
+  background: #fbfdfe !important;
+}
+
+.board-card-pricing {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0;
+  border: 0;
+}
+
+.board-card-pricing span {
+  display: grid;
+  gap: 1px;
+}
+
+.board-card-pricing strong {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.board-card-pricing span:first-child strong {
+  color: #dc7a20;
+}
+
+.board-card-pricing span:last-child strong {
+  color: #168f84;
+}
+
+.board-card-pricing small {
+  color: #93a1a7;
+  font-size: 9px;
+}
+
+.board-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+}
+
+.board-share-button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d9e5e8;
+  border-radius: 999px;
+  background: #fff;
+  color: #70858e;
+}
+
+.board-card-add-listing {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 11px;
+  border: 1px solid #a8dce2;
+  border-radius: 999px;
+  background: #fff;
+  color: #16889a;
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.board-card-link {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: #22a9bb !important;
+  color: #fff !important;
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: none !important;
+}
+
+.board-card-link:hover {
+  background: #1999aa !important;
+}
+
+@media (min-width: 701px) {
+  .board-card {
+    display: grid;
+    grid-template-columns:
+      minmax(220px, 1.15fr)
+      minmax(280px, 1.35fr)
+      auto
+      auto;
+    align-items: center;
+    min-height: 68px;
+  }
+
+  .board-card-top {
+    padding: 10px 8px 10px 14px;
+  }
+
+  .board-card-timing {
+    padding: 10px 8px;
+    white-space: nowrap;
+  }
+
+  .board-card-bottom {
+    display: contents;
+  }
+
+  .board-card-pricing {
+    padding: 0 12px;
+    border-left: 1px solid #edf1f2;
+  }
+
+  .board-card-actions {
+    justify-self: end;
+    padding-right: 10px;
+  }
+}
+
+@media (max-width: 700px) {
+  .boards-page {
+    width: calc(100% - 12px);
+  }
+
+  .boards-list {
+    gap: 7px;
+  }
+
+  .board-card {
+    border-radius: 13px;
+  }
+
+  .board-card-top {
+    padding: 9px 10px 3px 11px;
+  }
+
+  .board-card-copy h2 {
+    font-size: 16px;
+  }
+
+  .board-card-copy p {
+    font-size: 10.5px;
+  }
+
+  .board-status {
+    padding: 3px 6px;
+    font-size: 9px;
+  }
+
+  .board-card-timing {
+    gap: 5px;
+    padding: 4px 11px 7px;
+    font-size: 10px;
+  }
+
+  .board-card-timing strong {
+    font-size: 10px;
+  }
+
+  .board-card-bottom {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px 10px;
+    padding: 7px 9px 8px 11px;
+  }
+
+  .board-card-pricing {
+    gap: 15px;
+  }
+
+  .board-card-pricing strong {
+    font-size: 14px;
+  }
+
+  .board-card-pricing small {
+    font-size: 9px;
+  }
+
+  .board-card-actions {
+    justify-content: flex-end;
+    min-width: 0;
+  }
+
+  .board-share-button {
+    width: 30px;
+    height: 30px;
+  }
+
+  .board-card-add-listing,
+  .board-card-link {
+    min-height: 30px;
+    padding-inline: 9px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 390px) {
+  .board-card-timing {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+  }
+
+  .board-card-separator {
+    display: none;
+  }
+
+  .board-card-bottom {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .board-card-actions {
+    justify-content: flex-start;
+  }
+}
+
+/* END VISIBILITY MARKETPLACE CRISP BOARD CARD V1 */

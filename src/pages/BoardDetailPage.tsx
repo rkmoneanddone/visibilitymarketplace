@@ -6,7 +6,9 @@ import {
 
 import {
   ArrowLeft,
+  ArrowUp,
   CalendarDays,
+  Flame,
   LayoutGrid,
 } from "lucide-react";
 
@@ -14,6 +16,18 @@ import {
   Link,
   useParams,
 } from "react-router-dom";
+
+import {
+  BoardEntryLauncher,
+} from "../features/boards/BoardEntryLauncher";
+
+import {
+  PushUpLauncher,
+} from "../features/push-up/PushUpLauncher";
+
+import type {
+  PushUpTarget,
+} from "../features/push-up/types";
 
 import {
   getListingTypeName,
@@ -27,10 +41,20 @@ import {
   getBoardById,
 } from "../services/boards/boards";
 
+import {
+  getBoardEntries,
+  type BoardEntryWithListing,
+} from "../services/boards/boardEntries";
+
+
 import type {
   Board,
 } from "../types/board";
 
+
+import {
+  recordExternalClick,
+} from "../services/analytics/clickTracking";
 import "./board-detail.css";
 
 function formatDate(value: string) {
@@ -45,23 +69,37 @@ function formatDate(value: string) {
   );
 }
 
-function getStatusLabel(status: Board["status"]) {
+function getStatusLabel(
+  status: Board["status"],
+) {
   return status
     .replace(/_/g, " ")
     .replace(
       /\b\w/g,
-      (value) => value.toUpperCase(),
+      (value) =>
+        value.toUpperCase(),
     );
 }
 
-function getEntryState(board: Board) {
+function getEntryState(
+  board: Board,
+) {
   const now = Date.now();
+
   const entryStarts =
-    new Date(board.entryStartsAt).getTime();
+    new Date(
+      board.entryStartsAt,
+    ).getTime();
+
   const entryCloses =
-    new Date(board.entryClosesAt).getTime();
+    new Date(
+      board.entryClosesAt,
+    ).getTime();
+
   const ends =
-    new Date(board.endsAt).getTime();
+    new Date(
+      board.endsAt,
+    ).getTime();
 
   if (
     board.status === "archived" ||
@@ -79,9 +117,10 @@ function getEntryState(board: Board) {
   if (now < entryStarts) {
     return {
       label: "Entry opens soon",
-      detail: `Opens ${formatDate(
-        board.entryStartsAt,
-      )}`,
+      detail:
+        `Opens ${formatDate(
+          board.entryStartsAt,
+        )}`,
       canEnter: false,
     };
   }
@@ -98,12 +137,13 @@ function getEntryState(board: Board) {
   return {
     label: "Entry open",
     detail:
-      "Eligible listing owners can enter now.",
+      "Eligible published listings can enter now.",
     canEnter: true,
   };
 }
 
 export function BoardDetailPage() {
+
   const { boardId } =
     useParams<{
       boardId: string;
@@ -112,18 +152,26 @@ export function BoardDetailPage() {
   const [board, setBoard] =
     useState<Board | null>(null);
 
+  const [entries, setEntries] =
+    useState<
+      BoardEntryWithListing[]
+    >([]);
+
   const [loading, setLoading] =
     useState(true);
 
   const [error, setError] =
     useState<string | null>(null);
 
+
   useEffect(() => {
     let active = true;
 
     async function loadBoard() {
       if (!boardId) {
-        setError("Board not found.");
+        setError(
+          "Board not found.",
+        );
         setLoading(false);
         return;
       }
@@ -132,7 +180,7 @@ export function BoardDetailPage() {
         setLoading(true);
         setError(null);
 
-        const result =
+        const boardResult =
           await getBoardById(
             boardId,
           );
@@ -141,14 +189,40 @@ export function BoardDetailPage() {
           return;
         }
 
-        if (!result) {
+        if (!boardResult) {
           setError(
             "This board could not be found.",
           );
           return;
         }
 
-        setBoard(result);
+        setBoard(
+          boardResult,
+        );
+
+        try {
+          const entryResult =
+            await getBoardEntries(
+              boardId,
+            );
+
+          if (!active) {
+            return;
+          }
+
+          setEntries(
+            entryResult,
+          );
+        } catch (entryError) {
+          console.warn(
+            "Board loaded but entries could not be loaded:",
+            entryError,
+          );
+
+          if (active) {
+            setEntries([]);
+          }
+        }
       } catch (error) {
         console.error(
           "Failed to load board:",
@@ -172,16 +246,23 @@ export function BoardDetailPage() {
     return () => {
       active = false;
     };
-  }, [boardId]);
+  }, [
+    boardId,
+  ]);
 
   const entryState =
     useMemo(
       () =>
         board
-          ? getEntryState(board)
+          ? getEntryState(
+              board,
+            )
           : null,
-      [board],
+      [
+        board,
+      ],
     );
+
 
   if (loading) {
     return (
@@ -193,7 +274,11 @@ export function BoardDetailPage() {
     );
   }
 
-  if (error || !board || !entryState) {
+  if (
+    error ||
+    !board ||
+    !entryState
+  ) {
     return (
       <main className="board-detail-page">
         <div className="board-detail-state">
@@ -210,8 +295,45 @@ export function BoardDetailPage() {
     );
   }
 
+  const pushTargets:
+    PushUpTarget[] =
+      entries.map(
+        (item) => ({
+          id:
+            item.entry.listingId,
+
+          paymentTargetKind:
+            "board_entry",
+
+          paymentTargetId:
+            `${item.entry.boardId}_${item.entry.listingId}`,
+
+          purpose:
+            "board_entry_push",
+
+          title:
+            item.listing.title,
+
+          handle:
+            item.listing.handle,
+
+          imageUrl:
+            item.listing.featuredImageUrl,
+
+          currentBoostTotalMinor:
+            item.entry.boostTotalMinor,
+
+          minimumAmountMinor:
+            board.minimumBoostMinor,
+
+          currency:
+            board.currency,
+        }),
+      );
+
   return (
     <main className="board-detail-page">
+
       <Link
         className="board-detail-back"
         to="/boards"
@@ -220,12 +342,16 @@ export function BoardDetailPage() {
         Boards
       </Link>
 
-      <section className="board-detail-card board-summary">
+      <section className="board-detail-card board-summary board-event-hero">
+        <div className="board-event-glow" />
+
         <div className="board-summary-row board-summary-row-main">
           <div className="board-summary-identity">
-            <p className="board-detail-kicker">
-              <LayoutGrid size={13} />
-              BOARD
+            <p className="board-detail-kicker board-live-kicker">
+              <Flame size={13} />
+              {entryState.canEnter
+                ? "LIVE BOARD"
+                : "BOARD"}
             </p>
 
             <h1>
@@ -236,18 +362,27 @@ export function BoardDetailPage() {
               {getListingTypeName(
                 board.listingTypeId,
               )}
+
               <span>
                 {"\u00B7"}
               </span>
+
               {getStatusLabel(
                 board.status,
               )}
+
+              <span>
+                {"\u00B7"}
+              </span>
+
+              {entries.length} entries
             </p>
           </div>
 
           <div className="board-summary-prices board-summary-prices-top">
             <span>
               <small>Entry</small>
+
               <strong>
                 {formatMoneyMinor(
                   board.entryFeeMinor,
@@ -258,8 +393,9 @@ export function BoardDetailPage() {
 
             <span>
               <small>
-                Min Push Up
+                Push from
               </small>
+
               <strong>
                 {formatMoneyMinor(
                   board.minimumBoostMinor,
@@ -269,23 +405,42 @@ export function BoardDetailPage() {
             </span>
           </div>
 
-          <a
-            className="board-entry-link"
-            href={entryState.canEnter ? "#board-entries" : "#board-schedule"}
-          >
-            {entryState.canEnter
-              ? `Enter Board · ${formatMoneyMinor(
-                  board.entryFeeMinor,
-                  board.currency,
-                )}`
-              : entryState.detail}
-          </a>
+          {entryState.canEnter ? (
+            <BoardEntryLauncher
+              board={board}
+            >
+              {(openEntry) => (
+                <button
+                  className="board-entry-link"
+                  type="button"
+                  onClick={openEntry}
+                >
+                  {`Enter This Board - ${formatMoneyMinor(
+                    board.entryFeeMinor,
+                    board.currency,
+                  )}`}
+                </button>
+              )}
+            </BoardEntryLauncher>
+          ) : (
+            <button
+              className="board-entry-link"
+              type="button"
+              disabled
+            >
+              {entryState.label}
+            </button>
+          )}
         </div>
       </section>
 
-      <section id="board-schedule" className="board-detail-card board-schedule-card">
+      <section
+        id="board-schedule"
+        className="board-detail-card board-schedule-card"
+      >
         <div className="board-section-title">
           <CalendarDays size={15} />
+
           <h2>
             Schedule
           </h2>
@@ -330,27 +485,159 @@ export function BoardDetailPage() {
         </dl>
       </section>
 
-      <section id="board-entries" className="board-detail-card board-entries-card">
+      <section
+        id="board-entries"
+        className="board-detail-card board-entries-card"
+      >
         <div className="board-entries-heading">
           <div>
-            <span>TOP</span>
+            <span>LEADERBOARD</span>
+
             <h2>
               Listings in this Board
             </h2>
           </div>
+
+          <small>
+            Entry fee does not affect ranking.
+          </small>
         </div>
 
-        <div className="board-empty-row">
-          <strong>
-            No entries yet
-          </strong>
+        {entries.length > 0 ? (
+          <div className="board-entry-leaderboard">
+            {entries.map(
+              (
+                item,
+                index,
+              ) => {
+                const rank =
+                  index + 1;
 
-          <p>
-            During the entry window, any eligible {getListingTypeName(
-              board.listingTypeId,
-            )} listing owner can enter an existing ViewBid listing. Entered listings will appear here for everyone to discover and support.
-          </p>
-        </div>
+                return (
+                  <article
+                    className={`board-entry-row board-entry-rank-${Math.min(
+                      rank,
+                      3,
+                    )}`}
+                    key={
+                      item.entry.listingId
+                    }
+                  >
+                    <span className="board-entry-rank">
+                      #{rank}
+                    </span>
+
+                    <span className="board-entry-avatar">
+                      {item.listing
+                        .featuredImageUrl ? (
+                        <img
+                          src={
+                            item.listing
+                              .featuredImageUrl
+                          }
+                          alt=""
+                        />
+                      ) : (
+                        item.listing.title
+                          .charAt(0)
+                          .toUpperCase()
+                      )}
+                    </span>
+
+                    <span className="board-entry-identity">
+                      <strong>
+                        {item.listing.title}
+                      </strong>
+
+                      {item.listing
+                        .handle && (
+                        <small>
+                          {
+                            item.listing
+                              .handle
+                          }
+                        </small>
+                      )}
+                    </span>
+
+                    <span className="board-entry-boost">
+                      <strong>
+                        {formatMoneyMinor(
+                          item.entry
+                            .boostTotalMinor,
+                          board.currency,
+                        )}
+                      </strong>
+
+                      <small>
+                        pushed
+                      </small>
+                    </span>
+
+                    <span className="board-entry-actions">
+                      <a
+                        href={
+                          item.listing
+                            .externalUrl
+                        }
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={() =>
+                          void recordExternalClick(
+                            "board_entry",
+                            `${item.entry.boardId}_${item.entry.listingId}`,
+                          )
+                        }
+                      >
+                        Visit
+                      </a>
+                      <span className="board-entry-clicks">
+                        {item.entry.externalClicks ?? 0} clicks
+                      </span>
+
+                      <PushUpLauncher
+                        targets={
+                          pushTargets
+                        }
+                        initialTargetId={
+                          item.entry.listingId
+                        }
+                        contextLabel={`${board.name} Board`}
+                      >
+                        {(openPushUp) => (
+                          <button
+                            type="button"
+                            onClick={
+                              openPushUp
+                            }
+                          >
+                            <ArrowUp
+                              size={13}
+                            />
+                            Push Up
+                          </button>
+                        )}
+                      </PushUpLauncher>
+                    </span>
+                  </article>
+                );
+              },
+            )}
+          </div>
+        ) : (
+          <div className="board-empty-row">
+            <LayoutGrid size={22} />
+
+            <strong>
+              First listings will appear here
+            </strong>
+
+            <p>
+              Only paid, verified Board entries
+              will appear in this leaderboard.
+            </p>
+          </div>
+        )}
       </section>
     </main>
   );

@@ -25,6 +25,9 @@ export interface Board {
 
     listingTypeId: string;
 
+  categoryId?: string;
+  subcategoryId?: string;
+
     startsAt: string;
     entryStartsAt: string;
     entryClosesAt: string;
@@ -67,6 +70,8 @@ export interface BoardEntry {
 
     boostTotalMinor: number;
     supporterCount: number;
+
+    externalClicks?: number;
 
     joinedAt: string;
     updatedAt: string;

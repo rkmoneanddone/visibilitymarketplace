@@ -54,12 +54,25 @@ type ListingDialogMode =
   | "edit"
   | "admin-edit";
 
+type ListingBoardContext = {
+  boardId: string;
+  boardName: string;
+
+  listingTypeId: string;
+
+  categoryId?: string;
+  subcategoryId?: string;
+
+  entryFeeMinor: number;
+  currency: string;
+};
 type ListingDialogProps = {
   open: boolean;
   mode: ListingDialogMode;
 
   listing?: Listing;
 
+  boardContext?: ListingBoardContext;
   onClose: () => void;
 
   onSubmit: (
@@ -71,6 +84,8 @@ export function ListingDialog({
   open,
   mode,
   listing,
+
+  boardContext,
   onClose,
   onSubmit,
 }: ListingDialogProps) {
@@ -153,7 +168,58 @@ categoryId:
     setError(null);
   }, [open, listing]);
 
-  const targetOptions = useMemo(
+    /* VIEWBID BOARD MODE FORM LOCK */
+  useEffect(() => {
+    if (
+      !open ||
+      listing ||
+      !boardContext
+    ) {
+      return;
+    }
+
+    const targets =
+      getPromotionTargets(
+        boardContext.listingTypeId,
+      );
+
+    setForm((current) => ({
+      ...current,
+
+      listingTypeId:
+        boardContext.listingTypeId,
+
+      platformKey:
+        [
+          "youtube",
+          "facebook",
+          "instagram",
+          "x",
+        ].includes(
+          boardContext.listingTypeId,
+        )
+          ? boardContext.listingTypeId
+          : undefined,
+
+      targetKind:
+        targets[0]?.id ??
+        "other",
+
+      categoryId:
+        boardContext.categoryId ??
+        current.categoryId,
+
+      subcategoryId:
+        boardContext.subcategoryId ??
+        current.subcategoryId,
+    }));
+  }, [
+    open,
+    listing,
+    boardContext,
+  ]);
+
+const targetOptions = useMemo(
     () =>
       getPromotionTargets(
         form.listingTypeId,
@@ -395,7 +461,12 @@ categoryId:
         ? "Edit listing"
         : "Edit your listing";
 
-  const mainLinkLabel =
+    const displayHeading =
+    boardContext
+      ? boardContext.boardName
+      : heading;
+
+const mainLinkLabel =
     isWebsite
       ? "Website link"
       : isApp
@@ -433,7 +504,7 @@ categoryId:
         className="listing-dialog"
         role="dialog"
         aria-modal="true"
-        aria-label={heading}
+        aria-label={displayHeading}
       >
         <header className="listing-dialog-header">
           <div className="listing-dialog-heading">
@@ -446,7 +517,7 @@ categoryId:
                 GET DISCOVERED
               </p>
 
-              <h2>{heading}</h2>
+              <h2>{displayHeading}</h2>
             </div>
           </div>
 
@@ -456,12 +527,11 @@ categoryId:
             disabled={saving}
             onClick={onClose}
             aria-label="Close"
-          >
-            ×
-          </button>
+          >X</button>
         </header>
-
-        <div className="listing-status-strip">
+        {/* VIEWBID BOARD HIDE NORMAL STATUS STRIP */}
+        {!boardContext && (
+<div className="listing-status-strip">
           <span
             className={
               freeListing
@@ -487,12 +557,38 @@ categoryId:
             }
           </span>
         </div>
+        )}
 
-        <form
+                {boardContext && (
+          <div className="listing-board-fee-note">
+            <span>
+              Add Listing to Board
+            </span>
+
+            <strong>
+              Entry{" "}
+              {new Intl.NumberFormat(
+                undefined,
+                {
+                  style: "currency",
+                  currency:
+                    boardContext.currency,
+                  maximumFractionDigits: 0,
+                },
+              ).format(
+                boardContext.entryFeeMinor /
+                  100,
+              )}
+            </strong>
+          </div>
+        )}
+<form
           className="listing-form"
           onSubmit={handleSubmit}
         >
-          <div className="listing-form-row">
+                    {/* VIEWBID NORMAL LISTING TYPE ROW */}
+          {!boardContext && (
+<div className="listing-form-row">
             <label>
               Promote
 
@@ -500,6 +596,7 @@ categoryId:
                 value={
                   form.listingTypeId
                 }
+                disabled={!!boardContext}
                 onChange={(event) =>
                   handleListingTypeChange(
                     event.target.value,
@@ -555,6 +652,7 @@ categoryId:
               </select>
             </label>
           </div>
+          )}
 <label>
             {mainLinkLabel} *
 
@@ -596,7 +694,7 @@ categoryId:
             </label>
 
             <label className="listing-image-field">
-              Logo / image · max 5 MB
+              Logo / image - max 5 MB
 
               <span className="listing-file-control">
                 <ImagePlus size={15} />
@@ -666,13 +764,24 @@ categoryId:
           </div>
 
           <div className="listing-form-row">
+                      {/* VIEWBID BOARD CATEGORY DISPLAY */}
+          {boardContext?.categoryId ? (
             <label>
+              Category
+
+              <div className="listing-locked-value">
+                {boardContext.categoryId}
+              </div>
+            </label>
+          ) : (
+<label>
               Category *
 
               <select
                 value={
                   form.categoryId
                 }
+                disabled={!!boardContext?.categoryId}
                 onChange={(event) => {
                   updateField(
                     "categoryId",
@@ -708,6 +817,7 @@ categoryId:
                 )}
               </select>
             </label>
+          )}
 
             <label>
               Subcategory
@@ -907,10 +1017,23 @@ categoryId:
                 disabled={saving}
               >
                 {saving
-                  ? "Saving..."
-                  : mode === "create"
-                    ? "Add to board"
-                    : "Save changes"}
+      ? "Saving..."
+      : boardContext
+        ? `Add to Board - ${new Intl.NumberFormat(
+            undefined,
+            {
+              style: "currency",
+              currency:
+                boardContext.currency,
+              maximumFractionDigits: 0,
+            },
+          ).format(
+            boardContext.entryFeeMinor /
+              100,
+          )}`
+        : mode === "create"
+          ? "Add Public Listing"
+          : "Save changes"}
               </button>
             </div>
           </footer>

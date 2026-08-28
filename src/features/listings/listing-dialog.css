@@ -483,3 +483,126 @@
 }
 
 /* END VIEWBID MOBILE POPUP EXPLICIT -1PT V2 */
+
+/* BEGIN VIEWBID LISTING BOARD MODE V1 */
+
+.listing-board-context {
+  display: grid;
+  gap: 2px;
+  margin: 0 0 10px;
+  padding: 9px 11px;
+  border: 1px solid #cfe4e8;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #f3fbfc, #fffaf1);
+}
+
+.listing-board-context > span {
+  color: #d27a25;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .06em;
+}
+
+.listing-board-context > strong {
+  color: #285363;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.listing-board-context > small {
+  color: #768990;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.listing-form select:disabled {
+  cursor: not-allowed;
+  background: #f3f6f7;
+  color: #60747d;
+  opacity: 1;
+}
+
+/* END VIEWBID LISTING BOARD MODE V1 */
+
+/* BEGIN VIEWBID BOARD MODE CLEAN UI V2 */
+
+.listing-board-context {
+  margin-bottom: 14px;
+  padding: 12px 13px;
+}
+
+.listing-board-context > span {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.listing-board-context .listing-board-name {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #224f60;
+
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.listing-board-context > small {
+  margin-top: 2px;
+
+  color: #71858d;
+
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.listing-locked-value {
+  min-height: 40px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 11px;
+
+  border: 1px solid #dce6e8;
+  border-radius: 10px;
+
+  background: #f4f7f8;
+
+  color: #536b75;
+
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* END VIEWBID BOARD MODE CLEAN UI V2 */
+
+/* BEGIN VIEWBID CLEAN BOARD LISTING MODE V1 */
+
+.listing-board-fee-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin: 0 0 12px;
+  padding: 9px 11px;
+
+  border: 1px solid #dbe9ec;
+  border-radius: 11px;
+
+  background: #f7fbfc;
+  color: #59717c;
+
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.listing-board-fee-note strong {
+  color: #15899c;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* END VIEWBID CLEAN BOARD LISTING MODE V1 */

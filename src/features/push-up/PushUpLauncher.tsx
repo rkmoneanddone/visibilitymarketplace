@@ -1,4 +1,5 @@
 import {
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -11,34 +12,76 @@ import {
   PushUpDialog,
 } from "./PushUpDialog";
 
+import {
+  listingToPushUpTarget,
+  type PushUpTarget,
+} from "./types";
+
 type PushUpLauncherProps = {
-  listings: Listing[];
+  listings?: Listing[];
+
+  targets?: PushUpTarget[];
+
   initialListingId?: string;
+
+  initialTargetId?: string;
+
   contextLabel?: string;
+
   children: (
     openPushUp: () => void,
   ) => ReactNode;
 };
 
 export function PushUpLauncher({
-  listings,
+  listings = [],
+  targets,
   initialListingId,
-  contextLabel = "Marketplace ranking",
+  initialTargetId,
+  contextLabel =
+    "Marketplace ranking",
   children,
 }: PushUpLauncherProps) {
   const [open, setOpen] =
     useState(false);
 
+  const normalizedTargets =
+    useMemo(
+      () =>
+        targets ??
+        listings.map(
+          listingToPushUpTarget,
+        ),
+      [
+        listings,
+        targets,
+      ],
+    );
+
+  const resolvedInitialTargetId =
+    initialTargetId ??
+    initialListingId;
+
   return (
     <>
-      {children(() => setOpen(true))}
+      {children(() =>
+        setOpen(true)
+      )}
 
       {open && (
         <PushUpDialog
-          listings={listings}
-          initialListingId={initialListingId}
-          contextLabel={contextLabel}
-          onClose={() => setOpen(false)}
+          targets={
+            normalizedTargets
+          }
+          initialTargetId={
+            resolvedInitialTargetId
+          }
+          contextLabel={
+            contextLabel
+          }
+          onClose={() =>
+            setOpen(false)
+          }
         />
       )}
     </>

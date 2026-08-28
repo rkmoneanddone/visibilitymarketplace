@@ -32,6 +32,9 @@ import {
 
 import "./boards.css";
 
+import {
+  BoardEntryLauncher,
+} from "../features/boards/BoardEntryLauncher";
 function formatBoardDate(value: string) {
   return new Date(value).toLocaleString(
     undefined,
@@ -55,42 +58,7 @@ function getStatusLabel(
     );
 }
 
-function isEntryOpen(board: Board) {
-  const now = Date.now();
-  const entryStarts =
-    new Date(
-      board.entryStartsAt,
-    ).getTime();
-  const entryCloses =
-    new Date(
-      board.entryClosesAt,
-    ).getTime();
-  const ends =
-    new Date(
-      board.endsAt,
-    ).getTime();
 
-  return (
-    now >= entryStarts &&
-    now < entryCloses &&
-    now < ends &&
-    board.status !== "archived" &&
-    board.status !== "expired"
-  );
-}
-
-function getBoardActionLabel(
-  board: Board,
-) {
-  if (isEntryOpen(board)) {
-    return `Enter Board · ${formatMoneyMinor(
-      board.entryFeeMinor,
-      board.currency,
-    )}`;
-  }
-
-  return "View Board";
-}
 
 async function shareBoard(board: Board) {
   const boardUrl =
@@ -286,7 +254,7 @@ export function BoardsPage() {
                   </span>
 
                   <span className="board-card-separator">
-                    ·
+                    |
                   </span>
 
                   <span>
@@ -336,17 +304,22 @@ export function BoardsPage() {
                       <Share2 size={15} />
                     </button>
 
-                    <Link
-                      className={`board-card-link ${
-                        isEntryOpen(board)
-                          ? "entry-open"
-                          : ""
-                      }`}
+                                        <BoardEntryLauncher
+                      board={board}
+                    >
+                      {(openEntry) => (
+                        <button
+                          className="board-card-add-listing"
+                          type="button"
+                          onClick={openEntry}
+                        >Enter This Board</button>
+                      )}
+                    </BoardEntryLauncher>
+<Link
+                      className="board-card-link"
                       to={`/boards/${board.id}`}
                     >
-                      {getBoardActionLabel(
-                        board,
-                      )}
+                      View Board
                       <ArrowRight size={16} />
                     </Link>
                   </div>

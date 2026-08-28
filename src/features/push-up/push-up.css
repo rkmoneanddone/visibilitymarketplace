@@ -793,3 +793,30 @@
 }
 
 /* END VIEWBID PUSHUP EXPLICIT RESPONSIVE -1PT V2 */
+
+/* BEGIN VIEWBID PUSH UP FUNCTIONAL STATUS V1 */
+
+.pushup-intent-message,
+.pushup-intent-error {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+
+  border-radius: 10px;
+
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.pushup-intent-message {
+  border: 1px solid #b9dfcc;
+  background: #edf9f3;
+  color: #246b4a;
+}
+
+.pushup-intent-error {
+  border: 1px solid #efc6c0;
+  background: #fff2f0;
+  color: #9d332a;
+}
+
+/* END VIEWBID PUSH UP FUNCTIONAL STATUS V1 */
