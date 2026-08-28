@@ -59,6 +59,7 @@ export type BoardEntryStatus =
     | "withdrawn";
 
 export interface BoardEntry {
+    id: string;
     boardId: string;
     listingId: string;
 
@@ -67,6 +68,7 @@ export interface BoardEntry {
     status: BoardEntryStatus;
 
     entryFeeMinor: number;
+    currency: string;
     entryPaymentId?: string;
 
     boostTotalMinor: number;

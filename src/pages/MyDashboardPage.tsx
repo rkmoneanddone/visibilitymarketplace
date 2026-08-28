@@ -28,8 +28,16 @@ import {
 } from "../features/listings/ListingLauncher";
 
 import {
+  BoardEntryPaymentButton,
+} from "../features/boards/BoardEntryPaymentButton";
+
+import {
   getMyListings,
 } from "../services/listings/myListings";
+
+import {
+  getMyBoardEntries,
+} from "../services/boards/myBoardEntries";
 
 import {
   getCategoryName,
@@ -40,6 +48,10 @@ import {
 import type {
   Listing,
 } from "../types/marketplace";
+
+import type {
+  BoardEntry,
+} from "../types/board";
 
 import {
   archiveListingAsOwner,
@@ -62,6 +74,11 @@ export function MyDashboardPage() {
 
   const [listings, setListings] =
     useState<Listing[]>([]);
+
+  const [
+    boardEntries,
+    setBoardEntries,
+  ] = useState<BoardEntry[]>([]);
 
   const [loading, setLoading] =
     useState(true);
@@ -101,13 +118,27 @@ export function MyDashboardPage() {
         setLoading(true);
         setError(null);
 
-        const result =
-          await getMyListings(
-            profile!.uid,
-          );
+        const [
+          listingResult,
+          boardEntryResult,
+        ] =
+          await Promise.all([
+            getMyListings(
+              profile!.uid,
+            ),
+            getMyBoardEntries(
+              profile!.uid,
+            ),
+          ]);
 
         if (active) {
-          setListings(result);
+          setListings(
+            listingResult,
+          );
+
+          setBoardEntries(
+            boardEntryResult,
+          );
         }
       } catch (error) {
         console.error(
@@ -431,6 +462,13 @@ export function MyDashboardPage() {
         <div className="dashboard-list">
           {visibleListings.map(
             (listing) => {
+              const boardEntry =
+                boardEntries.find(
+                  (entry) =>
+                    entry.listingId ===
+                    listing.id,
+                );
+
               const typeName =
                 getListingTypeName(
                   listing.listingTypeId,
@@ -543,6 +581,19 @@ export function MyDashboardPage() {
                         size={13}
                       />
                     </a>
+
+                    {listing.status ===
+                      "published" &&
+                      boardEntry && (
+                        <BoardEntryPaymentButton
+                          entry={
+                            boardEntry
+                          }
+                          listing={
+                            listing
+                          }
+                        />
+                      )}
 
                     {listing.status ===
                       "published" && (
