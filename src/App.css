@@ -5692,3 +5692,174 @@ button.board-card-add-listing {
 }
 
 /* END VISIBILITY MARKETPLACE VISIBILITY CTA ALIGNMENT V1 */
+
+/* BEGIN VISIBILITY MARKETPLACE HOMEPAGE LISTING DISPLAY V1 */
+
+.marketplace-listing-list {
+  display: grid;
+  gap: 8px;
+}
+
+.marketplace-listing-row {
+  grid-template-columns:
+    40px
+    44px
+    minmax(0, 1fr)
+    minmax(76px, auto)
+    auto;
+  align-items: center;
+  min-height: 72px;
+  padding: 10px 12px;
+  gap: 10px;
+}
+
+.marketplace-listing-row .rank {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.marketplace-listing-row .listing-mark {
+  width: 40px;
+  height: 40px;
+}
+
+.marketplace-listing-row .listing-content {
+  min-width: 0;
+}
+
+.marketplace-listing-row .listing-title-line {
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.marketplace-listing-row .listing-title-line h3 {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.25;
+  font-weight: 500;
+}
+
+.marketplace-listing-identity {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
+}
+
+.marketplace-listing-owner {
+  color: var(--text-secondary, #5f6470);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.marketplace-listing-row .listing-meta {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.marketplace-listing-row .listing-score {
+  display: grid;
+  justify-items: end;
+  gap: 1px;
+  min-width: 72px;
+}
+
+.marketplace-listing-row .listing-score strong {
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+.marketplace-listing-row .listing-score > span {
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.marketplace-listing-row .listing-score .listing-click-count {
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+.marketplace-listing-row .listing-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.marketplace-listing-row .visit-button,
+.marketplace-listing-row .push-button {
+  min-height: 34px;
+  padding: 7px 11px;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .marketplace-listing-list {
+    gap: 6px;
+  }
+
+  .marketplace-listing-row {
+    grid-template-columns:
+      28px
+      38px
+      minmax(0, 1fr)
+      auto;
+    min-height: 0;
+    padding: 9px 8px;
+    gap: 7px;
+  }
+
+  .marketplace-listing-row .rank {
+    font-size: 12px;
+  }
+
+  .marketplace-listing-row .listing-mark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .marketplace-listing-row .listing-title-line h3 {
+    font-size: 14px;
+  }
+
+  .marketplace-listing-identity {
+    gap: 2px 6px;
+  }
+
+  .marketplace-listing-owner,
+  .marketplace-listing-row .listing-meta {
+    font-size: 11px;
+  }
+
+  .marketplace-listing-row .listing-score {
+    justify-items: end;
+    min-width: 62px;
+  }
+
+  .marketplace-listing-row .listing-score strong {
+    font-size: 13px;
+  }
+
+  .marketplace-listing-row .listing-score > span {
+    font-size: 10px;
+  }
+
+  .marketplace-listing-row .listing-actions {
+    grid-column: 3 / -1;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 1px;
+  }
+
+  .marketplace-listing-row .visit-button,
+  .marketplace-listing-row .push-button {
+    min-height: 32px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+/* END VISIBILITY MARKETPLACE HOMEPAGE LISTING DISPLAY V1 */

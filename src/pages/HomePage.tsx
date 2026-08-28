@@ -567,7 +567,7 @@ export function HomePage() {
               </div>
             </div>
 
-<div className="board-list">
+<div className="board-list marketplace-listing-list">
               {selectedPeriod !== "this-week" ? (
                 <div className="empty-board historical-board-note">
                   Historical ranking for this period is not connected yet.
@@ -580,11 +580,23 @@ export function HomePage() {
                 visibleListings.map((listing, index) => {
                   const typeName = getListingTypeName(listing.listingTypeId);
 
-                  const rank = listing.currentBoardRank ?? index + 1;
+                  const rank =
+                    selectedType === "All"
+                      ? visibleListings
+                          .slice(
+                            0,
+                            index + 1,
+                          )
+                          .filter(
+                            (candidate) =>
+                              candidate.listingTypeId ===
+                              listing.listingTypeId,
+                          ).length
+                      : index + 1;
 
                   return (
                     <article
-                      className={`board-row rank-${Math.min(rank, 4)}`}
+                      className={`board-row marketplace-listing-row rank-${Math.min(rank, 4)}`}
                       key={listing.id}
                     >
                       <div className="rank">
@@ -618,19 +630,23 @@ export function HomePage() {
                           )}
                         </div>
 
-                        {listing.handle && (
-                          <p className="listing-meta">
-                            <PlatformHandleLink
-                              typeName={typeName}
-                              handle={listing.handle}
-                              platformUrl={listing.platformUrl}
-                            />
-                          </p>
-                        )}
+                        <div className="marketplace-listing-identity">
+                          {listing.ownerDisplayName && (
+                            <span className="marketplace-listing-owner">
+                              {listing.ownerDisplayName}
+                            </span>
+                          )}
 
-                        <p className="listing-description">
-                          {listing.shortDescription}
-                        </p>
+                          {listing.handle && (
+                            <span className="listing-meta">
+                              <PlatformHandleLink
+                                typeName={typeName}
+                                handle={listing.handle}
+                                platformUrl={listing.platformUrl}
+                              />
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       <div className="listing-score">
@@ -640,6 +656,9 @@ export function HomePage() {
                           )}
                         </strong>
                         <span>pushed</span>
+                        <span className="listing-click-count">
+                          {listing.externalClicks ?? 0} clicks
+                        </span>
                       </div>
 
                       <div className="listing-actions">
@@ -656,9 +675,6 @@ export function HomePage() {
                             }                        >
                           Visit
                         </a>
-                          <span className="listing-click-count">
-                            {listing.externalClicks ?? 0} clicks
-                          </span>
 
                         <PushUpLauncher
                           listings={visibleListings}
