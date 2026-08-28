@@ -948,7 +948,7 @@ select {
   }
 }
 
-/* MOBILE ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â single source of truth */
+/* MOBILE - single source of truth */
 @media(max-width:640px) {
 
   .site-header,
@@ -4038,7 +4038,7 @@ body {
 }
 
 .mobile-stats span:not(:last-child)::after {
-  content: "ÃƒÂ¯Ã‚Â¿Ã‚Â½";
+  content: "\00B7";
   margin-left: 3px;
   color: #b4c0c7;
 }
@@ -4820,8 +4820,6 @@ body {
 
 /* END VIEWBID HOMEPAGE REAL DATA V3 */
 
-
-
 /* BEGIN VIEWBID TYPOGRAPHY SYSTEM V1 */
 
 :root {
@@ -5150,8 +5148,6 @@ small {
 }
 
 /* END VIEWBID TYPOGRAPHY SYSTEM V1 */
-
-
 
 /* BEGIN VIEWBID FONT WEIGHT NORMALIZATION V1 */
 
