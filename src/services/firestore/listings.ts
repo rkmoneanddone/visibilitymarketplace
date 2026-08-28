@@ -12,7 +12,7 @@ import type {
 const LISTINGS_COLLECTION = "listings";
 
 export async function getPublishedListings(
-  maxResults = 50,
+  maxResults = 200,
 ): Promise<Listing[]> {
   return dbQueryCollection<Listing>(
     LISTINGS_COLLECTION,

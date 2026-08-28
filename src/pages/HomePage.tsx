@@ -40,6 +40,48 @@ import {
   BoardEntryLauncher,
 } from "../features/boards/BoardEntryLauncher";
 
+function listingTimestamp(
+  listing: Listing,
+): number {
+  const value =
+    listing.publishedAt ??
+    listing.createdAt;
+
+  if (!value) {
+    return 0;
+  }
+
+  const timestamp =
+    new Date(value).getTime();
+
+  return Number.isNaN(timestamp)
+    ? 0
+    : timestamp;
+}
+
+function compareListingRank(
+  a: Listing,
+  b: Listing,
+): number {
+  const boostDifference =
+    (b.currentBoostTotalMinor ?? 0) -
+    (a.currentBoostTotalMinor ?? 0);
+
+  if (boostDifference !== 0) {
+    return boostDifference;
+  }
+
+  const dateDifference =
+    listingTimestamp(b) -
+    listingTimestamp(a);
+
+  if (dateDifference !== 0) {
+    return dateDifference;
+  }
+
+  return a.id.localeCompare(b.id);
+}
+
 export function HomePage() {
   const [selectedType, setSelectedType] =
     useState(() => {
@@ -247,10 +289,56 @@ export function HomePage() {
     [],
   );
 
+  const typeOrder =
+    new Map(
+      enabledTypes.map(
+        (type, index) => [
+          type.id,
+          index,
+        ],
+      ),
+    );
+
+  const rankedListings =
+    [...listings].sort(
+      (a, b) => {
+        if (
+          selectedType === "All"
+        ) {
+          const aTypeOrder =
+            typeOrder.get(
+              a.listingTypeId,
+            ) ??
+            Number.MAX_SAFE_INTEGER;
+
+          const bTypeOrder =
+            typeOrder.get(
+              b.listingTypeId,
+            ) ??
+            Number.MAX_SAFE_INTEGER;
+
+          if (
+            aTypeOrder !==
+            bTypeOrder
+          ) {
+            return (
+              aTypeOrder -
+              bTypeOrder
+            );
+          }
+        }
+
+        return compareListingRank(
+          a,
+          b,
+        );
+      },
+    );
+
   const typeListings =
     selectedType === "All"
-      ? listings
-      : listings.filter(
+      ? rankedListings
+      : rankedListings.filter(
           (listing) =>
             getListingTypeName(
               listing.listingTypeId,
