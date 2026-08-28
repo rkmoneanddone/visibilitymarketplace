@@ -25,21 +25,66 @@ import { getListingTypeName } from "../lib/marketplace/listing";
 import { formatMoneyMinor } from "../lib/marketplace/money";
 
 import { getTypeIcon } from "../lib/marketplace/icons";
-import {
-  demoBoardStats,
-  newToday,
-} from "../data/demoMarketplace";
 import { initialListingTypes } from "../config/listingTypes";
 import { siteConfig } from "../config/site";
 import { getPublishedListings } from "../services/firestore/listings";
+import { getPublicBoards } from "../services/boards/boards";
 import type { Listing } from "../types/marketplace";
+import type { Board } from "../types/board";
 import { PushUpLauncher } from "../features/push-up/PushUpLauncher";
+import {
+  recordExternalClick,
+} from "../services/analytics/clickTracking";
 
+import {
+  BoardEntryLauncher,
+} from "../features/boards/BoardEntryLauncher";
 
 export function HomePage() {
-  const [selectedType, setSelectedType] = useState("All");
+  const [selectedType, setSelectedType] =
+    useState(() => {
+      if (typeof window === "undefined") {
+        return "All";
+      }
+
+      const typeParam =
+        new URLSearchParams(
+          window.location.search,
+        )
+          .get("type")
+          ?.trim()
+          .toLowerCase();
+
+      if (!typeParam) {
+        return "All";
+      }
+
+      const matchedType =
+        initialListingTypes.find(
+          (type) =>
+            type.enabled &&
+            (
+              type.key.toLowerCase() ===
+                typeParam ||
+              type.id.toLowerCase() ===
+                typeParam
+            ),
+        );
+
+      return matchedType?.name ?? "All";
+    });
   const [selectedPeriod, setSelectedPeriod] =
     useState("this-week");
+  const [searchQuery, setSearchQuery] =
+    useState(() => {
+      if (typeof window === "undefined") {
+        return "";
+      }
+
+      return new URLSearchParams(
+        window.location.search,
+      ).get("q") ?? "";
+    });
   const [listings, setListings] = useState<Listing[]>([]);
   const [listingsLoading, setListingsLoading] = useState(true);
   const [listingsError, setListingsError] = useState<string | null>(null);
@@ -78,6 +123,122 @@ export function HomePage() {
     };
   }, []);
 
+  useEffect(() => {
+    function handlePopState() {
+      const params =
+        new URLSearchParams(
+          window.location.search,
+        );
+
+      const typeParam =
+        params
+          .get("type")
+          ?.trim()
+          .toLowerCase();
+
+      const matchedType =
+        initialListingTypes.find(
+          (type) =>
+            type.enabled &&
+            (
+              type.key.toLowerCase() ===
+                typeParam ||
+              type.id.toLowerCase() ===
+                typeParam
+            ),
+        );
+
+      setSelectedType(
+        matchedType?.name ?? "All",
+      );
+
+      setSearchQuery(
+        params.get("q") ?? "",
+      );
+    }
+
+    window.addEventListener(
+      "popstate",
+      handlePopState,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "popstate",
+        handlePopState,
+      );
+    };
+  }, []);
+
+  function selectListingType(
+    typeName: string,
+  ) {
+    setSelectedType(typeName);
+
+    const params =
+      new URLSearchParams(
+        window.location.search,
+      );
+
+    if (typeName === "All") {
+      params.delete("type");
+    } else {
+      const type =
+        initialListingTypes.find(
+          (item) =>
+            item.name === typeName,
+        );
+
+      if (type) {
+        params.set(
+          "type",
+          type.key,
+        );
+      }
+    }
+
+    const nextSearch =
+      params.toString();
+
+    window.history.pushState(
+      {},
+      "",
+      nextSearch
+        ? `${window.location.pathname}?${nextSearch}`
+        : window.location.pathname,
+    );
+  }
+
+  function updateSearchQuery(
+    value: string,
+  ) {
+    setSearchQuery(value);
+
+    const params =
+      new URLSearchParams(
+        window.location.search,
+      );
+
+    const normalized =
+      value.trim();
+
+    if (normalized) {
+      params.set("q", normalized);
+    } else {
+      params.delete("q");
+    }
+
+    const nextSearch =
+      params.toString();
+
+    window.history.replaceState(
+      {},
+      "",
+      nextSearch
+        ? `${window.location.pathname}?${nextSearch}`
+        : window.location.pathname,
+    );
+  }
   const enabledTypes = useMemo(
     () =>
       initialListingTypes
@@ -86,20 +247,91 @@ export function HomePage() {
     [],
   );
 
-  const visibleListings =
+  const typeListings =
     selectedType === "All"
       ? listings
       : listings.filter(
-        (listing) =>
-          getListingTypeName(listing.listingTypeId) === selectedType,
-      );
+          (listing) =>
+            getListingTypeName(
+              listing.listingTypeId,
+            ) === selectedType,
+        );
 
+  const normalizedSearch =
+    searchQuery
+      .trim()
+      .toLowerCase();
+
+  const visibleListings =
+    !normalizedSearch
+      ? typeListings
+      : typeListings.filter(
+          (listing) =>
+            [
+              listing.title,
+              listing.handle,
+              listing.shortDescription,
+              listing.ownerDisplayName,
+            ]
+              .filter(Boolean)
+              .some((value) =>
+                String(value)
+                  .toLowerCase()
+                  .includes(
+                    normalizedSearch,
+                  ),
+              ),
+        );
+
+  const typeCounts =
+    enabledTypes.reduce<
+      Record<string, number>
+    >(
+      (counts, type) => {
+        counts[type.name] =
+          listings.filter(
+            (listing) =>
+              listing.listingTypeId ===
+              type.id,
+          ).length;
+
+        return counts;
+      },
+      {},
+    );
+
+  const todayKey =
+    new Date().toDateString();
+
+  const newTodayListings =
+    typeListings.filter(
+      (listing) => {
+        const timestamp =
+          listing.publishedAt ??
+          listing.createdAt;
+
+        if (!timestamp) {
+          return false;
+        }
+
+        const date =
+          new Date(timestamp);
+
+        return (
+          !Number.isNaN(
+            date.getTime(),
+          ) &&
+          date.toDateString() ===
+            todayKey
+        );
+      },
+    );
   const boardStats = {
-    listed: visibleListings.length,
+    listed: typeListings.length,
 
-    today: demoBoardStats.newToday,
+    today: newTodayListings.length,
 
-    pushedMinor: visibleListings.reduce(
+    pushedMinor: typeListings.reduce(
       (total, listing) =>
         total + listing.currentBoostTotalMinor,
       0,
@@ -127,8 +359,7 @@ export function HomePage() {
             </div>
           </div>
         </section>
-
-        <div className="market-layout">
+<div className="market-layout">
           <section className="board-section" id="board">
             <div
               className="market-visitor-strip"
@@ -136,19 +367,22 @@ export function HomePage() {
               title="Visitor totals will appear here after real analytics data is connected."
             >
               <span>Total visitors</span>
-              <strong>�</strong>
+              <strong>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½</strong>
               <span>Live</span>
-              <strong>�</strong>
+              <strong>ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½</strong>
             </div>
 
             <div className="type-strip">
               <button
                 className={`type-link ${selectedType === "All" ? "active" : ""}`}
                 type="button"
-                onClick={() => setSelectedType("All")}
+                onClick={() => selectListingType("All")}
               >
                 <Sparkles size={15} />
                 <span>All</span>
+                <span className="type-count">
+                  {listings.length}
+                </span>
               </button>
 
               {enabledTypes.map((type) => (
@@ -157,10 +391,13 @@ export function HomePage() {
                     }`}
                   type="button"
                   key={type.id}
-                  onClick={() => setSelectedType(type.name)}
+                  onClick={() => selectListingType(type.name)}
                 >
                   {getTypeIcon(type.name)}
                   <span>{type.name}</span>
+                  <span className="type-count">
+                    {typeCounts[type.name] ?? 0}
+                  </span>
                 </button>
               ))}
             </div>
@@ -222,8 +459,22 @@ export function HomePage() {
                 <Search size={16} />
                 <input
                   type="search"
-                  placeholder="Search listings"
-                  aria-label="Search listings"
+                  value={searchQuery}
+                  onChange={(event) =>
+                    updateSearchQuery(
+                      event.target.value,
+                    )
+                  }
+                  placeholder={
+                    selectedType === "All"
+                      ? "Search all listings"
+                      : `Search ${selectedType} listings`
+                  }
+                  aria-label={
+                    selectedType === "All"
+                      ? "Search all listings"
+                      : `Search ${selectedType} listings`
+                  }
                 />
               </div>
             </div>
@@ -309,9 +560,17 @@ export function HomePage() {
                           href={listing.externalUrl}
                           target="_blank"
                           rel="noreferrer"
-                        >
+                            onClick={() =>
+                              void recordExternalClick(
+                                "listing",
+                                listing.id,
+                              )
+                            }                        >
                           Visit
                         </a>
+                          <span className="listing-click-count">
+                            {listing.externalClicks ?? 0} clicks
+                          </span>
 
                         <PushUpLauncher
                           listings={visibleListings}
@@ -335,10 +594,14 @@ export function HomePage() {
                 })
               ) : (
                 <div className="empty-board">
-                  No published listings in this type yet.
+                  {searchQuery.trim()
+                    ? `No ${selectedType === "All" ? "" : `${selectedType} `}listings match "${searchQuery.trim()}".`
+                    : `No ${selectedType === "All" ? "published" : selectedType} listings yet.`}
                 </div>
               )}
             </div>
+
+            <BoardsPreview />
 
             <div className="market-model-strip">
               <div className="market-model-price">
@@ -360,17 +623,17 @@ export function HomePage() {
                 Paid visibility is non-refundable after successful processing.
               </span>
 
-              <a href="/how-it-works">How it works →</a>
+              <a href="/how-it-works">How it works</a>
             </div>
 
             <div className="board-bottom">
               <span>Ranking is based on paid pushes this board period.</span>
-              <button type="button">View all →</button>
+              <button type="button">View all</button>
             </div>
 
             <div className="mobile-side-content">
               <VisibilityCard />
-              <NewTodayCard />
+              <NewTodayCard listings={newTodayListings} />
               <HowItWorksCard />
             </div>
           </section>
@@ -378,7 +641,7 @@ export function HomePage() {
           <aside className="side-panel">
 
             <VisibilityCard />
-            <NewTodayCard />
+            <NewTodayCard listings={newTodayListings} />
             <HowItWorksCard />
             <section className="board-summary">
               <div className="side-card-heading">
@@ -461,9 +724,9 @@ export function HomePage() {
 
           <div className="footer-column">
             <strong>For listings</strong>
-            <a href="#add-listing">Add listing</a>
+            <a href="#add-listing">Add Public Listing</a>
             <a href="#pricing">Pricing</a>
-            <a href="/how-it-works">How Push Up works</a>
+            <a href="/how-it-works">How it works</a>
           </div>
 
           <div className="footer-column">
@@ -476,7 +739,7 @@ export function HomePage() {
         </div>
 
         <div className="footer-bottom">
-          <span>© 2026 {siteConfig.name}</span>
+          <span>Copyright 2026 {siteConfig.name}</span>
           <span>Built for discovery.</span>
         </div>
       </footer>
@@ -496,6 +759,127 @@ function handleListingCreated(
   );
 }
 
+function BoardsPreview() {
+  const [boards, setBoards] =
+    useState<Board[]>([]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadBoards() {
+      try {
+        const result =
+          await getPublicBoards();
+
+        if (active) {
+          setBoards(
+            result.slice(0, 2),
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Failed to load Board preview:",
+          error,
+        );
+      }
+    }
+
+    void loadBoards();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (boards.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="home-boards-preview">
+      <div className="home-boards-preview-heading">
+        <div>
+          <span>BOARDS</span>
+
+          <h2>
+            Compete for a featured spot
+          </h2>
+        </div>
+
+        <a href="/boards">
+          See all boards
+        </a>
+      </div>
+
+      <div className="home-boards-preview-list">
+        {boards.map(
+          (board) => (
+            <div
+              className="home-board-preview-row"
+              key={board.id}
+            >
+              <span className="home-board-preview-accent" />
+
+              <span className="home-board-preview-status">
+                {board.status === "active" ||
+                board.status === "entry_open"
+                  ? "LIVE"
+                  : "OPEN"}
+              </span>
+
+              <span className="home-board-preview-copy">
+                <span className="home-board-preview-title">
+                  {board.name}
+                </span>
+
+                <span className="home-board-preview-meta">
+                  {getListingTypeName(
+                    board.listingTypeId,
+                  )}
+                  {" | "}
+                  Entry{" "}
+                  {formatMoneyMinor(
+                    board.entryFeeMinor,
+                    board.currency,
+                  )}
+                  {" | "}
+                  Push from{" "}
+                  {formatMoneyMinor(
+                    board.minimumBoostMinor,
+                    board.currency,
+                  )}
+                </span>
+
+              </span>
+
+              <span className="home-board-preview-actions">
+                <BoardEntryLauncher
+                  board={board}
+                >
+                  {(openEntry) => (
+                    <button
+                      className="home-board-preview-add"
+                      type="button"
+                      onClick={openEntry}
+                    >Enter This Board</button>
+                  )}
+                </BoardEntryLauncher>
+
+                <a
+                  className="home-board-preview-action"
+                  href={`/boards/${board.id}`}
+                >
+                  View Board
+                </a>
+              </span>
+            </div>
+          ),
+        )}
+      </div>
+    </section>
+  );
+}
+
 function VisibilityCard() {
   return (
     <section className="visibility-cta" id="add-listing">
@@ -511,7 +895,7 @@ function VisibilityCard() {
       </div>
 
       <p>
-        Put your channel, app, website or startup on the public board.
+        Put your channel, app, website or startup on the public marketplace.
       </p>
 
       <ListingLauncher
@@ -524,41 +908,87 @@ function VisibilityCard() {
             type="button"
             onClick={openListing}
           >
-            <ListPlus size={15} />
-            Add your listing
-          </button>
+            <ListPlus size={15} />Add Public Listing</button>
         )}
       </ListingLauncher>
     </section>
   );
 }
 
-function NewTodayCard() {
+function NewTodayCard({
+  listings,
+}: {
+  listings: Listing[];
+}) {
+  const shownListings =
+    listings.slice(0, 3);
+
   return (
-    <section className="side-section new-today-card" id="new">
+    <section
+      className="side-section new-today-card"
+      id="new"
+    >
       <div className="side-title">
         <div className="side-card-heading">
           <span className="side-icon new-icon">
             <Sparkles size={17} />
           </span>
 
-          <p className="eyebrow">NEW TODAY</p>
+          <p className="eyebrow">
+            NEW TODAY
+          </p>
         </div>
 
-        <span>{newToday.length} shown</span>
+        <span>
+          {shownListings.length} shown
+        </span>
       </div>
 
-      <div className="new-list">
-        {newToday.map((item) => (
-          <button type="button" key={item.name}>
-            <strong>{item.name}</strong>
-            <span>{item.type}</span>
-          </button>
-        ))}
-      </div>
+      {shownListings.length > 0 ? (
+        <div className="new-list">
+          {shownListings.map(
+            (listing) => (
+              <a
+                href={listing.externalUrl}
+                target="_blank"
+                rel="noreferrer"
+                key={listing.id}
+              >
+                <strong>
+                  {listing.title}
+                </strong>
 
-      <button className="text-action" type="button">
-        View all new listings →
+                <span>
+                  {getListingTypeName(
+                    listing.listingTypeId,
+                  )}
+                </span>
+              </a>
+            ),
+          )}
+        </div>
+      ) : (
+        <p className="new-today-empty">
+          No new listings today.
+        </p>
+      )}
+
+      <button
+        className="text-action"
+        type="button"
+        onClick={() => {
+          const board =
+            document.getElementById(
+              "board",
+            );
+
+          board?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }}
+      >
+        View all listings
       </button>
     </section>
   );
@@ -580,7 +1010,7 @@ function HowItWorksCard() {
 
       <p className="how-intro">
         List what you want discovered. The community can support it and
-        push it higher on the board.
+        push it higher in the marketplace.
       </p>
 
       <ol className="how-list">
@@ -605,7 +1035,7 @@ function HowItWorksCard() {
           <div>
             <strong>2. Get discovered</strong>
             <span>
-              Appear on the public board, search and category filters.
+              Appear on the public marketplace, search and category filters.
             </span>
           </div>
         </li>

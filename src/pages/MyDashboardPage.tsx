@@ -357,7 +357,7 @@ export function MyDashboardPage() {
               onClick={openListing}
             >
               <Plus size={15} />
-              Add Listing
+              <span>Add Public Listing</span>
             </button>
           )}
         </ListingLauncher>
@@ -544,7 +544,7 @@ export function MyDashboardPage() {
                       />
                     </a>
 
-                                        {listing.status ===
+                    {listing.status ===
                       "published" && (
                         <button
                           type="button"
@@ -559,7 +559,8 @@ export function MyDashboardPage() {
                           Share
                         </button>
                       )}
-{listing.status ===
+
+                    {listing.status ===
                       "published" && (
                         <button
                           type="button"

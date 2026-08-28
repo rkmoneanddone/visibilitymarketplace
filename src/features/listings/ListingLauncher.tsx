@@ -3,6 +3,7 @@ import type {
 } from "react";
 
 import {
+  useEffect,
   useState,
 } from "react";
 
@@ -54,8 +55,30 @@ export function ListingLauncher({
   const [authOpen, setAuthOpen] =
     useState(false);
 
+  const [
+    continueAfterAuth,
+    setContinueAfterAuth,
+  ] = useState(false);
+
+  useEffect(() => {
+    if (
+      !continueAfterAuth ||
+      !firebaseUser
+    ) {
+      return;
+    }
+
+    setContinueAfterAuth(false);
+    setAuthOpen(false);
+    setListingOpen(true);
+  }, [
+    continueAfterAuth,
+    firebaseUser,
+  ]);
+
   function openListing() {
     if (!firebaseUser) {
+      setContinueAfterAuth(true);
       setAuthOpen(true);
       return;
     }
@@ -89,9 +112,10 @@ export function ListingLauncher({
 
       <AuthDialog
         open={authOpen}
-        onClose={() =>
-          setAuthOpen(false)
-        }
+        onClose={() => {
+          setAuthOpen(false);
+          setContinueAfterAuth(false);
+        }}
       />
 
       <ListingDialog

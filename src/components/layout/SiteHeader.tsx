@@ -49,15 +49,15 @@ export function SiteHeader({
       </Link>
 
       <nav className="main-nav">
-        <Link to="/#board">
-          Explore
-        </Link>
 
         <Link to="/how-it-works">
           How it works
         </Link>
 
-        <Link className="boards-nav-link" to="/boards">
+        <Link
+          className="boards-nav-link"
+          to="/boards"
+        >
           Boards
         </Link>
 
@@ -74,7 +74,7 @@ export function SiteHeader({
               onClick={openListing}
             >
               <ListPlus size={15} />
-              Add Listing
+              <span>Add Public Listing</span>
             </button>
           )}
         </ListingLauncher>
