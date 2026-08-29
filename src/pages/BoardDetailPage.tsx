@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   ArrowUp,
   CalendarDays,
+  ExternalLink,
   Flame,
   LayoutGrid,
 } from "lucide-react";
@@ -589,6 +590,10 @@ export function BoardDetailPage() {
                           )
                         }
                       >
+                        <ExternalLink
+                          size={13}
+                          strokeWidth={2}
+                        />
                         Visit
                       </a>
                       <span className="board-entry-clicks">
@@ -607,7 +612,7 @@ export function BoardDetailPage() {
                           initialTargetId={
                             item.entry.listingId
                           }
-                          contextLabel={`${board.name} Board`}
+                          contextLabel={board.name}
                         >
                           {(openPushUp) => (
                             <button

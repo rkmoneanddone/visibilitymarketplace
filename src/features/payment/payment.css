@@ -228,3 +228,28 @@
     font-size: 18px;
   }
 }
+
+/* BEGIN VIEWBID EMULATOR PAYMENT BUTTON V2 */
+
+.payment-emulator-button {
+  width: 100%;
+  min-height: 38px;
+  margin-top: 8px;
+  border: 1px dashed #8c98a8;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.payment-emulator-button:hover:not(:disabled) {
+  background: #eef2f6;
+}
+
+.payment-emulator-button:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+/* END VIEWBID EMULATOR PAYMENT BUTTON V2 */

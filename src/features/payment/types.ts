@@ -30,3 +30,13 @@ export type PaymentIntentResult = {
 
   checkoutUrl: string | null;
 };
+
+export type EmulatorPaymentCompletionResult = {
+  success: boolean;
+
+  paymentIntentId: string;
+
+  status: "paid";
+
+  alreadyFulfilled: boolean;
+};

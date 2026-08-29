@@ -18,6 +18,9 @@ import {
 type CreateListingInput = {
   userId: string;
   form: ListingFormData;
+  visibilityScope?:
+    | "public"
+    | "board_only";
 };
 
 function createId(
@@ -50,6 +53,7 @@ function makeSlug(
 export async function createListing({
   userId,
   form,
+  visibilityScope = "public",
 }: CreateListingInput): Promise<Listing> {
   const listingId =
     createId("listing");
@@ -88,6 +92,8 @@ let uploadedImage:
 
     submittedByUserId:
       userId,
+
+    visibilityScope,
 listingTypeId:
       form.listingTypeId,
 

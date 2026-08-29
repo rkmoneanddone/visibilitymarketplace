@@ -185,7 +185,7 @@
 
 .pushup-listing-total small {
   color: #8390a1;
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .pushup-empty {
@@ -293,7 +293,7 @@
 .pushup-disclosure {
   margin: 8px 3px 0;
   color: #718096;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.35;
   text-align: center;
 }
@@ -448,7 +448,7 @@
 
 .pushup-current-amount span {
   color: #667085;
-  font-size: 10px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: .04em;
 }
@@ -492,7 +492,7 @@
 
 .pushup-selected-summary span {
   color: #8a94a3;
-  font-size: 9px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: .04em;
 }
@@ -510,7 +510,7 @@
 .pushup-selected-summary small {
   flex: 0 0 auto;
   color: #6f7d90;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .pushup-pay {
@@ -617,7 +617,7 @@
   .pushup-amounts button {
     min-width: 0;
     padding: 0 4px;
-    font-size: 10px;
+    font-size: 11px;
   }
 }
 
@@ -661,7 +661,7 @@
 /* Desktop: Push Up only -1pt */
 @media (min-width: 701px) {
   .pushup-kicker {
-    font-size: 9.67px !important;
+    font-size: 11px !important;
   }
 
   .pushup-header h2 {
@@ -681,7 +681,7 @@
   }
 
   .pushup-listing-copy small {
-    font-size: 9.67px !important;
+    font-size: 11px !important;
   }
 
   .pushup-listing-total strong {
@@ -689,11 +689,11 @@
   }
 
   .pushup-listing-total small {
-    font-size: 7.67px !important;
+    font-size: 10px !important;
   }
 
   .pushup-current-amount span {
-    font-size: 8.67px !important;
+    font-size: 10px !important;
   }
 
   .pushup-current-amount strong {
@@ -705,15 +705,15 @@
   }
 
   .pushup-selected-summary span {
-    font-size: 7.67px !important;
+    font-size: 10px !important;
   }
 
   .pushup-selected-summary strong {
-    font-size: 10.67px !important;
+    font-size: 11px !important;
   }
 
   .pushup-selected-summary small {
-    font-size: 8.67px !important;
+    font-size: 10px !important;
   }
 
   .pushup-pay {
@@ -721,14 +721,14 @@
   }
 
   .pushup-disclosure {
-    font-size: 8.67px !important;
+    font-size: 10px !important;
   }
 }
 
 /* Mobile: Push Up -1pt */
 @media (max-width: 700px) {
   .pushup-kicker {
-    font-size: 9.67px !important;
+    font-size: 11px !important;
   }
 
   .pushup-header h2 {
@@ -736,7 +736,7 @@
   }
 
   .pushup-header p {
-    font-size: 10.17px !important;
+    font-size: 11px !important;
   }
 
   .pushup-search input {
@@ -748,7 +748,7 @@
   }
 
   .pushup-listing-copy small {
-    font-size: 9.67px !important;
+    font-size: 11px !important;
   }
 
   .pushup-listing-total strong {
@@ -756,11 +756,11 @@
   }
 
   .pushup-listing-total small {
-    font-size: 7.67px !important;
+    font-size: 10px !important;
   }
 
   .pushup-current-amount span {
-    font-size: 8.67px !important;
+    font-size: 10px !important;
   }
 
   .pushup-current-amount strong {
@@ -768,19 +768,19 @@
   }
 
   .pushup-amounts button {
-    font-size: 9.67px !important;
+    font-size: 11px !important;
   }
 
   .pushup-selected-summary span {
-    font-size: 7.67px !important;
+    font-size: 10px !important;
   }
 
   .pushup-selected-summary strong {
-    font-size: 10.67px !important;
+    font-size: 11px !important;
   }
 
   .pushup-selected-summary small {
-    font-size: 8.67px !important;
+    font-size: 10px !important;
   }
 
   .pushup-pay {
@@ -788,7 +788,7 @@
   }
 
   .pushup-disclosure {
-    font-size: 8.67px !important;
+    font-size: 10px !important;
   }
 }
 
@@ -820,3 +820,190 @@
 }
 
 /* END VIEWBID PUSH UP FUNCTIONAL STATUS V1 */
+
+/* BEGIN VIEWBID PUSHUP COMPACT HIERARCHY V4 */
+
+/* Lighter, smaller dialog heading. */
+.pushup-header h2 {
+  margin-top: 4px !important;
+  font-size: 21px !important;
+  font-weight: 400 !important;
+  line-height: 1.1 !important;
+  letter-spacing: -0.02em !important;
+}
+
+/* Keep support copy secondary. */
+.pushup-header p {
+  margin-top: 5px !important;
+  font-size: 11.5px !important;
+  line-height: 1.3 !important;
+}
+
+/* Selected listing should be easy to read. */
+.pushup-listings {
+  gap: 6px !important;
+  margin-top: 9px !important;
+}
+
+.pushup-listing {
+  grid-template-columns:
+    48px
+    minmax(0, 1fr)
+    auto !important;
+  min-height: 58px !important;
+  padding:
+    9px
+    12px !important;
+  gap: 11px !important;
+  border-radius: 14px !important;
+}
+
+.pushup-listing-mark {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 11px !important;
+}
+
+.pushup-listing-copy strong {
+  font-size: 14.5px !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+}
+
+.pushup-listing-copy small {
+  margin-top: 2px !important;
+  font-size: 11px !important;
+}
+
+.pushup-listing-total strong {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+/* Tighter amount panel. */
+.pushup-amount-panel {
+  margin-top: 10px !important;
+  padding:
+    10px
+    11px !important;
+  border-radius: 15px !important;
+}
+
+.pushup-amount-row {
+  gap: 10px !important;
+}
+
+.pushup-current-amount {
+  min-width: 82px !important;
+}
+
+.pushup-current-amount span {
+  font-size: 10px !important;
+}
+
+.pushup-current-amount strong {
+  font-size: 25px !important;
+  font-weight: 500 !important;
+}
+
+/* Price choices should not dominate the listing. */
+.pushup-amounts {
+  gap: 6px !important;
+}
+
+.pushup-amounts button {
+  min-height: 31px !important;
+  padding:
+    0
+    9px !important;
+  border-radius: 10px !important;
+  font-size: 11.5px !important;
+  font-weight: 400 !important;
+}
+
+.pushup-pay {
+  min-height: 39px !important;
+  margin-top: 9px !important;
+  border-radius: 11px !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+}
+
+.pushup-disclosure {
+  margin-top: 6px !important;
+  font-size: 10px !important;
+}
+
+/* Old selected-summary styles remain harmless, but the JSX is removed. */
+.pushup-selected-summary {
+  display: none !important;
+}
+
+@media (max-width: 700px) {
+  .pushup-sheet {
+    padding:
+      11px
+      12px
+      13px !important;
+  }
+
+  .pushup-header h2 {
+    font-size: 19px !important;
+  }
+
+  .pushup-header p {
+    font-size: 11px !important;
+  }
+
+  .pushup-listing {
+    grid-template-columns:
+      44px
+      minmax(0, 1fr)
+      auto !important;
+    min-height: 55px !important;
+    padding:
+      8px
+      10px !important;
+  }
+
+  .pushup-listing-mark {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .pushup-listing-copy strong {
+    font-size: 13.5px !important;
+  }
+
+  .pushup-amount-panel {
+    padding:
+      9px
+      10px !important;
+  }
+
+  .pushup-amount-row {
+    grid-template-columns:
+      68px
+      minmax(0, 1fr) !important;
+    gap: 7px !important;
+  }
+
+  .pushup-current-amount strong {
+    font-size: 23px !important;
+  }
+
+  .pushup-amounts button {
+    min-height: 30px !important;
+    padding:
+      0
+      6px !important;
+    font-size: 11px !important;
+  }
+
+  .pushup-pay {
+    min-height: 38px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* END VIEWBID PUSHUP COMPACT HIERARCHY V4 */

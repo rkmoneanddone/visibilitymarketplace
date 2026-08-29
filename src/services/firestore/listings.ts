@@ -14,19 +14,26 @@ const LISTINGS_COLLECTION = "listings";
 export async function getPublishedListings(
   maxResults = 200,
 ): Promise<Listing[]> {
-  return dbQueryCollection<Listing>(
-    LISTINGS_COLLECTION,
-    [
-      where(
-        "status",
-        "==",
-        "published",
-      ),
-      orderBy(
-        "currentBoostTotalMinor",
-        "desc",
-      ),
-      limit(maxResults),
-    ],
+  const listings =
+    await dbQueryCollection<Listing>(
+      LISTINGS_COLLECTION,
+      [
+        where(
+          "status",
+          "==",
+          "published",
+        ),
+        orderBy(
+          "currentBoostTotalMinor",
+          "desc",
+        ),
+        limit(maxResults),
+      ],
+    );
+
+  return listings.filter(
+    (listing) =>
+      listing.visibilityScope !==
+      "board_only",
   );
 }

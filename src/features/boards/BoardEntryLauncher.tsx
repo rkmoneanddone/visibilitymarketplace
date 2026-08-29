@@ -144,6 +144,9 @@ export function BoardEntryLauncher({
 
         form:
           constrainedData,
+
+        visibilityScope:
+          "board_only",
       });
 
     const result =

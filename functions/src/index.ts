@@ -13,6 +13,7 @@ import {
 } from "firebase-admin/firestore";
 
 import {
+  fulfillVerifiedPayment,
   validatePaymentRequest,
 } from "./paymentCore";
 initializeApp();
@@ -1712,6 +1713,123 @@ export const createPaymentIntent =
   );
 
 /* END VIEWBID GENERIC PAYMENT INTENT V1 */
+/* BEGIN VIEWBID EMULATOR PAYMENT COMPLETION V2 */
+
+/**
+ * Local emulator helper for end-to-end payment testing.
+ *
+ * This callable:
+ * - does not require authentication
+ * - works only when FUNCTIONS_EMULATOR === "true"
+ * - works only for provider === "unconfigured"
+ * - uses the same fulfillVerifiedPayment() path as a real verified webhook
+ *
+ * It therefore cannot be used to create free paid ranking in deployed Firebase.
+ */
+export const completeEmulatorPayment =
+  onCall(
+    {
+      region: "asia-south1",
+    },
+    async (request) => {
+      if (
+        process.env.FUNCTIONS_EMULATOR !==
+        "true"
+      ) {
+        throw new HttpsError(
+          "failed-precondition",
+          "Emulator payment completion is available only in the Firebase Emulator.",
+        );
+      }
+
+      const paymentIntentId =
+        normalizeString(
+          request.data
+            ?.paymentIntentId,
+        );
+
+      if (!paymentIntentId) {
+        throw new HttpsError(
+          "invalid-argument",
+          "paymentIntentId is required.",
+        );
+      }
+
+      const paymentRef =
+        db
+          .collection(
+            "paymentIntents",
+          )
+          .doc(
+            paymentIntentId,
+          );
+
+      const paymentSnap =
+        await paymentRef.get();
+
+      if (!paymentSnap.exists) {
+        throw new HttpsError(
+          "not-found",
+          "Payment intent not found.",
+        );
+      }
+
+      const payment =
+        paymentSnap.data();
+
+      if (
+        payment?.fulfilledAt
+      ) {
+        return {
+          success: true,
+          paymentIntentId,
+          status: "paid",
+          alreadyFulfilled: true,
+        };
+      }
+
+      if (
+        payment?.provider !==
+        "unconfigured"
+      ) {
+        throw new HttpsError(
+          "failed-precondition",
+          "Emulator completion is disabled for configured payment providers.",
+        );
+      }
+
+      if (
+        payment?.status !==
+        "created"
+      ) {
+        throw new HttpsError(
+          "failed-precondition",
+          `Payment cannot be emulator-completed from status: ${String(
+            payment?.status || "",
+          )}`,
+        );
+      }
+
+      const providerPaymentId =
+        `emulator_${paymentIntentId}`;
+
+      await fulfillVerifiedPayment(
+        db,
+        paymentIntentId,
+        providerPaymentId,
+      );
+
+      return {
+        success: true,
+        paymentIntentId,
+        status: "paid",
+        alreadyFulfilled: false,
+      };
+    },
+  );
+
+/* END VIEWBID EMULATOR PAYMENT COMPLETION V2 */
+
 
 /* BEGIN VIEWBID CLICK TRACKING V1 */
 

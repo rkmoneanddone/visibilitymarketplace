@@ -13,6 +13,7 @@ import {
 } from "../../lib/marketplace/money";
 
 import {
+  completeEmulatorPayment,
   createPaymentIntent,
 } from "../../services/payments/paymentClient";
 
@@ -41,6 +42,14 @@ export function PaymentDialog({
 
   const [error, setError] =
     useState<string | null>(null);
+
+  const [
+    emulatorPaymentIntentId,
+    setEmulatorPaymentIntentId,
+  ] =
+    useState<string | null>(
+      null,
+    );
 
   if (!open) {
     return null;
@@ -71,8 +80,14 @@ export function PaymentDialog({
         return;
       }
 
+      setEmulatorPaymentIntentId(
+        result.paymentIntentId,
+      );
+
       setMessage(
-        `Payment intent ${result.paymentIntentId} is ready. The payment gateway adapter is not connected yet.`,
+        import.meta.env.DEV
+          ? "Payment intent is ready. Complete it through the local Firebase Emulator test control below."
+          : `Payment intent ${result.paymentIntentId} is ready. The payment gateway adapter is not connected yet.`,
       );
     } catch (error) {
       console.error(
@@ -82,6 +97,50 @@ export function PaymentDialog({
 
       setError(
         "Unable to prepare payment right now.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleEmulatorComplete() {
+    if (
+      submitting ||
+      !emulatorPaymentIntentId
+    ) {
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError(null);
+      setMessage(null);
+
+      const result =
+        await completeEmulatorPayment(
+          emulatorPaymentIntentId,
+        );
+
+      setMessage(
+        result.alreadyFulfilled
+          ? "Emulator payment was already fulfilled. Refreshing..."
+          : "Emulator payment verified and fulfilled. Refreshing...",
+      );
+
+      window.setTimeout(
+        () => {
+          window.location.reload();
+        },
+        650,
+      );
+    } catch (error) {
+      console.error(
+        "Unable to complete emulator payment:",
+        error,
+      );
+
+      setError(
+        "Emulator payment completion failed. Make sure the Firebase Functions emulator is running.",
       );
     } finally {
       setSubmitting(false);
@@ -173,6 +232,22 @@ export function PaymentDialog({
             ? "Preparing payment..."
             : "Continue to payment"}
         </button>
+
+        {import.meta.env.DEV &&
+          emulatorPaymentIntentId && (
+            <button
+              className="payment-emulator-button"
+              type="button"
+              disabled={submitting}
+              onClick={
+                handleEmulatorComplete
+              }
+            >
+              {submitting
+                ? "Completing emulator payment..."
+                : "Complete payment in Emulator"}
+            </button>
+          )}
 
         {message && (
           <p

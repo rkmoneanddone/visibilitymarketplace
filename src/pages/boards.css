@@ -160,7 +160,7 @@
   border-radius: 999px;
   background: #eef2f6;
   color: #526075;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
 }
 
@@ -220,7 +220,7 @@
 
 .board-card-pricing small {
   color: #7a8798;
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .board-card-actions {
@@ -313,23 +313,23 @@
   }
 
   .board-card-copy p {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .board-status {
     padding: 4px 8px;
-    font-size: 8.5px;
+    font-size: 10px;
   }
 
   .board-card-timing {
     gap: 6px;
     padding: 5px 12px 9px 14px;
-    font-size: 9.5px;
+    font-size: 11px;
     line-height: 1.25;
   }
 
   .board-card-timing strong {
-    font-size: 9.5px;
+    font-size: 11px;
   }
 
   .board-card-bottom {
@@ -346,7 +346,7 @@
   }
 
   .board-card-pricing small {
-    font-size: 8px;
+    font-size: 10px;
   }
 
   .board-share-button {
@@ -357,7 +357,7 @@
   .board-card-link {
     min-height: 34px;
     padding-inline: 12px;
-    font-size: 10px;
+    font-size: 11px;
   }
 }
 
@@ -749,7 +749,7 @@
   border-radius: 999px;
   background: #eff8f4 !important;
   color: #278060 !important;
-  font-size: 9.5px;
+  font-size: 11px;
   font-weight: 500;
   line-height: 1.2;
   box-shadow: none !important;
@@ -812,7 +812,7 @@
 
 .board-card-pricing small {
   color: #93a1a7;
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .board-card-actions {
@@ -841,7 +841,7 @@
   border-radius: 999px;
   background: #fff;
   color: #16889a;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
@@ -857,7 +857,7 @@
   border-radius: 999px;
   background: #22a9bb !important;
   color: #fff !important;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 500;
   line-height: 1;
   text-decoration: none;
@@ -927,22 +927,22 @@
   }
 
   .board-card-copy p {
-    font-size: 10.5px;
+    font-size: 11px;
   }
 
   .board-status {
     padding: 3px 6px;
-    font-size: 9px;
+    font-size: 10px;
   }
 
   .board-card-timing {
     gap: 5px;
     padding: 4px 11px 7px;
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .board-card-timing strong {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .board-card-bottom {
@@ -961,7 +961,7 @@
   }
 
   .board-card-pricing small {
-    font-size: 9px;
+    font-size: 10px;
   }
 
   .board-card-actions {
@@ -978,7 +978,7 @@
   .board-card-link {
     min-height: 30px;
     padding-inline: 9px;
-    font-size: 10px;
+    font-size: 11px;
   }
 }
 
@@ -1030,7 +1030,7 @@
   display: block;
   margin-bottom: 3px;
   color: #168b78;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 650;
   letter-spacing: .08em;
 }
@@ -1048,7 +1048,7 @@
   border-radius: 999px;
   background: #eef7f5;
   color: #47746b;
-  font-size: 10px;
+  font-size: 11px;
   text-align: center;
 }
 
@@ -1128,3 +1128,436 @@
 }
 
 /* END VIEWBID CLOSED BOARD HISTORY V1 */
+
+/* BEGIN VIEWBID COMPACT BOARD LIST CARDS V2 */
+
+.boards-list {
+  gap: 7px !important;
+}
+
+.board-card-top {
+  padding:
+    9px
+    14px
+    4px !important;
+}
+
+.board-card-timing {
+  padding:
+    3px
+    14px
+    6px !important;
+}
+
+.board-card-bottom {
+  padding:
+    6px
+    10px
+    7px
+    14px !important;
+}
+
+.board-card-link {
+  min-height: 32px !important;
+}
+
+.board-share-button {
+  width: 32px !important;
+  height: 32px !important;
+}
+
+@media (max-width: 700px) {
+  .board-card-top {
+    padding:
+      8px
+      10px
+      3px
+      12px !important;
+  }
+
+  .board-card-timing {
+    padding:
+      3px
+      10px
+      5px
+      12px !important;
+  }
+
+  .board-card-bottom {
+    padding:
+      5px
+      8px
+      6px
+      12px !important;
+  }
+
+  .board-card-link {
+    min-height: 31px !important;
+  }
+
+  .board-share-button {
+    width: 31px !important;
+    height: 31px !important;
+  }
+}
+
+/* END VIEWBID COMPACT BOARD LIST CARDS V2 */
+
+/* BEGIN VIEWBID VISIBLE BOARD CARD PALETTE V3 */
+
+/* Base Board card: make the styling visibly intentional. */
+.board-card {
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 14px !important;
+  border-width: 1px !important;
+  border-style: solid !important;
+  box-shadow:
+    0 5px 16px rgb(32 70 86 / 7%) !important;
+}
+
+.board-card::before {
+  content: "";
+  position: absolute;
+  inset:
+    0
+    auto
+    0
+    0;
+  width: 5px;
+  z-index: 2;
+}
+
+/* Board 1 - warm amber. */
+.boards-list .board-card:nth-child(3n + 1) {
+  border-color: #f1d59b !important;
+  background: #fffaf0 !important;
+}
+
+.boards-list .board-card:nth-child(3n + 1)::before {
+  background: #f2a824;
+}
+
+.boards-list .board-card:nth-child(3n + 1) .board-card-top,
+.boards-list .board-card:nth-child(3n + 1) .board-card-timing,
+.boards-list .board-card:nth-child(3n + 1) .board-card-bottom {
+  background: #fffaf0 !important;
+}
+
+/* Board 2 - soft blue. */
+.boards-list .board-card:nth-child(3n + 2) {
+  border-color: #b9d8f4 !important;
+  background: #f2f8fe !important;
+}
+
+.boards-list .board-card:nth-child(3n + 2)::before {
+  background: #4a9fe5;
+}
+
+.boards-list .board-card:nth-child(3n + 2) .board-card-top,
+.boards-list .board-card:nth-child(3n + 2) .board-card-timing,
+.boards-list .board-card:nth-child(3n + 2) .board-card-bottom {
+  background: #f2f8fe !important;
+}
+
+/* Board 3 - soft green. */
+.boards-list .board-card:nth-child(3n) {
+  border-color: #b7dfc9 !important;
+  background: #f1faf5 !important;
+}
+
+.boards-list .board-card:nth-child(3n)::before {
+  background: #32a66c;
+}
+
+.boards-list .board-card:nth-child(3n) .board-card-top,
+.boards-list .board-card:nth-child(3n) .board-card-timing,
+.boards-list .board-card:nth-child(3n) .board-card-bottom {
+  background: #f1faf5 !important;
+}
+
+/* Keep internal sections unified, not three white strips. */
+.board-card-top,
+.board-card-timing,
+.board-card-bottom {
+  border: 0 !important;
+}
+
+.board-card-bottom {
+  border-top:
+    1px solid
+    rgb(72 101 112 / 10%) !important;
+}
+
+/* Slightly tighter density. */
+.board-card-top {
+  padding:
+    8px
+    14px
+    3px
+    16px !important;
+}
+
+.board-card-timing {
+  padding:
+    2px
+    14px
+    5px
+    16px !important;
+}
+
+.board-card-bottom {
+  padding:
+    5px
+    10px
+    6px
+    16px !important;
+}
+
+/* Desktop one-row card remains compact. */
+@media (min-width: 901px) {
+  .board-card {
+    min-height: 0 !important;
+  }
+}
+
+/* Mobile preserves the same visible palette. */
+@media (max-width: 700px) {
+  .board-card {
+    border-radius: 13px !important;
+  }
+
+  .board-card::before {
+    width: 4px;
+  }
+
+  .board-card-top {
+    padding:
+      7px
+      10px
+      3px
+      12px !important;
+  }
+
+  .board-card-timing {
+    padding:
+      2px
+      10px
+      5px
+      12px !important;
+  }
+
+  .board-card-bottom {
+    padding:
+      5px
+      8px
+      6px
+      12px !important;
+  }
+}
+
+/* END VIEWBID VISIBLE BOARD CARD PALETTE V3 */
+
+/* BEGIN VIEWBID BOARD PAGE HIERARCHY V4 */
+
+/* Section heading is one compact information line. */
+.boards-group-heading {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 36px !important;
+  margin:
+    0
+    0
+    7px !important;
+  padding:
+    0
+    2px
+    5px !important;
+}
+
+.boards-group-title {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.boards-group-title > span {
+  flex: 0 0 auto;
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+  letter-spacing: .06em !important;
+}
+
+.boards-group-title > h2 {
+  flex: 0 1 auto;
+  margin: 0 !important;
+  font-size: 17px !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+}
+
+.boards-group-title > small {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding:
+    4px
+    9px;
+  border-radius: 999px;
+  background: #eef7f6;
+  color: #47736f;
+  font-size: 11px !important;
+  line-height: 1.1 !important;
+  white-space: nowrap;
+}
+
+/* Reduce Board title prominence by about 2px. */
+.board-card-copy {
+  min-width: 0 !important;
+}
+
+.board-card-copy h2 {
+  max-width: 100%;
+  margin: 0 !important;
+  overflow: hidden;
+  color: #27465a;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  line-height: 1.18 !important;
+  letter-spacing: -0.015em !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Give the title area room, but let it yield to timing/pricing/actions. */
+@media (min-width: 901px) {
+  .board-card-copy {
+    min-width: 180px !important;
+    max-width: 300px !important;
+  }
+
+  .board-card-copy h2 {
+    width: 100%;
+  }
+}
+
+/* On mobile, allow long names to wrap to two lines rather than break layout. */
+@media (max-width: 700px) {
+  .boards-group-heading {
+    min-height: 32px !important;
+    margin-bottom: 6px !important;
+    padding-bottom: 4px !important;
+  }
+
+  .boards-group-title {
+    gap: 7px;
+  }
+
+  .boards-group-title > span {
+    font-size: 10px !important;
+  }
+
+  .boards-group-title > h2 {
+    font-size: 15px !important;
+  }
+
+  .boards-group-title > small {
+    padding:
+      3px
+      7px;
+    font-size: 10px !important;
+  }
+
+  .board-card-copy h2 {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 15px !important;
+    line-height: 1.18 !important;
+    text-overflow: ellipsis;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+}
+
+/* END VIEWBID BOARD PAGE HIERARCHY V4 */
+
+/* BEGIN VIEWBID MOBILE BOARDS HEADER COMPACT V5 */
+
+@media (max-width: 700px) {
+  .boards-page {
+    padding-top: 0 !important;
+    padding-bottom: 18px !important;
+  }
+
+  .boards-header {
+    margin-bottom: 5px !important;
+    padding:
+      1px
+      2px
+      6px !important;
+  }
+
+  .boards-header h1 {
+    font-size: 19px !important;
+    line-height: 1.08 !important;
+  }
+
+  .boards-search {
+    height: 34px !important;
+    margin-top: 6px !important;
+    padding:
+      0
+      10px !important;
+  }
+
+  .boards-search input {
+    font-size: 12px !important;
+  }
+
+  .boards-sections {
+    margin-top: 0 !important;
+  }
+
+  .boards-group {
+    margin-top: 0 !important;
+  }
+
+  .boards-group-heading {
+    min-height: 27px !important;
+    margin:
+      0
+      0
+      4px !important;
+    padding:
+      0
+      1px
+      3px !important;
+  }
+
+  .boards-group-title {
+    gap: 6px !important;
+  }
+
+  .boards-group-title > span {
+    font-size: 10px !important;
+  }
+
+  .boards-group-title > h2 {
+    font-size: 14px !important;
+  }
+
+  .boards-group-title > small {
+    padding:
+      2px
+      6px !important;
+    font-size: 10px !important;
+  }
+
+  .boards-list {
+    gap: 6px !important;
+  }
+}
+
+/* END VIEWBID MOBILE BOARDS HEADER COMPACT V5 */

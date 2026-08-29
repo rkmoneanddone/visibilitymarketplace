@@ -59,9 +59,7 @@ export function PushUpDialog({
     setSelectedTargetId,
   ] =
     useState(
-      initialTargetId ??
-      targets[0]?.id ??
-      "",
+      initialTargetId ?? "",
     );
 
   const [amountMinor, setAmountMinor] =
@@ -69,10 +67,7 @@ export function PushUpDialog({
       targets.find(
         (target) =>
           target.id ===
-          (
-            initialTargetId ??
-            targets[0]?.id
-          ),
+          initialTargetId,
       )?.minimumAmountMinor ??
       100,
     );
@@ -113,7 +108,15 @@ export function PushUpDialog({
           .toLowerCase();
 
       if (!normalized) {
-        return targets;
+        if (!initialTargetId) {
+          return [];
+        }
+
+        return targets.filter(
+          (target) =>
+            target.id ===
+            initialTargetId,
+        );
       }
 
       return targets.filter(
@@ -128,6 +131,7 @@ export function PushUpDialog({
     }, [
       targets,
       query,
+      initialTargetId,
     ]);
 
   const availableAmounts =
@@ -328,7 +332,9 @@ export function PushUpDialog({
               )
             ) : (
               <div className="pushup-empty">
-                No matching listings.
+                {query.trim()
+                  ? "No matching listings."
+                  : "Search for the listing you want to Push Up."}
               </div>
             )}
           </div>
@@ -379,27 +385,7 @@ export function PushUpDialog({
                 )}
               </div>
             </div>
-
-            {selectedTarget && (
-              <div className="pushup-selected-summary">
-                <span>
-                  Selected
-                </span>
-
-                <strong>
-                  {selectedTarget.title}
-                </strong>
-
-                <small>
-                  {formatMoneyMinor(
-                    selectedTarget.currentBoostTotalMinor,
-                    selectedTarget.currency,
-                  )} pushed
-                </small>
-              </div>
-            )}
-
-            <button
+<button
               className="pushup-pay"
               type="button"
               disabled={

@@ -49,6 +49,10 @@ export type PromotionTargetKind =
   | "startup"
   | "other";
 
+export type ListingVisibilityScope =
+  | "public"
+  | "board_only";
+
 export type ListingSubmissionRelationship =
   | "owner"
   | "supporter";
@@ -64,6 +68,9 @@ export interface Listing {
   id: string;
 
   submittedByUserId: string;
+
+  // Legacy records without this field are treated as public.
+  visibilityScope?: ListingVisibilityScope;
 
   submissionRelationship?: ListingSubmissionRelationship;
 

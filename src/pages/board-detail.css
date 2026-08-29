@@ -203,7 +203,7 @@
 
 .board-entries-heading span {
   color: #2d7a50;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.04em;
 }
 
@@ -281,7 +281,7 @@
   }
 
   .board-summary-prices small {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .board-summary-prices strong {
@@ -304,7 +304,7 @@
   }
 
   .board-schedule-grid dt {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .board-schedule-grid dd {
@@ -339,7 +339,7 @@
 }
 
 .board-summary-note {
-  font-size: 10px;
+  font-size: 11px;
 }
 
 @media (max-width: 700px) {
@@ -420,7 +420,7 @@
   }
 
   .board-summary-status small {
-    font-size: 10.5px;
+    font-size: 11px;
   }
 
   .board-summary-row-main button {
@@ -496,7 +496,7 @@
   }
 
   .board-summary-prices-top small {
-    font-size: 9px;
+    font-size: 10px;
   }
 
   .board-summary-prices-top strong {
@@ -508,7 +508,7 @@
     grid-row: 2;
     margin-top: 1px;
     align-self: start;
-    font-size: 10.5px;
+    font-size: 11px;
   }
 }
 
@@ -596,7 +596,7 @@
   }
 
   .board-summary-prices small {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .board-summary-prices strong {
@@ -830,7 +830,7 @@
   }
 
   .board-summary-prices-top small {
-    font-size: 9px;
+    font-size: 10px;
   }
 
   .board-summary-prices-top strong {
@@ -841,7 +841,7 @@
     min-height: 34px;
     margin-top: 4px;
     padding-inline: 12px;
-    font-size: 10.5px;
+    font-size: 11px;
   }
 
   .board-schedule-card,
@@ -931,7 +931,7 @@
 .board-entries-heading small {
   color: #84949b;
 
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .board-entry-leaderboard {
@@ -1071,7 +1071,7 @@
 .board-entry-identity small {
   color: #748b95;
 
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .board-entry-boost {
@@ -1089,7 +1089,7 @@
 .board-entry-boost small {
   color: #7e9097;
 
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .board-entry-actions {
@@ -1113,7 +1113,7 @@
 
   padding: 0 10px;
 
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .board-entry-actions > a {
@@ -1266,7 +1266,7 @@
 
 .board-detail-kicker {
   margin-bottom: 2px;
-  font-size: 10.5px;
+  font-size: 11px;
   letter-spacing: 0.03em;
 }
 
@@ -1290,7 +1290,7 @@
 }
 
 .board-summary-prices-top small {
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .board-summary-prices-top strong {
@@ -1339,7 +1339,7 @@
 }
 
 .board-schedule-grid dt {
-  font-size: 10.5px;
+  font-size: 11px;
 }
 
 .board-schedule-grid dd {
@@ -1362,7 +1362,7 @@
 }
 
 .board-entries-heading > div > span {
-  font-size: 9.5px;
+  font-size: 11px;
 }
 
 .board-entries-heading h2 {
@@ -1372,7 +1372,7 @@
 }
 
 .board-entries-heading small {
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .board-empty-row {
@@ -1420,7 +1420,7 @@
   }
 
   .board-detail-kicker {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .board-summary-meta {
@@ -1436,7 +1436,7 @@
   }
 
   .board-summary-prices-top small {
-    font-size: 9px;
+    font-size: 10px;
   }
 
   .board-summary-prices-top strong {
@@ -1449,7 +1449,7 @@
     justify-self: end;
     min-height: 31px !important;
     padding-inline: 12px !important;
-    font-size: 10.5px !important;
+    font-size: 11px !important;
   }
 
   .board-schedule-card {
@@ -1463,7 +1463,7 @@
   }
 
   .board-schedule-grid dt {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .board-schedule-grid dd {
@@ -1530,7 +1530,7 @@
 
   .board-detail-kicker {
     margin-bottom: 1px;
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .board-summary h1 {
@@ -1552,7 +1552,7 @@
   }
 
   .board-summary-prices-top small {
-    font-size: 9.5px;
+    font-size: 11px;
   }
 
   .board-summary-prices-top strong {
@@ -1562,7 +1562,7 @@
   .board-entry-link {
     min-height: 30px !important;
     padding: 0 12px !important;
-    font-size: 10.5px !important;
+    font-size: 11px !important;
   }
 
   .board-schedule-card {
@@ -1602,7 +1602,7 @@
 
   .board-schedule-grid dt {
     flex: 0 0 auto;
-    font-size: 9.5px;
+    font-size: 11px;
   }
 
   .board-schedule-grid dd {
@@ -1624,7 +1624,7 @@
   }
 
   .board-entries-heading > div > span {
-    font-size: 9px;
+    font-size: 10px;
   }
 
   .board-entries-heading h2 {
@@ -1633,7 +1633,7 @@
   }
 
   .board-entries-heading small {
-    font-size: 9.5px;
+    font-size: 11px;
   }
 
   .board-empty-row {
@@ -1656,7 +1656,7 @@
 
   .board-empty-row p {
     margin-top: 2px;
-    font-size: 10.5px;
+    font-size: 11px;
     line-height: 1.25;
   }
 }
@@ -1787,7 +1787,7 @@
   }
 
   .board-summary-prices-top small {
-    font-size: 10px !important;
+    font-size: 11px !important;
   }
 
   .board-summary-prices-top strong {
@@ -1802,7 +1802,7 @@
     margin: 0 !important;
     min-height: 31px !important;
     padding: 0 10px !important;
-    font-size: 10.5px !important;
+    font-size: 11px !important;
   }
 
   .board-schedule-card {
@@ -1978,7 +1978,7 @@
 
   .board-schedule-grid dt,
   .board-schedule-grid dd {
-    font-size: 10.5px !important;
+    font-size: 11px !important;
     white-space: nowrap !important;
   }
 
@@ -1996,7 +1996,7 @@
 
   .board-schedule-grid dt,
   .board-schedule-grid dd {
-    font-size: 10px !important;
+    font-size: 11px !important;
   }
 }
 
@@ -2022,7 +2022,7 @@
 
 /* Make the small BOARD label quieter too. */
 .board-detail-kicker {
-  font-size: 10.5px !important;
+  font-size: 11px !important;
   line-height: 1.1 !important;
 }
 
@@ -2040,7 +2040,7 @@
 }
 
 .board-summary-prices-top small {
-  font-size: 9.5px !important;
+  font-size: 11px !important;
 }
 
 .board-summary-prices-top strong {
@@ -2052,7 +2052,7 @@
   padding:
     0
     8px !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
 }
 
 /* Mobile gets the same hierarchy, just slightly tighter. */
@@ -2072,11 +2072,11 @@
   }
 
   .board-summary-meta {
-    font-size: 10.5px !important;
+    font-size: 11px !important;
   }
 
   .board-detail-kicker {
-    font-size: 10px !important;
+    font-size: 11px !important;
   }
 
   .board-summary-prices-top {
@@ -2084,7 +2084,7 @@
   }
 
   .board-summary-prices-top small {
-    font-size: 9px !important;
+    font-size: 10px !important;
   }
 
   .board-summary-prices-top strong {
@@ -2096,8 +2096,48 @@
     padding:
       0
       8px !important;
-    font-size: 9.5px !important;
+    font-size: 11px !important;
   }
 }
 
 /* END VIEWBID BOARD HERO TYPOGRAPHY V6 */
+
+/* BEGIN VIEWBID BOARD ENTRY COMPACT ACTIONS V1 */
+
+/* Reduce horizontal waste while preserving rank / avatar / actions. */
+.board-entry-row {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+/* Visit now has an icon and should remain compact. */
+.board-entry-actions > a {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+}
+
+/* Mobile: tighter left/right card padding. */
+@media (max-width: 700px) {
+  .board-entries-card {
+    padding-left: 7px !important;
+    padding-right: 7px !important;
+  }
+
+  .board-entry-row {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+
+  .board-entry-actions {
+    gap: 5px !important;
+  }
+
+  .board-entry-actions > a {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+}
+
+/* END VIEWBID BOARD ENTRY COMPACT ACTIONS V1 */

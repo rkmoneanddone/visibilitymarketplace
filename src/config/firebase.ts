@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { connectAuthEmulator, getAuth } from "firebase/auth";
+import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -20,6 +20,31 @@ export const auth = getAuth(firebaseApp);
 export const db = getFirestore(firebaseApp);
 export const storage = getStorage(firebaseApp);
 
+/* BEGIN VIEWBID LOCAL EMULATOR WIRING V1 */
+
+export const useFirebaseEmulators =
+  import.meta.env.DEV &&
+  import.meta.env
+    .VITE_USE_FIREBASE_EMULATORS ===
+    "true";
+
+if (useFirebaseEmulators) {
+  connectAuthEmulator(
+    auth,
+    "http://127.0.0.1:9099",
+    {
+      disableWarnings: true,
+    },
+  );
+
+  connectFirestoreEmulator(
+    db,
+    "127.0.0.1",
+    8080,
+  );
+}
+
+/* END VIEWBID LOCAL EMULATOR WIRING V1 */
 export async function initializeFirebaseAnalytics() {
   if (typeof window === "undefined") {
     return null;

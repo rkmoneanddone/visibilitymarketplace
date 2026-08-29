@@ -568,7 +568,7 @@ export function BoardsPage() {
           {openBoards.length > 0 && (
             <section className="boards-group">
               <div className="boards-group-heading">
-                <div>
+                <div className="boards-group-title">
                   <span>
                     OPEN BOARDS
                   </span>
@@ -576,11 +576,11 @@ export function BoardsPage() {
                   <h2>
                     Compete now
                   </h2>
-                </div>
 
-                <small>
-                  {openBoards.length}
-                </small>
+                  <small>
+                    {openBoards.length} boards
+                  </small>
+                </div>
               </div>
 
               <div className="boards-list">
@@ -600,7 +600,7 @@ export function BoardsPage() {
           {closedBoards.length > 0 && (
             <section className="boards-group boards-group-history">
               <div className="boards-group-heading">
-                <div>
+                <div className="boards-group-title">
                   <span>
                     CLOSED BOARDS
                   </span>
@@ -608,11 +608,11 @@ export function BoardsPage() {
                   <h2>
                     Past competitions
                   </h2>
-                </div>
 
-                <small>
-                  {closedBoards.length}
-                </small>
+                  <small>
+                    {closedBoards.length} boards
+                  </small>
+                </div>
               </div>
 
               <div className="boards-list">

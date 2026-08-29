@@ -374,6 +374,37 @@ export async function validatePaymentRequest(
     );
   }
 
+  /* BEGIN VIEWBID BOARD PUSH WINDOW HARDENING V1 */
+
+  const boardStatus =
+    normalizeString(
+      board?.status,
+    );
+
+  if (
+    [
+      "expired",
+      "archived",
+      "cancelled",
+      "rejected",
+    ].includes(
+      boardStatus,
+    )
+  ) {
+    throw new HttpsError(
+      "failed-precondition",
+      "This Board is closed.",
+    );
+  }
+
+  const boardStartsAt =
+    new Date(
+      String(
+        board?.startsAt ||
+        "",
+      ),
+    ).getTime();
+
   const boardEndsAt =
     new Date(
       String(
@@ -384,16 +415,39 @@ export async function validatePaymentRequest(
 
   if (
     Number.isNaN(
-      boardEndsAt,
+      boardStartsAt,
     ) ||
+    Number.isNaN(
+      boardEndsAt,
+    )
+  ) {
+    throw new HttpsError(
+      "failed-precondition",
+      "Board dates are invalid.",
+    );
+  }
+
+  if (
+    Date.now() <
+    boardStartsAt
+  ) {
+    throw new HttpsError(
+      "failed-precondition",
+      "This Board has not started.",
+    );
+  }
+
+  if (
     Date.now() >=
-      boardEndsAt
+    boardEndsAt
   ) {
     throw new HttpsError(
       "failed-precondition",
       "This Board has ended.",
     );
   }
+
+  /* END VIEWBID BOARD PUSH WINDOW HARDENING V1 */
 
   const minimumBoostMinor =
     Number(

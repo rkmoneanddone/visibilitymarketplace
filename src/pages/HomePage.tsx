@@ -10,6 +10,7 @@ import {
 import {
   ArrowUp,
   BarChart3,
+  ExternalLink,
   Eye,
   Flame,
   ListPlus,
@@ -366,51 +367,14 @@ export function HomePage() {
     [],
   );
 
-  const typeOrder =
-    new Map(
-      enabledTypes.map(
-        (type, index) => [
-          type.id,
-          index,
-        ],
-      ),
-    );
-
   const rankedListings =
     [...listings].sort(
-      (a, b) => {
-        if (
-          selectedType === "All"
-        ) {
-          const aTypeOrder =
-            typeOrder.get(
-              a.listingTypeId,
-            ) ??
-            Number.MAX_SAFE_INTEGER;
-
-          const bTypeOrder =
-            typeOrder.get(
-              b.listingTypeId,
-            ) ??
-            Number.MAX_SAFE_INTEGER;
-
-          if (
-            aTypeOrder !==
-            bTypeOrder
-          ) {
-            return (
-              aTypeOrder -
-              bTypeOrder
-            );
-          }
-        }
-
-        return compareListingRank(
+      (a, b) =>
+        compareListingRank(
           a,
           b,
           selectedPeriod,
-        );
-      },
+        ),
     );
 
   const typeListings =
@@ -660,18 +624,7 @@ export function HomePage() {
                   const typeName = getListingTypeName(listing.listingTypeId);
 
                   const rank =
-                    selectedType === "All"
-                      ? visibleListings
-                          .slice(
-                            0,
-                            index + 1,
-                          )
-                          .filter(
-                            (candidate) =>
-                              candidate.listingTypeId ===
-                              listing.listingTypeId,
-                          ).length
-                      : index + 1;
+                    index + 1;
 
                   return (
                     <article
@@ -701,12 +654,6 @@ export function HomePage() {
                       <div className="listing-content">
                         <div className="listing-title-line">
                           <h3>{listing.title}</h3>
-
-                          {rank === 1 && (
-                            <span className="rank-badge badge-top">
-                              #1
-                            </span>
-                          )}
                         </div>
 
                         <div className="marketplace-listing-identity">
@@ -729,17 +676,23 @@ export function HomePage() {
                       </div>
 
                       <div className="listing-score">
-                        <strong>
-                          {formatMoneyMinor(
-                            listingPeriodBoost(
-                              listing,
-                              selectedPeriod,
-                            ),
-                          )}
-                        </strong>
-                        <span>pushed</span>
-                        <span className="listing-click-count">
-                          {listing.externalClicks ?? 0} clicks
+                        <span className="listing-score-line">
+                          <strong>
+                            {formatMoneyMinor(
+                              listingPeriodBoost(
+                                listing,
+                                selectedPeriod,
+                              ),
+                            )}
+                          </strong>
+
+                          <span>
+                            pushed
+                          </span>
+
+                          <span className="listing-click-count">
+                            {listing.externalClicks ?? 0} clicks
+                          </span>
                         </span>
                       </div>
 
@@ -755,6 +708,10 @@ export function HomePage() {
                                 listing.id,
                               )
                             }                        >
+                          <ExternalLink
+                            size={13}
+                            strokeWidth={2}
+                          />
                           Visit
                         </a>
 
@@ -1186,7 +1143,7 @@ function NewTodayCard({
           </span>
 
           <p className="eyebrow">
-            NEW TODAY
+            <h4>NEW TODAY</h4>
           </p>
         </div>
 
@@ -1205,9 +1162,7 @@ function NewTodayCard({
                 rel="noreferrer"
                 key={listing.id}
               >
-                <strong>
                   {listing.title}
-                </strong>
 
                 <span>
                   {getListingTypeName(
