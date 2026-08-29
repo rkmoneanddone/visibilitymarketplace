@@ -1561,3 +1561,34 @@
 }
 
 /* END VIEWBID MOBILE BOARDS HEADER COMPACT V5 */
+
+/* BEGIN VIEWBID COST AWARE BOARD PAGINATION V1 */
+.boards-search-note {
+  display: block;
+  margin-top: 4px;
+  color: #6b7f91;
+  font-size: 10px;
+}
+
+.boards-load-more-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 14px 0 4px;
+}
+
+.boards-load-more {
+  min-width: 118px;
+  min-height: 34px;
+  padding: 6px 14px;
+  border: 1px solid #b9cad9;
+  border-radius: 999px;
+  background: #fff;
+  color: #36566e;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.boards-load-more:disabled {
+  opacity: .6;
+}
+/* END VIEWBID COST AWARE BOARD PAGINATION V1 */

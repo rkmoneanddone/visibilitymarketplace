@@ -10,21 +10,34 @@ import type {
   Board,
 } from "../../types/board";
 
+import {
+  withEffectiveBoardStatus,
+} from "./boardLifecycle";
+
 export async function getBoardById(
   boardId: string,
 ): Promise<Board | null> {
-  return dbGetDocument<Board>(
-    "boards",
-    boardId,
-  );
+  const board =
+    await dbGetDocument<Board>(
+      "boards",
+      boardId,
+    );
+
+  return board
+    ? withEffectiveBoardStatus(
+        board,
+      )
+    : null;
 }
 
 export async function getPublicBoards(): Promise<
   Board[]
 > {
-  return dbQueryCollection<Board>(
-    "boards",
-    [
+  const boards =
+    await dbQueryCollection<Board>(
+      "boards",
+      [
+
       where(
         "status",
         "in",
@@ -41,30 +54,51 @@ export async function getPublicBoards(): Promise<
       ),
 
       limit(50),
-    ],
+
+      ],
+    );
+
+  return boards.map(
+    withEffectiveBoardStatus,
   );
 }
 export async function getPublicBoardHistory(): Promise<
   Board[]
 > {
-  return dbQueryCollection<Board>(
-    "boards",
-    [
-      where(
-        "status",
-        "in",
-        [
-          "expired",
+  const boards =
+    await dbQueryCollection<Board>(
+      "boards",
+      [
+        where(
+          "status",
+          "in",
+          [
+            "approved",
+            "entry_open",
+            "active",
+            "expired",
+            "archived",
+          ],
+        ),
+
+        orderBy(
+          "createdAt",
+          "desc",
+        ),
+
+        limit(50),
+      ],
+    );
+
+  return boards
+    .map(
+      withEffectiveBoardStatus,
+    )
+    .filter(
+      (board) =>
+        board.status ===
+          "expired" ||
+        board.status ===
           "archived",
-        ],
-      ),
-
-      orderBy(
-        "createdAt",
-        "desc",
-      ),
-
-      limit(50),
-    ],
-  );
+    );
 }

@@ -2,6 +2,10 @@ import type {
   Listing,
 } from "../../types/marketplace";
 
+import {
+  initialListingTypes,
+} from "../../config/listingTypes";
+
 export type PushUpTarget = {
   id: string;
 
@@ -31,6 +35,17 @@ export type PushUpTarget = {
 export function listingToPushUpTarget(
   listing: Listing,
 ): PushUpTarget {
+  const listingType =
+    initialListingTypes.find(
+      (type) =>
+        type.id ===
+        listing.listingTypeId,
+    );
+
+  const minimumAmountMinor =
+    listingType?.minimumBoostMinor ??
+    100;
+
   return {
     id:
       listing.id,
@@ -56,8 +71,7 @@ export function listingToPushUpTarget(
     currentBoostTotalMinor:
       listing.currentBoostTotalMinor,
 
-    minimumAmountMinor:
-      100,
+    minimumAmountMinor,
 
     currency:
       "USD",

@@ -1,4 +1,5 @@
 import {
+  LayoutGrid,
   ListPlus,
   TrendingUp,
 } from "lucide-react";
@@ -55,10 +56,11 @@ export function SiteHeader({
         </Link>
 
         <Link
-          className="boards-nav-link"
+          className="add-link boards-nav-link"
           to="/boards"
         >
-          Boards
+          <LayoutGrid size={15} />
+          <span>Boards</span>
         </Link>
 
         <ListingLauncher

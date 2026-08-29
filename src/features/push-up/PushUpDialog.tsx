@@ -233,7 +233,7 @@ export function PushUpDialog({
             </button>
           </header>
 
-          {targets.length > 1 && (
+          {!initialTargetId && targets.length > 1 && (
             <label className="pushup-search">
               <Search size={17} />
 

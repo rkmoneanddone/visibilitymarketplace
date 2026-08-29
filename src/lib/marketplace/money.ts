@@ -28,5 +28,5 @@ export function formatMoneyMinor(
 
   return `${prefix}${minorToMajor(
     amountMinor,
-  ).toFixed(0)}`;
+  ).toFixed(0)} `;
 }

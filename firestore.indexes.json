@@ -1,43 +1,301 @@
 {
-  "indexes": [
-    {
-      "collectionGroup": "boardPeriods",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "startsAt",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "DESCENDING"
-        }
-      ],
-      "density": "SPARSE_ALL"
-    },
-    {
-      "collectionGroup": "listings",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "currentBoostTotalMinor",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "DESCENDING"
-        }
-      ],
-      "density": "SPARSE_ALL"
-    }
-  ],
-  "fieldOverrides": []
+    "indexes":  [
+                    {
+                        "collectionGroup":  "boardPeriods",
+                        "queryScope":  "COLLECTION",
+                        "fields":  [
+                                       {
+                                           "fieldPath":  "status",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "startsAt",
+                                           "order":  "DESCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "__name__",
+                                           "order":  "DESCENDING"
+                                       }
+                                   ],
+                        "density":  "SPARSE_ALL"
+                    },
+                    {
+                        "collectionGroup":  "listings",
+                        "queryScope":  "COLLECTION",
+                        "fields":  [
+                                       {
+                                           "fieldPath":  "status",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "currentBoostTotalMinor",
+                                           "order":  "DESCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "__name__",
+                                           "order":  "DESCENDING"
+                                       }
+                                   ],
+                        "density":  "SPARSE_ALL"
+                    },
+                    {
+                        "collectionGroup":  "listings",
+                        "queryScope":  "COLLECTION",
+                        "fields":  [
+                                       {
+                                           "fieldPath":  "status",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "visibilityScope",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "weeklyBoostKey",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "weeklyBoostTotalMinor",
+                                           "order":  "DESCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "publishedAt",
+                                           "order":  "DESCENDING"
+                                       }
+                                   ]
+                    },
+                    {
+                        "collectionGroup":  "listings",
+                        "queryScope":  "COLLECTION",
+                        "fields":  [
+                                       {
+                                           "fieldPath":  "status",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "visibilityScope",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "listingTypeId",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "weeklyBoostKey",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "weeklyBoostTotalMinor",
+                                           "order":  "DESCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "publishedAt",
+                                           "order":  "DESCENDING"
+                                       }
+                                   ]
+                    },
+                    {
+                        "collectionGroup":  "listings",
+                        "queryScope":  "COLLECTION",
+                        "fields":  [
+                                       {
+                                           "fieldPath":  "status",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "visibilityScope",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "monthlyBoostKey",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "monthlyBoostTotalMinor",
+                                           "order":  "DESCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "publishedAt",
+                                           "order":  "DESCENDING"
+                                       }
+                                   ]
+                    },
+                    {
+                        "collectionGroup":  "listings",
+                        "queryScope":  "COLLECTION",
+                        "fields":  [
+                                       {
+                                           "fieldPath":  "status",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "visibilityScope",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "listingTypeId",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "monthlyBoostKey",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "monthlyBoostTotalMinor",
+                                           "order":  "DESCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "publishedAt",
+                                           "order":  "DESCENDING"
+                                       }
+                                   ]
+                    },
+                    {
+                        "collectionGroup":  "listings",
+                        "queryScope":  "COLLECTION",
+                        "fields":  [
+                                       {
+                                           "fieldPath":  "status",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "visibilityScope",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "publishedAt",
+                                           "order":  "DESCENDING"
+                                       }
+                                   ]
+                    },
+                    {
+                        "collectionGroup":  "listings",
+                        "queryScope":  "COLLECTION",
+                        "fields":  [
+                                       {
+                                           "fieldPath":  "status",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "visibilityScope",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "listingTypeId",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "publishedAt",
+                                           "order":  "DESCENDING"
+                                       }
+                                   ]
+                    },
+                    {
+                        "collectionGroup":  "listings",
+                        "queryScope":  "COLLECTION",
+                        "fields":  [
+                                       {
+                                           "fieldPath":  "status",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "visibilityScope",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "searchTokens",
+                                           "arrayConfig":  "CONTAINS"
+                                       }
+                                   ]
+                    },
+                    {
+                        "collectionGroup":  "listings",
+                        "queryScope":  "COLLECTION",
+                        "fields":  [
+                                       {
+                                           "fieldPath":  "status",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "visibilityScope",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "listingTypeId",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "searchTokens",
+                                           "arrayConfig":  "CONTAINS"
+                                       }
+                                   ]
+                    },
+                    {
+                        "collectionGroup":  "boards",
+                        "queryScope":  "COLLECTION",
+                        "fields":  [
+                                       {
+                                           "fieldPath":  "status",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "createdAt",
+                                           "order":  "DESCENDING"
+                                       }
+                                   ]
+                    },
+                    {
+                        "collectionGroup":  "boards",
+                        "queryScope":  "COLLECTION",
+                        "fields":  [
+                                       {
+                                           "fieldPath":  "status",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "searchTokens",
+                                           "arrayConfig":  "CONTAINS"
+                                       }
+                                   ]
+                    },
+                    {
+                        "collectionGroup":  "boardEntries",
+                        "queryScope":  "COLLECTION",
+                        "fields":  [
+                                       {
+                                           "fieldPath":  "boardId",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "status",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "boostTotalMinor",
+                                           "order":  "DESCENDING"
+                                       }
+                                   ]
+                    },
+                    {
+                        "collectionGroup":  "boardEntries",
+                        "queryScope":  "COLLECTION",
+                        "fields":  [
+                                       {
+                                           "fieldPath":  "boardId",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "status",
+                                           "order":  "ASCENDING"
+                                       },
+                                       {
+                                           "fieldPath":  "searchTokens",
+                                           "arrayConfig":  "CONTAINS"
+                                       }
+                                   ]
+                    }
+                ],
+    "fieldOverrides":  [
+
+                       ]
 }

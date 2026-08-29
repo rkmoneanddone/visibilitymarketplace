@@ -6152,20 +6152,20 @@ button.board-card-add-listing {
 
 .board-heading {
   border-top-width: 1px !important;
-  border-left: 5px solid #4d79c7 !important;
+  border-left: 3px solid #4d79c7 !important;
 }
 
 .home-search-only {
-  border-left: 5px solid #4d79c7 !important;
+  border-left: 3px solid #4d79c7 !important;
 }
 
 .marketplace-listing-list {
-  border-left: 5px solid #4d79c7 !important;
+  border-left: 3px solid #4d79c7 !important;
 }
 
 .home-boards-preview {
   border-top-width: 1px !important;
-  border-left: 5px solid #4f9a7e !important;
+  border-left: 4px solid #4f9a7e !important;
 }
 
 /* END VISIBILITY MARKETPLACE LEFT SECTION RIBBONS V1 */
@@ -6437,3 +6437,296 @@ button.board-card-add-listing {
 }
 
 /* END VIEWBID REMOVE LEGACY PUSHED LABEL V1 */
+
+/* BEGIN VIEWBID PUBLIC FIRESTORE PAGINATION SEARCH V1 */
+.public-search-note {
+  display: block;
+  margin-top: 5px;
+  color: #6b7f91;
+  font-size: 10px;
+}
+
+.public-load-more-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 14px 0 4px;
+}
+
+.public-load-more {
+  min-width: 118px;
+  min-height: 34px;
+  padding: 6px 14px;
+  border: 1px solid #b9cad9;
+  border-radius: 999px;
+  background: #fff;
+  color: #36566e;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.public-load-more:disabled {
+  opacity: .6;
+}
+/* END VIEWBID PUBLIC FIRESTORE PAGINATION SEARCH V1 */
+
+/* BEGIN VIEWBID SEARCH CLEAR CURSOR V1 */
+input[type="search"]::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
+input[type="search"] {
+  cursor: text;
+}
+/* END VIEWBID SEARCH CLEAR CURSOR V1 */
+
+
+
+/* BEGIN VIEWBID HEADER ACTION CONSISTENCY V1 */
+
+/* Boards uses the exact Add Public Listing component style. */
+.main-nav .boards-nav-link.add-link {
+  text-decoration: none;
+}
+
+/* Sign in is intentionally secondary, but uses the same header geometry. */
+.main-nav .account-link {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 1px solid #b9d7df;
+  border-radius: 999px;
+  background: #fff;
+  color: #31566c;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.main-nav .account-link:hover {
+  border-color: #7fc7d2;
+  background: #f7fcfd;
+  color: #167f91;
+}
+
+@media (max-width: 700px) {
+  .main-nav .boards-nav-link.add-link,
+  .main-nav .add-link {
+    min-height: 34px;
+  }
+
+  .main-nav .boards-nav-link.add-link {
+    padding-inline: 10px;
+  }
+
+  .main-nav .boards-nav-link.add-link svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .main-nav .account-link {
+    min-height: 34px;
+    padding: 0 11px;
+    border-radius: 999px;
+    font-size: 12px;
+  }
+}
+/* END VIEWBID HEADER ACTION CONSISTENCY V1 */
+
+/* BEGIN VIEWBID HOME LOWER CLEANUP V1 */
+
+.home-trust-strip {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-top: 1px solid #edf2f5;
+  border-bottom: 1px solid #edf2f5;
+  background: #fff;
+  color: #5f7382;
+  font-size: 12px;
+}
+
+.home-trust-strip span + span {
+  padding-left: 14px;
+  border-left: 1px solid #dde6eb;
+}
+
+.home-trust-strip a {
+  margin-left: auto;
+  color: #167f91;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.home-trust-strip a:hover {
+  text-decoration: underline;
+}
+
+.home-discover-compact {
+  display: grid;
+  grid-template-columns: minmax(180px, .8fr) minmax(260px, 1.4fr) auto;
+  align-items: center;
+  gap: 22px;
+  margin-top: 18px;
+  padding: 18px 0;
+  border-top: 1px solid #edf1f4;
+  border-bottom: 1px solid #edf1f4;
+}
+
+.home-discover-compact h2 {
+  margin: 3px 0 0;
+  color: #213f53;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.home-discover-compact > p {
+  margin: 0;
+  color: #5f7382;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.home-discover-links {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.home-discover-links a {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 11px;
+  border: 1px solid #d8e3e8;
+  border-radius: 999px;
+  background: #fff;
+  color: #31566c;
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.home-discover-links a:hover {
+  border-color: #8bcbd5;
+  background: #f8fdfe;
+  color: #167f91;
+}
+
+.home-footer-compact {
+  margin-top: 18px;
+  padding: 14px 0 10px;
+  border-top: 1px solid #e7ecef;
+}
+
+.home-footer-main {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.home-footer-main .brand {
+  flex: 0 0 auto;
+}
+
+.home-footer-tagline {
+  color: #7a8d98;
+  font-size: 11px;
+}
+
+.home-footer-links {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.home-footer-links a {
+  color: #5b7180;
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.home-footer-links a:hover {
+  color: #167f91;
+}
+
+.home-footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 9px;
+  border-top: 1px solid #edf1f4;
+  color: #91a0aa;
+  font-size: 10px;
+}
+
+@media (max-width: 700px) {
+  .home-trust-strip {
+    display: grid;
+    gap: 5px;
+    padding: 9px 4px;
+    font-size: 11px;
+  }
+
+  .home-trust-strip span + span {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .home-trust-strip a {
+    margin-left: 0;
+    margin-top: 2px;
+  }
+
+  .home-discover-compact {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 14px 0;
+  }
+
+  .home-discover-compact h2 {
+    font-size: 19px;
+  }
+
+  .home-discover-compact > p {
+    font-size: 12px;
+  }
+
+  .home-discover-links {
+    justify-content: flex-start;
+  }
+
+  .home-footer-main {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+  }
+
+  .home-footer-tagline {
+    flex-basis: 100%;
+  }
+
+  .home-footer-links {
+    width: 100%;
+    margin-left: 0;
+    gap: 13px;
+    flex-wrap: wrap;
+  }
+
+  .home-footer-bottom {
+    font-size: 9px;
+  }
+}
+
+/* END VIEWBID HOME LOWER CLEANUP V1 */

@@ -2141,3 +2141,139 @@
 }
 
 /* END VIEWBID BOARD ENTRY COMPACT ACTIONS V1 */
+
+/* BEGIN VIEWBID BOARD LISTING SEARCH PAGINATION V1 */
+.board-entry-search-wrap {
+  min-width: min(330px, 100%);
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+}
+
+.board-entry-search {
+  width: min(310px, 100%);
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  border: 1px solid #cdd9e5;
+  border-radius: 999px;
+  background: #fff;
+  color: #728497;
+}
+
+.board-entry-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #29465b;
+  font: inherit;
+  font-size: 11px;
+}
+
+.board-entry-search-note {
+  color: #6b7f91;
+  font-size: 10px;
+}
+
+.board-entry-load-more-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 2px;
+}
+
+.board-entry-load-more {
+  min-width: 118px;
+  min-height: 34px;
+  padding: 6px 14px;
+  border: 1px solid #b9cad9;
+  border-radius: 999px;
+  background: #fff;
+  color: #36566e;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.board-entry-load-more:disabled {
+  opacity: .6;
+}
+
+@media (max-width: 700px) {
+  .board-entry-search-wrap {
+    width: 100%;
+    min-width: 0;
+    justify-items: stretch;
+  }
+
+  .board-entry-search {
+    width: 100%;
+  }
+}
+/* END VIEWBID BOARD LISTING SEARCH PAGINATION V1 */
+
+/* BEGIN VIEWBID BOARD SEARCH DESKTOP ALIGN V1 */
+@media (min-width: 701px) {
+  .board-entries-heading {
+    align-items: center;
+  }
+
+  .board-entry-search-wrap {
+    align-self: center;
+    justify-items: end;
+  }
+
+  .board-entry-search {
+    margin-top: 0;
+  }
+}
+/* END VIEWBID BOARD SEARCH DESKTOP ALIGN V1 */
+
+/* BEGIN VIEWBID BOARD SEARCH MATCH MAIN V1 */
+@media (min-width: 701px) {
+  .board-entries-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+  }
+
+  .board-entry-search-wrap {
+    width: min(320px, 38%);
+    min-width: 0;
+    display: grid;
+    justify-items: stretch;
+    align-self: flex-end;
+    gap: 4px;
+  }
+
+  .board-entry-search {
+    width: 100%;
+    height: 40px;
+    min-height: 40px;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0 12px;
+    border: 1px solid #dce8ec;
+    border-radius: 999px;
+    background: #fbfeff;
+    color: #8ca0ac;
+  }
+
+  .board-entry-search:focus-within {
+    border-color: #64c9d5;
+    box-shadow: 0 0 0 3px rgb(100 201 213 / 10%);
+  }
+
+  .board-entry-search input {
+    height: 100%;
+    font-size: 13px;
+  }
+
+  .board-entry-search-wrap > small {
+    text-align: right;
+  }
+}
+/* END VIEWBID BOARD SEARCH MATCH MAIN V1 */

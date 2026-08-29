@@ -30,9 +30,16 @@ service cloud.firestore {
         && request.resource.data.status == "submitted"
         && request.resource.data.externalClicks == 0
         && request.resource.data.currentBoostTotalMinor == 0
+        && request.resource.data.visibilityScope in [
+          "public",
+          "board_only"
+        ]
+        && request.resource.data.searchTokens is list
+        && request.resource.data.searchTokens.size() <= 120
         && request.resource.data.keys().hasOnly([
           "id",
           "submittedByUserId",
+          "visibilityScope",
           "listingTypeId",
           "platformKey",
           "targetKind",
@@ -41,6 +48,7 @@ service cloud.firestore {
           "subcategoryId",
           "title",
           "slug",
+          "searchTokens",
           "handle",
           "platformUrl",
           "shortDescription",

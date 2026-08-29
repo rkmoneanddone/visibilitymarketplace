@@ -44,6 +44,81 @@ function normalizeString(
   ).trim();
 }
 
+const publicListingPricing:
+  Record<
+    string,
+    {
+      minimumBoostMinor: number;
+      boostingEnabled: boolean;
+    }
+  > = {
+    youtube: {
+      minimumBoostMinor: 100,
+      boostingEnabled: true,
+    },
+
+    facebook: {
+      minimumBoostMinor: 100,
+      boostingEnabled: true,
+    },
+
+    instagram: {
+      minimumBoostMinor: 100,
+      boostingEnabled: true,
+    },
+
+    x: {
+      minimumBoostMinor: 100,
+      boostingEnabled: true,
+    },
+
+    app: {
+      minimumBoostMinor: 100,
+      boostingEnabled: true,
+    },
+
+    startup: {
+      minimumBoostMinor: 100,
+      boostingEnabled: true,
+    },
+
+    website: {
+      minimumBoostMinor: 100,
+      boostingEnabled: true,
+    },
+
+    other: {
+      minimumBoostMinor: 100,
+      boostingEnabled: true,
+    },
+  };
+
+function getPublicListingPricing(
+  listingTypeId: unknown,
+) {
+  const typeId =
+    normalizeString(
+      listingTypeId,
+    );
+
+  const pricing =
+    publicListingPricing[
+      typeId
+    ];
+
+  if (
+    !pricing ||
+    !pricing.boostingEnabled
+  ) {
+    throw new HttpsError(
+      "failed-precondition",
+      "Push Up is not available for this Listing Type.",
+    );
+  }
+
+  return pricing;
+}
+
 function getUtcMonthKey(
   date: Date,
 ): string {
@@ -231,10 +306,34 @@ export async function validatePaymentRequest(
       );
     }
 
-    if (amountMinor < 100) {
+    const visibilityScope =
+      normalizeString(
+        listing?.visibilityScope ||
+        "public",
+      );
+
+    if (
+      visibilityScope ===
+      "board_only"
+    ) {
+      throw new HttpsError(
+        "failed-precondition",
+        "Board-only listings cannot receive a Public Push Up.",
+      );
+    }
+
+    const pricing =
+      getPublicListingPricing(
+        listing?.listingTypeId,
+      );
+
+    if (
+      amountMinor <
+      pricing.minimumBoostMinor
+    ) {
       throw new HttpsError(
         "invalid-argument",
-        "Minimum Push Up is $1.",
+        "Push Up amount is below the Listing Type minimum.",
       );
     }
 
@@ -332,6 +431,85 @@ export async function validatePaymentRequest(
       throw new HttpsError(
         "failed-precondition",
         "This Board Entry is not awaiting payment.",
+      );
+    }
+
+    const boardStatus =
+      normalizeString(
+        board?.status,
+      );
+
+    if (
+      [
+        "expired",
+        "archived",
+        "cancelled",
+        "rejected",
+      ].includes(
+        boardStatus,
+      )
+    ) {
+      throw new HttpsError(
+        "failed-precondition",
+        "This Board is closed.",
+      );
+    }
+
+    const entryStartsAt =
+      new Date(
+        String(
+          board?.entryStartsAt ||
+          "",
+        ),
+      ).getTime();
+
+    const entryClosesAt =
+      new Date(
+        String(
+          board?.entryClosesAt ||
+          "",
+        ),
+      ).getTime();
+
+    const endsAt =
+      new Date(
+        String(
+          board?.endsAt ||
+          "",
+        ),
+      ).getTime();
+
+    if (
+      Number.isNaN(
+        entryStartsAt,
+      ) ||
+      Number.isNaN(
+        entryClosesAt,
+      ) ||
+      Number.isNaN(
+        endsAt,
+      )
+    ) {
+      throw new HttpsError(
+        "failed-precondition",
+        "Board dates are invalid.",
+      );
+    }
+
+    const nowMs =
+      Date.now();
+
+    if (
+      nowMs <
+        entryStartsAt ||
+      nowMs >=
+        entryClosesAt ||
+      nowMs >=
+        endsAt
+    ) {
+      throw new HttpsError(
+        "failed-precondition",
+        "The Board entry payment window is closed.",
       );
     }
 
@@ -620,6 +798,110 @@ export async function fulfillVerifiedPayment(
               "boardEntries",
             )
             .doc(targetId);
+
+        const entrySnap =
+          await transaction.get(
+            entryRef,
+          );
+
+        if (!entrySnap.exists) {
+          throw new Error(
+            "Board Entry not found during payment fulfillment.",
+          );
+        }
+
+        const entry =
+          entrySnap.data();
+
+        if (
+          entry?.status !==
+          "pending_payment"
+        ) {
+          throw new Error(
+            "Board Entry is no longer awaiting payment.",
+          );
+        }
+
+        const boardId =
+          normalizeString(
+            entry?.boardId,
+          );
+
+        if (!boardId) {
+          throw new Error(
+            "Board Entry is missing boardId.",
+          );
+        }
+
+        const boardRef =
+          db
+            .collection(
+              "boards",
+            )
+            .doc(boardId);
+
+        const boardSnap =
+          await transaction.get(
+            boardRef,
+          );
+
+        if (!boardSnap.exists) {
+          throw new Error(
+            "Board not found during entry payment fulfillment.",
+          );
+        }
+
+        const board =
+          boardSnap.data();
+
+        const entryStartsAt =
+          new Date(
+            String(
+              board?.entryStartsAt ||
+              "",
+            ),
+          ).getTime();
+
+        const entryClosesAt =
+          new Date(
+            String(
+              board?.entryClosesAt ||
+              "",
+            ),
+          ).getTime();
+
+        const endsAt =
+          new Date(
+            String(
+              board?.endsAt ||
+              "",
+            ),
+          ).getTime();
+
+        const nowMs =
+          Date.now();
+
+        if (
+          Number.isNaN(
+            entryStartsAt,
+          ) ||
+          Number.isNaN(
+            entryClosesAt,
+          ) ||
+          Number.isNaN(
+            endsAt,
+          ) ||
+          nowMs <
+            entryStartsAt ||
+          nowMs >=
+            entryClosesAt ||
+          nowMs >=
+            endsAt
+        ) {
+          throw new Error(
+            "Board Entry payment window is closed.",
+          );
+        }
 
         transaction.update(
           entryRef,

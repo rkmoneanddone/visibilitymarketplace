@@ -53,6 +53,77 @@ function normalizeString(
   return String(value ?? "").trim();
 }
 
+function buildSearchTokens(
+  ...values: unknown[]
+): string[] {
+  const result =
+    new Set<string>();
+
+  for (const value of values) {
+    const normalized =
+      normalizeString(value)
+        .toLowerCase()
+        .replace(/@/g, " ")
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    if (!normalized) {
+      continue;
+    }
+
+    for (
+      const word
+      of normalized.split(" ")
+    ) {
+      const numericOnly =
+        /^\d+$/.test(
+          word,
+        );
+
+      if (
+        word.length < 2 &&
+        !numericOnly
+      ) {
+        continue;
+      }
+
+      const maxPrefix =
+        Math.min(
+          word.length,
+          32,
+        );
+
+      const startSize =
+        numericOnly
+          ? 1
+          : 2;
+
+      for (
+        let size = startSize;
+        size <= maxPrefix;
+        size += 1
+      ) {
+        result.add(
+          word.slice(0, size),
+        );
+
+        if (
+          result.size >= 120
+        ) {
+          return Array.from(
+            result,
+          );
+        }
+      }
+    }
+  }
+
+  return Array.from(
+    result,
+  );
+}
+
 function canManageListing(
   listing: FirebaseFirestore.DocumentData,
   uid: string,
@@ -331,6 +402,11 @@ export const requestBoard =
               id: boardRef.id,
 
               name,
+
+              searchTokens:
+                buildSearchTokens(
+                  name,
+                ),
 
               slug:
                 name
@@ -1533,6 +1609,37 @@ export const createBoardEntryIntent =
 
                 boardId,
                 listingId,
+
+                searchTokens:
+                  buildSearchTokens(
+                    listing.title,
+                    listing.handle,
+                  ),
+
+                listingTitle:
+                  normalizeString(
+                    listing.title,
+                  ),
+
+                listingHandle:
+                  normalizeString(
+                    listing.handle,
+                  ) || null,
+
+                listingExternalUrl:
+                  normalizeString(
+                    listing.externalUrl,
+                  ),
+
+                listingFeaturedImageUrl:
+                  normalizeString(
+                    listing.featuredImageUrl,
+                  ) || null,
+
+                listingTypeId:
+                  normalizeString(
+                    listing.listingTypeId,
+                  ),
 
                 submittedByUserId:
                   request.auth!.uid,

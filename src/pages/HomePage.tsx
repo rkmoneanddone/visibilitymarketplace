@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ListingLauncher,
 } from "../features/listings/ListingLauncher";
@@ -18,7 +18,6 @@ import {
   Search,
   Sparkles,
   TrendingUp,
-  Zap,
 } from "lucide-react";
 import { marketplaceConfig } from "../config/marketplace";
 import { getListingTypeName } from "../lib/marketplace/listing";
@@ -28,7 +27,15 @@ import { formatMoneyMinor } from "../lib/marketplace/money";
 import { getTypeIcon } from "../lib/marketplace/icons";
 import { initialListingTypes } from "../config/listingTypes";
 import { siteConfig } from "../config/site";
-import { getPublishedListings } from "../services/firestore/listings";
+import {
+  getPublicListingsPage,
+  searchPublicListings,
+  type PublicListingCursor,
+} from "../services/firestore/pagedListings";
+
+import {
+  matchesSearch,
+} from "../services/search/searchTokens";
 import { getPublicBoards } from "../services/boards/boards";
 import type { Listing } from "../types/marketplace";
 import type { Board } from "../types/board";
@@ -209,29 +216,107 @@ export function HomePage() {
   const [listingsLoading, setListingsLoading] = useState(true);
   const [listingsError, setListingsError] = useState<string | null>(null);
 
+  const [
+    listingsCursor,
+    setListingsCursor,
+  ] =
+    useState<PublicListingCursor>(
+      null,
+    );
+
+  const [
+    hasMoreListings,
+    setHasMoreListings,
+  ] =
+    useState(false);
+
+  const [
+    loadingMoreListings,
+    setLoadingMoreListings,
+  ] =
+    useState(false);
+
+  const [
+    dbSearchListings,
+    setDbSearchListings,
+  ] =
+    useState<Listing[]>([]);
+
+  const [
+    searchingAllListings,
+    setSearchingAllListings,
+  ] =
+    useState(false);
+
+  const publicSearchCache =
+    useRef<
+      Map<string, Listing[]>
+    >(
+      new Map(),
+    );
 
   useEffect(() => {
     let active = true;
+
+    const selectedTypeConfig =
+      selectedType === "All"
+        ? undefined
+        : initialListingTypes.find(
+            (type) =>
+              type.name ===
+              selectedType,
+          );
 
     async function loadListings() {
       try {
         setListingsLoading(true);
         setListingsError(null);
 
-        const publishedListings = await getPublishedListings();
+        setListings([]);
+        setListingsCursor(null);
+        setHasMoreListings(false);
+
+        const result =
+          await getPublicListingsPage({
+            period:
+              selectedPeriod,
+
+            listingTypeId:
+              selectedTypeConfig?.id,
+
+            pageSize:
+              20,
+          });
 
         if (active) {
-          setListings(publishedListings);
+          setListings(
+            result.items,
+          );
+
+          setListingsCursor(
+            result.cursor,
+          );
+
+          setHasMoreListings(
+            result.hasMore,
+          );
         }
       } catch (error) {
-        console.error("Failed to load marketplace listings:", error);
+        console.error(
+          "Failed to load marketplace listings:",
+          error,
+        );
 
         if (active) {
-          setListingsError("Unable to load listings right now.");
+          setListingsError(
+            "Unable to load listings right now.",
+          );
         }
       } finally {
         if (active) {
-          setListingsLoading(false);
+          setListingsLoading(
+            false,
+          );
         }
       }
     }
@@ -241,7 +326,228 @@ export function HomePage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [
+    selectedPeriod,
+    selectedType,
+  ]);
+  useEffect(() => {
+    const queryText =
+      searchQuery
+        .trim()
+        .toLowerCase();
+
+    setDbSearchListings(
+      [],
+    );
+
+    if (!queryText) {
+      setSearchingAllListings(
+        false,
+      );
+      return;
+    }
+
+    const selectedTypeConfig =
+      selectedType === "All"
+        ? undefined
+        : initialListingTypes.find(
+            (type) =>
+              type.name ===
+              selectedType,
+          );
+
+    const localMatches =
+      listings.filter(
+        (listing) =>
+          matchesSearch(
+            queryText,
+            listing.title,
+            listing.handle,
+          ),
+      );
+
+    if (
+      localMatches.length >
+      0
+    ) {
+      setSearchingAllListings(
+        false,
+      );
+      return;
+    }
+
+    const cacheKey =
+      [
+        selectedTypeConfig?.id ??
+          "all",
+        queryText,
+      ].join(":");
+
+    const cached =
+      publicSearchCache
+        .current
+        .get(
+          cacheKey,
+        );
+
+    if (cached) {
+      setDbSearchListings(
+        cached,
+      );
+
+      setSearchingAllListings(
+        false,
+      );
+
+      return;
+    }
+
+    let cancelled =
+      false;
+
+    const timer =
+      window.setTimeout(
+        () => {
+          setSearchingAllListings(
+            true,
+          );
+
+          void searchPublicListings({
+            searchText:
+              queryText,
+
+            listingTypeId:
+              selectedTypeConfig?.id,
+
+            maxResults:
+              20,
+          })
+            .then(
+              (result) => {
+                if (
+                  cancelled
+                ) {
+                  return;
+                }
+
+                publicSearchCache
+                  .current
+                  .set(
+                    cacheKey,
+                    result,
+                  );
+
+                setDbSearchListings(
+                  result,
+                );
+              },
+            )
+            .catch(
+              (searchError) => {
+                console.error(
+                  "Public listing search failed:",
+                  searchError,
+                );
+              },
+            )
+            .finally(
+              () => {
+                if (
+                  !cancelled
+                ) {
+                  setSearchingAllListings(
+                    false,
+                  );
+                }
+              },
+            );
+        },
+        500,
+      );
+
+    return () => {
+      cancelled = true;
+
+      window.clearTimeout(
+        timer,
+      );
+    };
+  }, [
+    listings,
+    searchQuery,
+    selectedType,
+  ]);
+
+  async function loadMoreListings() {
+    if (
+      loadingMoreListings ||
+      !hasMoreListings ||
+      !listingsCursor
+    ) {
+      return;
+    }
+
+    const selectedTypeConfig =
+      selectedType === "All"
+        ? undefined
+        : initialListingTypes.find(
+            (type) =>
+              type.name ===
+              selectedType,
+          );
+
+    try {
+      setLoadingMoreListings(
+        true,
+      );
+
+      const result =
+        await getPublicListingsPage({
+          period:
+            selectedPeriod,
+
+          listingTypeId:
+            selectedTypeConfig?.id,
+
+          cursor:
+            listingsCursor,
+
+          pageSize:
+            20,
+        });
+
+      setListings(
+        (current) => [
+          ...current,
+          ...result.items.filter(
+            (nextListing) =>
+              !current.some(
+                (currentListing) =>
+                  currentListing.id ===
+                  nextListing.id,
+              ),
+          ),
+        ],
+      );
+
+      setListingsCursor(
+        result.cursor,
+      );
+
+      setHasMoreListings(
+        result.hasMore,
+      );
+    } catch (error) {
+      console.error(
+        "Failed to load more Public listings:",
+        error,
+      );
+    } finally {
+      setLoadingMoreListings(
+        false,
+      );
+    }
+  }
 
   useEffect(() => {
     function handlePopState() {
@@ -392,43 +698,23 @@ export function HomePage() {
       .trim()
       .toLowerCase();
 
-  const visibleListings =
+  const localSearchListings =
     !normalizedSearch
       ? typeListings
       : typeListings.filter(
           (listing) =>
-            [
+            matchesSearch(
+              normalizedSearch,
               listing.title,
               listing.handle,
-              listing.shortDescription,
-              listing.ownerDisplayName,
-            ]
-              .filter(Boolean)
-              .some((value) =>
-                String(value)
-                  .toLowerCase()
-                  .includes(
-                    normalizedSearch,
-                  ),
-              ),
+            ),
         );
 
-  const typeCounts =
-    enabledTypes.reduce<
-      Record<string, number>
-    >(
-      (counts, type) => {
-        counts[type.name] =
-          listings.filter(
-            (listing) =>
-              listing.listingTypeId ===
-              type.id,
-          ).length;
-
-        return counts;
-      },
-      {},
-    );
+  const visibleListings =
+    normalizedSearch &&
+    localSearchListings.length === 0
+      ? dbSearchListings
+      : localSearchListings;
 
   const todayKey =
     new Date().toDateString();
@@ -529,9 +815,7 @@ export function HomePage() {
                 >
                   {getTypeIcon(type.name)}
                   <span>{type.name}</span>
-                  <span className="type-count">
-                    {typeCounts[type.name] ?? 0}
-                  </span>
+
                 </button>
               ))}
             </div>
@@ -612,6 +896,12 @@ export function HomePage() {
                   }
                 />
               </div>
+
+              {searchingAllListings && (
+                <span className="public-search-note">
+                  Searching all Public Listings...
+                </span>
+              )}
             </div>
 
 <div className="board-list marketplace-listing-list">
@@ -620,19 +910,37 @@ export function HomePage() {
               ) : listingsError ? (
                 <div className="empty-board">{listingsError}</div>
               ) : visibleListings.length > 0 ? (
-                visibleListings.map((listing, index) => {
+                visibleListings.map((listing) => {
                   const typeName = getListingTypeName(listing.listingTypeId);
 
+                  const loadedIndex =
+                    listings.findIndex(
+                      (loadedListing) =>
+                        loadedListing.id ===
+                        listing.id,
+                    );
+
                   const rank =
-                    index + 1;
+                    loadedIndex >= 0
+                      ? loadedIndex + 1
+                      : null;
 
                   return (
                     <article
-                      className={`board-row marketplace-listing-row rank-${Math.min(rank, 4)}`}
+                      className={
+                        rank
+                          ? `board-row marketplace-listing-row rank-${Math.min(
+                              rank,
+                              4,
+                            )}`
+                          : "board-row marketplace-listing-row"
+                      }
                       key={listing.id}
                     >
                       <div className="rank">
-                        #{rank}
+                        {rank
+                          ? `#${rank}`
+                          : "-"}
                       </div>
 
                       <div
@@ -687,7 +995,7 @@ export function HomePage() {
                           </strong>
 
                           <span>
-                            pushed
+                              pushed
                           </span>
 
                           <span className="listing-click-count">
@@ -744,38 +1052,41 @@ export function HomePage() {
               )}
             </div>
 
+            {!searchQuery.trim() &&
+              hasMoreListings &&
+              !listingsLoading && (
+                <div className="public-load-more-wrap">
+                  <button
+                    className="public-load-more"
+                    type="button"
+                    disabled={
+                      loadingMoreListings
+                    }
+                    onClick={() =>
+                      void loadMoreListings()
+                    }
+                  >
+                    {loadingMoreListings
+                      ? "Loading..."
+                      : "Load More"}
+                  </button>
+                </div>
+              )}
+
             <BoardsPreview />
-
-            <div className="market-model-strip">
-              <div className="market-model-price">
-                <span className="free-pill">
-                  {marketplaceConfig.pricing.freeListingLabel}
-                </span>
-                <span className="model-or">OR</span>
-                <span className="vip-pill">
-                  <Zap size={13} />
-                  {marketplaceConfig.pricing.boardVisibilityLabel}
-                </span>
-              </div>
-
-              <p>
-                List for free. Get discovered. Support any listing to push it higher.
-              </p>
-
-              <span className="market-refund-note">
-                Paid visibility is non-refundable after successful processing.
-              </span>
-
-              <a href="/how-it-works">How it works</a>
-            </div>
-
-            <div className="board-bottom">
+            <div className="home-trust-strip">
               <span>
-                Ranking is based on verified paid pushes for the selected period.
+                Public Listings can be added free.
               </span>
-              <button type="button">View all</button>
-            </div>
 
+              <span>
+                Verified paid Push Ups affect ranking only after successful processing.
+              </span>
+
+              <a href="/how-it-works">
+                How it works
+              </a>
+            </div>
             <div className="mobile-side-content">
               <VisibilityCard />
               <NewTodayCard listings={newTodayListings} />
@@ -820,72 +1131,78 @@ export function HomePage() {
             </section>
           </aside>
         </div>
-
-        <section className="seo-content">
+        <section className="home-discover-compact">
           <div>
-            <p className="eyebrow">DISCOVER MORE</p>
-            <h2>A marketplace for attention.</h2>
+            <p className="eyebrow">
+              DISCOVER
+            </p>
+
+            <h2>
+              Explore visibility.
+            </h2>
           </div>
 
           <p>
-            Discover emerging YouTube channels, Instagram creators, Facebook
-            pages, apps, websites and startups. Listings compete for visibility
-            while supporters can help the projects they like move higher on
-            the public board.
+            Browse Public Listings or enter a focused Board competition.
           </p>
 
-          <div className="seo-links">
-            <a href="#youtube">YouTube channels</a>
-            <a href="#instagram">Instagram creators</a>
-            <a href="#apps">Apps</a>
-            <a href="#startups">Startups</a>
-            <a href="#websites">Websites</a>
+          <div className="home-discover-links">
+            <a href="/#board">
+              Public Listings
+            </a>
+
+            <a href="/boards">
+              Boards
+            </a>
+
+            <a href="/how-it-works">
+              How it works
+            </a>
           </div>
         </section>
       </main>
+      <footer className="site-footer home-footer-compact">
+        <div className="home-footer-main">
+          <a
+            className="brand"
+            href="/"
+          >
+            <span className="brand-icon">
+              <TrendingUp size={17} />
+            </span>
 
-      <footer className="site-footer">
-        <div className="footer-main">
-          <div className="footer-brand">
-            <a className="brand" href="/">
-              <span className="brand-icon">
-                <TrendingUp size={17} />
-              </span>
-              {siteConfig.name}
+            {siteConfig.name}
+          </a>
+
+          <span className="home-footer-tagline">
+            Discover it. Support it. Push it higher.
+          </span>          <nav className="home-footer-links">
+            <a href="/about">
+              About Us
             </a>
 
-            <p>
-              Discover it. Support it. Push it higher.
-            </p>
-          </div>
+            <a href="/contact">
+              Contact Us
+            </a>
 
-          <div className="footer-column">
-            <strong>Discover</strong>
-            <a href="#board">Top listings</a>
-            <a href="#new">New today</a>
-            <a href="#youtube">YouTube</a>
-            <a href="#apps">Apps & startups</a>
-          </div>
+            <a href="/privacy">
+              Privacy
+            </a>
 
-          <div className="footer-column">
-            <strong>For listings</strong>
-            <a href="#add-listing">Add Public Listing</a>
-            <a href="#pricing">Pricing</a>
-            <a href="/how-it-works">How it works</a>
-          </div>
-
-          <div className="footer-column">
-            <strong>Company</strong>
-            <a href="#about">About</a>
-            <a href="#contact">Contact</a>
-            <a href="#privacy">Privacy</a>
-            <a href="#terms">Terms</a>
-          </div>
+            <a href="/terms">
+              Terms & Conditions
+            </a>
+          </nav>
         </div>
 
-        <div className="footer-bottom">
-          <span>Copyright 2026 {siteConfig.name}</span>
-          <span>Built for discovery.</span>
+        <div className="home-footer-bottom">
+          <span>
+            Copyright 2026 {siteConfig.name}
+          </span>
+
+          <span>
+            Built for discovery.
+          </span>
         </div>
       </footer>
     </>

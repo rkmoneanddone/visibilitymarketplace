@@ -94,6 +94,8 @@ export interface Listing {
   title: string;
   slug: string;
 
+  searchTokens?: string[];
+
   handle?: string;
   ownerDisplayName?: string;
 

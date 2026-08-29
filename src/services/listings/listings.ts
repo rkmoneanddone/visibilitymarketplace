@@ -15,6 +15,10 @@ import {
   uploadListingFeaturedImage,
 } from "./listingImages";
 
+import {
+  buildSearchTokens,
+} from "../search/searchTokens";
+
 type CreateListingInput = {
   userId: string;
   form: ListingFormData;
@@ -123,6 +127,12 @@ listingTypeId:
     slug:
       makeSlug(
         form.title,
+      ),
+
+    searchTokens:
+      buildSearchTokens(
+        form.title,
+        form.handle,
       ),
 
     ...(form.handle

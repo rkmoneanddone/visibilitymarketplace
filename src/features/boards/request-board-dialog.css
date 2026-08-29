@@ -119,16 +119,16 @@
 
 @media (max-width: 700px) {
   .request-board-types legend {
-    font-size: 10.67px !important;
+    font-size: 11px !important;
   }
 
   .request-board-type-grid label,
   .request-board-type-grid span {
-    font-size: 10.67px !important;
+    font-size: 11px !important;
   }
 
   .request-board-textarea {
-    font-size: 10.67px !important;
+    font-size: 11px !important;
   }
 }
 

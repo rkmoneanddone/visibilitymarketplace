@@ -16,6 +16,8 @@ export interface Board {
     name: string;
     slug: string;
 
+    searchTokens?: string[];
+
     createdByUserId: string;
     createdByDisplayName: string;
     createdByEmail: string;
@@ -75,6 +77,14 @@ export interface BoardEntry {
     supporterCount: number;
 
     externalClicks?: number;
+
+    searchTokens?: string[];
+
+    listingTitle?: string;
+    listingHandle?: string;
+    listingExternalUrl?: string;
+    listingFeaturedImageUrl?: string;
+    listingTypeId?: string;
 
     joinedAt: string;
     updatedAt: string;

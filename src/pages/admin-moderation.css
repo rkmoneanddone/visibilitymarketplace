@@ -93,7 +93,7 @@
   padding: 2px 6px;
   border-radius: 999px;
   background: #fff3cf;
-  font-size: 10px;
+  font-size: 11px;
   color: #765f24;
 }
 
@@ -299,7 +299,7 @@
   background: #fff4d6;
   color: #8a641d;
 
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
 }
 
@@ -326,7 +326,7 @@
 }
 
 .admin-board-requester small {
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .admin-board-schedule {
@@ -350,7 +350,7 @@
 }
 
 .admin-board-info span {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
 
   letter-spacing: 0.04em;

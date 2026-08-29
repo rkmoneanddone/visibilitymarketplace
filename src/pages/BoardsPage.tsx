@@ -1,6 +1,7 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -19,9 +20,14 @@ import {
 } from "../lib/marketplace/listing";
 
 import {
-  getPublicBoardHistory,
-  getPublicBoards,
-} from "../services/boards/boards";
+  getBoardsPage,
+  searchBoards,
+  type BoardPageCursor,
+} from "../services/boards/pagedBoards";
+
+import {
+  matchesSearch,
+} from "../services/search/searchTokens";
 
 import type {
   Board,
@@ -385,6 +391,45 @@ export function BoardsPage() {
   const [search, setSearch] =
     useState("");
 
+  const [
+    boardCursor,
+    setBoardCursor,
+  ] =
+    useState<BoardPageCursor>(
+      null,
+    );
+
+  const [
+    hasMoreBoards,
+    setHasMoreBoards,
+  ] =
+    useState(false);
+
+  const [
+    loadingMoreBoards,
+    setLoadingMoreBoards,
+  ] =
+    useState(false);
+
+  const [
+    dbSearchBoards,
+    setDbSearchBoards,
+  ] =
+    useState<Board[]>([]);
+
+  const [
+    searchingAllBoards,
+    setSearchingAllBoards,
+  ] =
+    useState(false);
+
+  const boardSearchCache =
+    useRef<
+      Map<string, Board[]>
+    >(
+      new Map(),
+    );
+
   useEffect(() => {
     let active = true;
 
@@ -393,45 +438,29 @@ export function BoardsPage() {
         setLoading(true);
         setError(null);
 
-        const [
-          openResult,
-          historyResult,
-        ] =
-          await Promise.all([
-            getPublicBoards(),
-            getPublicBoardHistory(),
-          ]);
-
-        const merged =
-          new Map<
-            string,
-            Board
-          >();
-
-        for (
-          const board
-          of [
-            ...openResult,
-            ...historyResult,
-          ]
-        ) {
-          merged.set(
-            board.id,
-            board,
+        const result =
+          await getBoardsPage(
+            null,
+            20,
           );
-        }
 
         if (active) {
           setBoards(
-            Array.from(
-              merged.values(),
-            ),
+            result.items,
+          );
+
+          setBoardCursor(
+            result.cursor,
+          );
+
+          setHasMoreBoards(
+            result.hasMore,
           );
         }
-      } catch (error) {
+      } catch (loadError) {
         console.error(
           "Failed to load boards:",
-          error,
+          loadError,
         );
 
         if (active) {
@@ -453,6 +482,188 @@ export function BoardsPage() {
     };
   }, []);
 
+  useEffect(() => {
+    const query =
+      search
+        .trim()
+        .toLowerCase();
+
+    setDbSearchBoards([]);
+
+    if (query.length < 2) {
+      setSearchingAllBoards(
+        false,
+      );
+      return;
+    }
+
+    const localMatches =
+      boards.filter(
+        (board) =>
+          matchesSearch(
+            query,
+            board.name,
+          ),
+      );
+
+    if (
+      localMatches.length >
+      0
+    ) {
+      setSearchingAllBoards(
+        false,
+      );
+      return;
+    }
+
+    const cached =
+      boardSearchCache
+        .current
+        .get(query);
+
+    if (cached) {
+      setDbSearchBoards(
+        cached,
+      );
+      setSearchingAllBoards(
+        false,
+      );
+      return;
+    }
+
+    let cancelled =
+      false;
+
+    const timer =
+      window.setTimeout(
+        () => {
+          setSearchingAllBoards(
+            true,
+          );
+
+          void searchBoards(
+            query,
+            20,
+          )
+            .then(
+              (result) => {
+                if (
+                  cancelled
+                ) {
+                  return;
+                }
+
+                boardSearchCache
+                  .current
+                  .set(
+                    query,
+                    result,
+                  );
+
+                setDbSearchBoards(
+                  result,
+                );
+              },
+            )
+            .catch(
+              (searchError) => {
+                console.error(
+                  "Board search failed:",
+                  searchError,
+                );
+              },
+            )
+            .finally(
+              () => {
+                if (
+                  !cancelled
+                ) {
+                  setSearchingAllBoards(
+                    false,
+                  );
+                }
+              },
+            );
+        },
+        500,
+      );
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(
+        timer,
+      );
+    };
+  }, [
+    boards,
+    search,
+  ]);
+
+  async function loadMoreBoards() {
+    if (
+      loadingMoreBoards ||
+      !hasMoreBoards ||
+      !boardCursor
+    ) {
+      return;
+    }
+
+    try {
+      setLoadingMoreBoards(
+        true,
+      );
+
+      const result =
+        await getBoardsPage(
+          boardCursor,
+          20,
+        );
+
+      setBoards(
+        (current) => {
+          const merged =
+            new Map<
+              string,
+              Board
+            >();
+
+          for (
+            const board
+            of [
+              ...current,
+              ...result.items,
+            ]
+          ) {
+            merged.set(
+              board.id,
+              board,
+            );
+          }
+
+          return Array.from(
+            merged.values(),
+          );
+        },
+      );
+
+      setBoardCursor(
+        result.cursor,
+      );
+
+      setHasMoreBoards(
+        result.hasMore,
+      );
+    } catch (loadError) {
+      console.error(
+        "Failed to load more boards:",
+        loadError,
+      );
+    } finally {
+      setLoadingMoreBoards(
+        false,
+      );
+    }
+  }
   const {
     openBoards,
     closedBoards,
@@ -463,17 +674,22 @@ export function BoardsPage() {
           .trim()
           .toLowerCase();
 
-      const searched =
+      const localSearched =
         query
           ? boards.filter(
               (board) =>
-                board.name
-                  .toLowerCase()
-                  .includes(
-                    query,
-                  ),
+                matchesSearch(
+                  query,
+                  board.name,
+                ),
             )
           : boards;
+
+      const searched =
+        query &&
+        localSearched.length === 0
+          ? dbSearchBoards
+          : localSearched;
 
       const open =
         searched
@@ -511,6 +727,7 @@ export function BoardsPage() {
       };
     }, [
       boards,
+      dbSearchBoards,
       search,
     ]);
 
@@ -549,6 +766,12 @@ export function BoardsPage() {
             placeholder="Search boards"
           />
         </label>
+
+        {searchingAllBoards && (
+          <span className="boards-search-note">
+            Searching all Boards...
+          </span>
+        )}
       </header>
 
       {loading ? (
@@ -630,6 +853,27 @@ export function BoardsPage() {
           )}
         </div>
       )}
+
+      {!search.trim() &&
+        hasMoreBoards &&
+        !loading && (
+          <div className="boards-load-more-wrap">
+            <button
+              className="boards-load-more"
+              type="button"
+              disabled={
+                loadingMoreBoards
+              }
+              onClick={() =>
+                void loadMoreBoards()
+              }
+            >
+              {loadingMoreBoards
+                ? "Loading..."
+                : "Load More"}
+            </button>
+          </div>
+        )}
     </main>
   );
 }

@@ -34,7 +34,7 @@
 .auth-kicker {
   margin: 0 0 3px;
   color: #708096;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.07em;
 }
 
@@ -118,7 +118,7 @@
   padding: 0 9px;
   background: #fff;
   color: #8995a4;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .auth-dialog form {
@@ -361,7 +361,7 @@
   }
 
   .auth-subtitle {
-    font-size: 10.5px;
+    font-size: 11px;
   }
 
   .auth-google,
@@ -626,7 +626,7 @@
   }
 
   .auth-kicker {
-    font-size: 10.67px !important;
+    font-size: 11px !important;
   }
 
   .auth-subtitle {
@@ -639,11 +639,11 @@
   }
 
   .auth-google-mark {
-    font-size: 9.67px !important;
+    font-size: 11px !important;
   }
 
   .auth-divider span {
-    font-size: 10.67px !important;
+    font-size: 11px !important;
   }
 
   .auth-dialog label {

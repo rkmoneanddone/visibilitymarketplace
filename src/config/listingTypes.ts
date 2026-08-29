@@ -56,7 +56,7 @@ export const initialListingTypes: ListingType[] = [
     listingFeeMinor: 299,
     minimumBoostMinor: 100,
     boostingEnabled: true,
-    sortOrder: 4,
+    sortOrder: 5,
   },
   {
     id: "startup",
@@ -67,7 +67,7 @@ export const initialListingTypes: ListingType[] = [
     listingFeeMinor: 499,
     minimumBoostMinor: 100,
     boostingEnabled: true,
-    sortOrder: 5,
+    sortOrder: 6,
   },
   {
     id: "website",
@@ -78,7 +78,7 @@ export const initialListingTypes: ListingType[] = [
     listingFeeMinor: 199,
     minimumBoostMinor: 100,
     boostingEnabled: true,
-    sortOrder: 6,
+    sortOrder: 7,
   },
   {
     id: "other",

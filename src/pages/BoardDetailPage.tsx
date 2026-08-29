@@ -1,6 +1,7 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -11,6 +12,7 @@ import {
   ExternalLink,
   Flame,
   LayoutGrid,
+  Search,
 } from "lucide-react";
 
 import {
@@ -43,9 +45,15 @@ import {
 } from "../services/boards/boards";
 
 import {
-  getBoardEntries,
-  type BoardEntryWithListing,
-} from "../services/boards/boardEntries";
+  getBoardEntriesPage,
+  searchBoardEntries,
+  type BoardEntryPageCursor,
+  type PagedBoardEntryItem,
+} from "../services/boards/pagedBoardEntries";
+
+import {
+  matchesSearch,
+} from "../services/search/searchTokens";
 
 
 import type {
@@ -155,8 +163,58 @@ export function BoardDetailPage() {
 
   const [entries, setEntries] =
     useState<
-      BoardEntryWithListing[]
+      PagedBoardEntryItem[]
     >([]);
+
+  const [
+    entryCursor,
+    setEntryCursor,
+  ] =
+    useState<BoardEntryPageCursor>(
+      null,
+    );
+
+  const [
+    hasMoreEntries,
+    setHasMoreEntries,
+  ] =
+    useState(false);
+
+  const [
+    loadingMoreEntries,
+    setLoadingMoreEntries,
+  ] =
+    useState(false);
+
+  const [
+    entrySearch,
+    setEntrySearch,
+  ] =
+    useState("");
+
+  const [
+    dbEntrySearchResults,
+    setDbEntrySearchResults,
+  ] =
+    useState<
+      PagedBoardEntryItem[]
+    >([]);
+
+  const [
+    searchingAllEntries,
+    setSearchingAllEntries,
+  ] =
+    useState(false);
+
+  const entrySearchCache =
+    useRef<
+      Map<
+        string,
+        PagedBoardEntryItem[]
+      >
+    >(
+      new Map(),
+    );
 
   const [loading, setLoading] =
     useState(true);
@@ -203,8 +261,10 @@ export function BoardDetailPage() {
 
         try {
           const entryResult =
-            await getBoardEntries(
+            await getBoardEntriesPage(
               boardId,
+              null,
+              20,
             );
 
           if (!active) {
@@ -212,7 +272,15 @@ export function BoardDetailPage() {
           }
 
           setEntries(
-            entryResult,
+            entryResult.items,
+          );
+
+          setEntryCursor(
+            entryResult.cursor,
+          );
+
+          setHasMoreEntries(
+            entryResult.hasMore,
           );
         } catch (entryError) {
           console.warn(
@@ -250,6 +318,192 @@ export function BoardDetailPage() {
   }, [
     boardId,
   ]);
+
+  useEffect(() => {
+    const query =
+      entrySearch
+        .trim()
+        .toLowerCase();
+
+    setDbEntrySearchResults(
+      [],
+    );
+
+    if (
+      !boardId ||
+      query.length < 2
+    ) {
+      setSearchingAllEntries(
+        false,
+      );
+      return;
+    }
+
+    const localMatches =
+      entries.filter(
+        (item) =>
+          matchesSearch(
+            query,
+            item.listing.title,
+            item.listing.handle,
+          ),
+      );
+
+    if (
+      localMatches.length >
+      0
+    ) {
+      setSearchingAllEntries(
+        false,
+      );
+      return;
+    }
+
+    const cacheKey =
+      `${boardId}:${query}`;
+
+    const cached =
+      entrySearchCache
+        .current
+        .get(
+          cacheKey,
+        );
+
+    if (cached) {
+      setDbEntrySearchResults(
+        cached,
+      );
+      setSearchingAllEntries(
+        false,
+      );
+      return;
+    }
+
+    let cancelled =
+      false;
+
+    const timer =
+      window.setTimeout(
+        () => {
+          setSearchingAllEntries(
+            true,
+          );
+
+          void searchBoardEntries(
+            boardId,
+            query,
+            20,
+          )
+            .then(
+              (result) => {
+                if (
+                  cancelled
+                ) {
+                  return;
+                }
+
+                entrySearchCache
+                  .current
+                  .set(
+                    cacheKey,
+                    result,
+                  );
+
+                setDbEntrySearchResults(
+                  result,
+                );
+              },
+            )
+            .catch(
+              (searchError) => {
+                console.error(
+                  "Board listing search failed:",
+                  searchError,
+                );
+              },
+            )
+            .finally(
+              () => {
+                if (
+                  !cancelled
+                ) {
+                  setSearchingAllEntries(
+                    false,
+                  );
+                }
+              },
+            );
+        },
+        500,
+      );
+
+    return () => {
+      cancelled = true;
+
+      window.clearTimeout(
+        timer,
+      );
+    };
+  }, [
+    boardId,
+    entries,
+    entrySearch,
+  ]);
+
+  async function loadMoreEntries() {
+    if (
+      !boardId ||
+      !entryCursor ||
+      !hasMoreEntries ||
+      loadingMoreEntries
+    ) {
+      return;
+    }
+
+    try {
+      setLoadingMoreEntries(
+        true,
+      );
+
+      const result =
+        await getBoardEntriesPage(
+          boardId,
+          entryCursor,
+          20,
+        );
+
+      setEntries(
+        (current) => [
+          ...current,
+          ...result.items.filter(
+            (nextItem) =>
+              !current.some(
+                (currentItem) =>
+                  currentItem.entry.id ===
+                  nextItem.entry.id,
+              ),
+          ),
+        ],
+      );
+
+      setEntryCursor(
+        result.cursor,
+      );
+
+      setHasMoreEntries(
+        result.hasMore,
+      );
+    } catch (loadError) {
+      console.error(
+        "Failed to load more Board listings:",
+        loadError,
+      );
+    } finally {
+      setLoadingMoreEntries(
+        false,
+      );
+    }
+  }
 
   const entryState =
     useMemo(
@@ -296,42 +550,28 @@ export function BoardDetailPage() {
     );
   }
 
-  const pushTargets:
-    PushUpTarget[] =
-      entries.map(
-        (item) => ({
-          id:
-            item.entry.listingId,
+  const query =
+    entrySearch
+      .trim()
+      .toLowerCase();
 
-          paymentTargetKind:
-            "board_entry",
+  const localEntryMatches =
+    query
+      ? entries.filter(
+          (item) =>
+            matchesSearch(
+              query,
+              item.listing.title,
+              item.listing.handle,
+            ),
+        )
+      : entries;
 
-          paymentTargetId:
-            `${item.entry.boardId}_${item.entry.listingId}`,
-
-          purpose:
-            "board_entry_push",
-
-          title:
-            item.listing.title,
-
-          handle:
-            item.listing.handle,
-
-          imageUrl:
-            item.listing.featuredImageUrl,
-
-          currentBoostTotalMinor:
-            item.entry.boostTotalMinor,
-
-          minimumAmountMinor:
-            board.minimumBoostMinor,
-
-          currency:
-            board.currency,
-        }),
-      );
-
+  const displayEntries =
+    query &&
+    localEntryMatches.length === 0
+      ? dbEntrySearchResults
+      : localEntryMatches;
   return (
     <main className="board-detail-page">
 
@@ -376,7 +616,9 @@ export function BoardDetailPage() {
                 {"\u00B7"}
               </span>
 
-              {entries.length} entries
+              {hasMoreEntries
+                ? `${entries.length}+ entries`
+                : `${entries.length} entries`}
             </p>
           </div>
 
@@ -499,33 +741,70 @@ export function BoardDetailPage() {
             </h2>
           </div>
 
-          <small>
-            Entry fee does not affect ranking.
-          </small>
+          <div className="board-entry-search-wrap">
+            <label className="board-entry-search">
+              <Search size={15} />
+
+              <input
+                type="search"
+                value={entrySearch}
+                onChange={(event) =>
+                  setEntrySearch(
+                    event.target.value,
+                  )
+                }
+                placeholder="Search title or @handle"
+              />
+            </label>
+
+            {searchingAllEntries && (
+              <small className="board-entry-search-note">
+                Searching all Board listings...
+              </small>
+            )}
+
+            <small>
+              Entry fee does not affect ranking.
+            </small>
+          </div>
         </div>
 
-        {entries.length > 0 ? (
+        {displayEntries.length > 0 ? (
           <div className="board-entry-leaderboard">
-            {entries.map(
+            {displayEntries.map(
               (
                 item,
-                index,
               ) => {
+                const loadedIndex =
+                  entries.findIndex(
+                    (loadedItem) =>
+                      loadedItem.entry.id ===
+                      item.entry.id,
+                  );
+
                 const rank =
-                  index + 1;
+                  loadedIndex >= 0
+                    ? loadedIndex + 1
+                    : null;
 
                 return (
                   <article
-                    className={`board-entry-row board-entry-rank-${Math.min(
-                      rank,
-                      3,
-                    )}`}
+                    className={
+                      rank
+                        ? `board-entry-row board-entry-rank-${Math.min(
+                            rank,
+                            3,
+                          )}`
+                        : "board-entry-row"
+                    }
                     key={
                       item.entry.listingId
                     }
                   >
                     <span className="board-entry-rank">
-                      #{rank}
+                      {rank
+                        ? `#${rank}`
+                        : "-"}
                     </span>
 
                     <span className="board-entry-avatar">
@@ -606,9 +885,39 @@ export function BoardDetailPage() {
                           board.endsAt,
                         ).getTime() ? (
                         <PushUpLauncher
-                          targets={
-                            pushTargets
-                          }
+                          targets={[
+                            {
+                              id:
+                                item.entry.listingId,
+
+                              paymentTargetKind:
+                                "board_entry",
+
+                              paymentTargetId:
+                                `${item.entry.boardId}_${item.entry.listingId}`,
+
+                              purpose:
+                                "board_entry_push",
+
+                              title:
+                                item.listing.title,
+
+                              handle:
+                                item.listing.handle,
+
+                              imageUrl:
+                                item.listing.featuredImageUrl,
+
+                              currentBoostTotalMinor:
+                                item.entry.boostTotalMinor,
+
+                              minimumAmountMinor:
+                                board.minimumBoostMinor,
+
+                              currency:
+                                board.currency,
+                            } satisfies PushUpTarget,
+                          ]}
                           initialTargetId={
                             item.entry.listingId
                           }
@@ -653,6 +962,26 @@ export function BoardDetailPage() {
             </p>
           </div>
         )}
+
+        {!entrySearch.trim() &&
+          hasMoreEntries && (
+            <div className="board-entry-load-more-wrap">
+              <button
+                className="board-entry-load-more"
+                type="button"
+                disabled={
+                  loadingMoreEntries
+                }
+                onClick={() =>
+                  void loadMoreEntries()
+                }
+              >
+                {loadingMoreEntries
+                  ? "Loading..."
+                  : "Load More"}
+              </button>
+            </div>
+          )}
       </section>
     </main>
   );
