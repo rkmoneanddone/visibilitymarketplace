@@ -86,6 +86,43 @@ function isBoardClosed(
   );
 }
 
+function getBoardEntryWindowState(
+  board: Board,
+):
+  | "upcoming"
+  | "open"
+  | "closed" {
+  const now =
+    Date.now();
+
+  const entryStartsAt =
+    new Date(
+      board.entryStartsAt,
+    ).getTime();
+
+  const entryClosesAt =
+    new Date(
+      board.entryClosesAt,
+    ).getTime();
+
+  if (
+    Number.isNaN(entryStartsAt) ||
+    Number.isNaN(entryClosesAt)
+  ) {
+    return "closed";
+  }
+
+  if (now < entryStartsAt) {
+    return "upcoming";
+  }
+
+  if (now >= entryClosesAt) {
+    return "closed";
+  }
+
+  return "open";
+}
+
 function boardSortTime(
   board: Board,
 ): number {
@@ -150,6 +187,11 @@ function BoardCard({
   board,
   closed,
 }: BoardCardProps) {
+  const entryWindowState =
+    getBoardEntryWindowState(
+      board,
+    );
+
   return (
     <article
       className={
@@ -279,21 +321,35 @@ function BoardCard({
             <Share2 size={15} />
           </button>
 
-          {!closed && (
-            <BoardEntryLauncher
-              board={board}
-            >
-              {(openEntry) => (
-                <button
-                  className="board-card-add-listing"
-                  type="button"
-                  onClick={openEntry}
-                >
-                  Enter This Board
-                </button>
-              )}
-            </BoardEntryLauncher>
-          )}
+          {!closed &&
+            entryWindowState === "open" && (
+              <BoardEntryLauncher
+                board={board}
+              >
+                {(openEntry) => (
+                  <button
+                    className="board-card-add-listing"
+                    type="button"
+                    onClick={openEntry}
+                  >
+                    Enter This Board
+                  </button>
+                )}
+              </BoardEntryLauncher>
+            )}
+
+          {!closed &&
+            entryWindowState !== "open" && (
+              <button
+                className="board-card-add-listing"
+                type="button"
+                disabled
+              >
+                {entryWindowState === "upcoming"
+                  ? "Entry opens soon"
+                  : "Entry closed"}
+              </button>
+            )}
 
           <Link
             className={

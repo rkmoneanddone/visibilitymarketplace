@@ -1704,3 +1704,400 @@
 }
 
 /* END VISIBILITY MARKETPLACE CENTER BOARD PRICES DESKTOP V1 */
+
+/* BEGIN VIEWBID COMPACT BOARD DETAIL V4 */
+
+/* Reduce desktop card density without changing structure. */
+.board-summary-row-main {
+  gap: 16px !important;
+  padding: 9px 11px 8px !important;
+}
+
+.board-schedule-card {
+  padding: 9px 11px !important;
+}
+
+.board-entries-card {
+  padding: 10px 11px !important;
+}
+
+/* Schedule: compact 2 x 2 reading order. */
+.board-schedule-grid {
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px 22px !important;
+  margin-top: 7px !important;
+}
+
+.board-schedule-grid div {
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 5px !important;
+}
+
+.board-schedule-grid dt,
+.board-schedule-grid dd {
+  font-size: 12px !important;
+  line-height: 1.3;
+}
+
+.board-schedule-grid dd {
+  color: #111111 !important;
+  font-weight: 500 !important;
+}
+
+/* Mobile hero:
+   title/category first;
+   prices and entry state/action share the next row. */
+@media (max-width: 700px) {
+  .board-summary-row-main {
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto !important;
+    gap: 5px 8px !important;
+    padding: 8px 8px 7px !important;
+  }
+
+  .board-summary-identity {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+  }
+
+  .board-summary h1 {
+    font-size: 18px !important;
+    line-height: 1.12 !important;
+  }
+
+  .board-summary-meta {
+    margin-top: 2px !important;
+  }
+
+  .board-summary-prices-top {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    align-self: center !important;
+    margin: 0 !important;
+    gap: 14px !important;
+  }
+
+  .board-summary-prices-top span {
+    display: inline-flex !important;
+    align-items: baseline !important;
+    gap: 4px !important;
+  }
+
+  .board-summary-prices-top small {
+    font-size: 10px !important;
+  }
+
+  .board-summary-prices-top strong {
+    font-size: 14px !important;
+  }
+
+  .board-entry-link {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    align-self: center !important;
+    justify-self: end !important;
+    margin: 0 !important;
+    min-height: 31px !important;
+    padding: 0 10px !important;
+    font-size: 10.5px !important;
+  }
+
+  .board-schedule-card {
+    padding: 8px 9px !important;
+  }
+
+  .board-section-title {
+    gap: 4px !important;
+  }
+
+  .board-section-title h2 {
+    font-size: 14px !important;
+  }
+
+  .board-schedule-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px 10px !important;
+    margin-top: 6px !important;
+  }
+
+  .board-schedule-grid div {
+    grid-template-columns: 1fr !important;
+    gap: 1px !important;
+  }
+
+  .board-schedule-grid dt,
+  .board-schedule-grid dd {
+    font-size: 11px !important;
+  }
+
+  .board-schedule-grid dd {
+    color: #111111 !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .board-summary-row-main {
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto !important;
+  }
+
+  .board-summary-identity {
+    grid-column: 1 / -1 !important;
+  }
+
+  .board-summary-prices-top {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+  }
+
+  .board-entry-link {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+  }
+}
+
+/* END VIEWBID COMPACT BOARD DETAIL V4 */
+
+/* BEGIN VIEWBID BOARD DETAIL INLINE SCHEDULE V5 */
+
+/* Make the Board hero visibly tighter on desktop too. */
+.board-summary-row-main {
+  padding:
+    7px
+    9px
+    6px !important;
+  gap: 10px !important;
+}
+
+.board-detail-kicker {
+  margin-bottom: 0 !important;
+}
+
+.board-summary-meta {
+  margin-top: 1px !important;
+}
+
+.board-summary-prices-top {
+  margin-top: 0 !important;
+}
+
+.board-entry-link {
+  margin-top: 0 !important;
+}
+
+/* Schedule items: label and datetime stay on the SAME line. */
+.board-schedule-grid {
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr)) !important;
+  gap:
+    6px
+    16px !important;
+}
+
+.board-schedule-grid div {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 4px !important;
+  min-width: 0;
+}
+
+.board-schedule-grid dt,
+.board-schedule-grid dd {
+  margin: 0 !important;
+  font-size: 12px !important;
+  line-height: 1.25 !important;
+  white-space: nowrap;
+}
+
+.board-schedule-grid dt::after {
+  content: ":";
+}
+
+.board-schedule-grid dd {
+  color: #111111 !important;
+  font-weight: 500 !important;
+}
+
+/* Mobile: compact card and keep both schedule columns inline. */
+@media (max-width: 700px) {
+  .board-summary-row-main {
+    padding:
+      6px
+      7px
+      5px !important;
+    gap:
+      3px
+      6px !important;
+  }
+
+  .board-summary h1 {
+    margin-top: 0 !important;
+  }
+
+  .board-summary-prices-top {
+    gap: 10px !important;
+  }
+
+  .board-summary-prices-top span {
+    gap: 3px !important;
+  }
+
+  .board-entry-link {
+    min-height: 29px !important;
+    padding:
+      0
+      9px !important;
+  }
+
+  .board-schedule-card {
+    padding:
+      7px
+      8px !important;
+  }
+
+  .board-schedule-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+    gap:
+      5px
+      8px !important;
+    margin-top: 5px !important;
+  }
+
+  .board-schedule-grid div {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 3px !important;
+    min-width: 0;
+  }
+
+  .board-schedule-grid dt,
+  .board-schedule-grid dd {
+    font-size: 10.5px !important;
+    white-space: nowrap !important;
+  }
+
+  .board-schedule-grid dd {
+    color: #111111 !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .board-schedule-grid {
+    gap:
+      5px
+      6px !important;
+  }
+
+  .board-schedule-grid dt,
+  .board-schedule-grid dd {
+    font-size: 10px !important;
+  }
+}
+
+/* END VIEWBID BOARD DETAIL INLINE SCHEDULE V5 */
+
+/* BEGIN VIEWBID BOARD HERO TYPOGRAPHY V6 */
+
+/* Match the Board title more closely to the main site-brand feel. */
+.board-summary h1 {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  line-height: 1.12 !important;
+  letter-spacing: -0.02em !important;
+}
+
+/* Keep category, status and entry count secondary. */
+.board-summary-meta {
+  margin-top: 1px !important;
+  gap: 4px !important;
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+}
+
+/* Make the small BOARD label quieter too. */
+.board-detail-kicker {
+  font-size: 10.5px !important;
+  line-height: 1.1 !important;
+}
+
+/* Tighter overall hero card. */
+.board-summary-row-main {
+  padding:
+    5px
+    7px
+    5px !important;
+  gap: 7px !important;
+}
+
+.board-summary-prices-top {
+  gap: 9px !important;
+}
+
+.board-summary-prices-top small {
+  font-size: 9.5px !important;
+}
+
+.board-summary-prices-top strong {
+  font-size: 13.5px !important;
+}
+
+.board-entry-link {
+  min-height: 28px !important;
+  padding:
+    0
+    8px !important;
+  font-size: 10px !important;
+}
+
+/* Mobile gets the same hierarchy, just slightly tighter. */
+@media (max-width: 700px) {
+  .board-summary-row-main {
+    padding:
+      4px
+      6px
+      4px !important;
+    gap:
+      2px
+      5px !important;
+  }
+
+  .board-summary h1 {
+    font-size: 17px !important;
+  }
+
+  .board-summary-meta {
+    font-size: 10.5px !important;
+  }
+
+  .board-detail-kicker {
+    font-size: 10px !important;
+  }
+
+  .board-summary-prices-top {
+    gap: 8px !important;
+  }
+
+  .board-summary-prices-top small {
+    font-size: 9px !important;
+  }
+
+  .board-summary-prices-top strong {
+    font-size: 13px !important;
+  }
+
+  .board-entry-link {
+    min-height: 27px !important;
+    padding:
+      0
+      8px !important;
+    font-size: 9.5px !important;
+  }
+}
+
+/* END VIEWBID BOARD HERO TYPOGRAPHY V6 */

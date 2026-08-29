@@ -947,6 +947,43 @@ function handleListingCreated(
   );
 }
 
+function getBoardPreviewEntryState(
+  board: Board,
+):
+  | "upcoming"
+  | "open"
+  | "closed" {
+  const now =
+    Date.now();
+
+  const entryStartsAt =
+    new Date(
+      board.entryStartsAt,
+    ).getTime();
+
+  const entryClosesAt =
+    new Date(
+      board.entryClosesAt,
+    ).getTime();
+
+  if (
+    Number.isNaN(entryStartsAt) ||
+    Number.isNaN(entryClosesAt)
+  ) {
+    return "closed";
+  }
+
+  if (now < entryStartsAt) {
+    return "upcoming";
+  }
+
+  if (now >= entryClosesAt) {
+    return "closed";
+  }
+
+  return "open";
+}
+
 function BoardsPreview() {
   const [boards, setBoards] =
     useState<Board[]>([]);
@@ -1009,10 +1046,18 @@ function BoardsPreview() {
               <span className="home-board-preview-accent" />
 
               <span className="home-board-preview-status">
-                {board.status === "active" ||
-                board.status === "entry_open"
-                  ? "LIVE"
-                  : "OPEN"}
+                {getBoardPreviewEntryState(
+                  board,
+                ) === "closed"
+                  ? "ENTRY CLOSED"
+                  : getBoardPreviewEntryState(
+                        board,
+                      ) === "upcoming"
+                    ? "SOON"
+                    : board.status === "active" ||
+                        board.status === "entry_open"
+                      ? "LIVE"
+                      : "OPEN"}
               </span>
 
               <span className="home-board-preview-copy">
@@ -1041,17 +1086,35 @@ function BoardsPreview() {
               </span>
 
               <span className="home-board-preview-actions">
-                <BoardEntryLauncher
-                  board={board}
-                >
-                  {(openEntry) => (
-                    <button
-                      className="home-board-preview-add"
-                      type="button"
-                      onClick={openEntry}
-                    >Enter This Board</button>
-                  )}
-                </BoardEntryLauncher>
+                {getBoardPreviewEntryState(
+                  board,
+                ) === "open" ? (
+                  <BoardEntryLauncher
+                    board={board}
+                  >
+                    {(openEntry) => (
+                      <button
+                        className="home-board-preview-add"
+                        type="button"
+                        onClick={openEntry}
+                      >
+                        Enter This Board
+                      </button>
+                    )}
+                  </BoardEntryLauncher>
+                ) : (
+                  <button
+                    className="home-board-preview-add"
+                    type="button"
+                    disabled
+                  >
+                    {getBoardPreviewEntryState(
+                      board,
+                    ) === "upcoming"
+                      ? "Entry opens soon"
+                      : "Entry closed"}
+                  </button>
+                )}
 
                 <a
                   className="home-board-preview-action"

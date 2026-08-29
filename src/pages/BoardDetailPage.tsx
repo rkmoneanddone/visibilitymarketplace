@@ -457,19 +457,10 @@ export function BoardDetailPage() {
           </div>
 
           <div>
-            <dt>Entry opens</dt>
+            <dt>Entry starts</dt>
             <dd>
               {formatDate(
                 board.entryStartsAt,
-              )}
-            </dd>
-          </div>
-
-          <div>
-            <dt>Entry closes</dt>
-            <dd>
-              {formatDate(
-                board.entryClosesAt,
               )}
             </dd>
           </div>
@@ -479,6 +470,15 @@ export function BoardDetailPage() {
             <dd>
               {formatDate(
                 board.endsAt,
+              )}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Entry closes</dt>
+            <dd>
+              {formatDate(
+                board.entryClosesAt,
               )}
             </dd>
           </div>
@@ -595,29 +595,39 @@ export function BoardDetailPage() {
                         {item.entry.externalClicks ?? 0} clicks
                       </span>
 
-                      <PushUpLauncher
-                        targets={
-                          pushTargets
-                        }
-                        initialTargetId={
-                          item.entry.listingId
-                        }
-                        contextLabel={`${board.name} Board`}
-                      >
-                        {(openPushUp) => (
-                          <button
-                            type="button"
-                            onClick={
-                              openPushUp
-                            }
-                          >
-                            <ArrowUp
-                              size={13}
-                            />
-                            Push Up
-                          </button>
-                        )}
-                      </PushUpLauncher>
+                      {entryState.canEnter ||
+                      Date.now() <
+                        new Date(
+                          board.endsAt,
+                        ).getTime() ? (
+                        <PushUpLauncher
+                          targets={
+                            pushTargets
+                          }
+                          initialTargetId={
+                            item.entry.listingId
+                          }
+                          contextLabel={`${board.name} Board`}
+                        >
+                          {(openPushUp) => (
+                            <button
+                              type="button"
+                              onClick={
+                                openPushUp
+                              }
+                            >
+                              <ArrowUp
+                                size={13}
+                              />
+                              Push Up
+                            </button>
+                          )}
+                        </PushUpLauncher>
+                      ) : (
+                        <span className="board-entry-final-label">
+                          Final
+                        </span>
+                      )}
                     </span>
                   </article>
                 );
