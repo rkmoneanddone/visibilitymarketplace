@@ -268,21 +268,6 @@ const targetOptions = useMemo(
     form.listingTypeId ===
     "website";
 
-  const listingType =
-    initialListingTypes.find(
-      (type) =>
-        type.id ===
-        form.listingTypeId ||
-        type.key ===
-        form.listingTypeId,
-    );
-
-  const freeListing =
-    marketplaceConfig.pricing
-      .freeListingEnabled &&
-    (listingType?.freeListingAllowance ??
-      0) > 0;
-
   function updateField<
     K extends keyof ListingFormData,
   >(
@@ -532,21 +517,13 @@ const mainLinkLabel =
         {/* VIEWBID BOARD HIDE NORMAL STATUS STRIP */}
         {!boardContext && (
 <div className="listing-status-strip">
-          <span
-            className={
-              freeListing
-                ? "listing-status-badge free"
-                : "listing-status-badge paid"
-            }
-          >
-            {freeListing
-              ? "FREE LISTING"
-              : "PAID LISTING"}
+          <span className="listing-status-badge paid">
+            LISTING SUBMISSION
           </span>
 
           <span className="listing-status-copy">
             <Sparkles size={13} />
-            Put it on the visibility board.
+            Admin review required. Listing fee does not affect ranking.
           </span>
 
           <span className="listing-push-note">
@@ -562,11 +539,11 @@ const mainLinkLabel =
                 {boardContext && (
           <div className="listing-board-fee-note">
             <span>
-              Add Listing to Board
+              Listing fee confirmed before payment
             </span>
 
             <strong>
-              Entry{" "}
+              Board entry{" "}
               {new Intl.NumberFormat(
                 undefined,
                 {

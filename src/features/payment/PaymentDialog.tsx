@@ -147,9 +147,17 @@ export function PaymentDialog({
     }
   }
 
-  const isBoardEntry =
+  const paymentSafetyCopy =
     request.purpose ===
-    "board_entry";
+      "board_entry"
+      ? "Board entry payment activates participation only. It does not improve Board rank."
+      : request.purpose ===
+          "listing_submission"
+        ? "The Listing fee sends this Listing to Admin review. Approval is required and the fee does not improve ranking."
+        : request.purpose ===
+            "board_activation"
+          ? "The activation fee starts an Admin-approved Board. It does not improve Board ranking."
+          : "Only verified Push Up payments affect ranking.";
 
   return (
     <div
@@ -214,9 +222,7 @@ export function PaymentDialog({
           <ShieldCheck size={16} />
 
           <span>
-            {isBoardEntry
-              ? "Board entry payment activates participation only. It does not improve Board rank."
-              : "Paid visibility affects ranking only after verified payment."}
+            {paymentSafetyCopy}
           </span>
         </div>
 

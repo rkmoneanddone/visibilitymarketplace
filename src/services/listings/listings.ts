@@ -187,7 +187,7 @@ listingTypeId:
       : {}),
 
     status:
-      "submitted",
+      "payment_pending",
 
     externalClicks:
       0,

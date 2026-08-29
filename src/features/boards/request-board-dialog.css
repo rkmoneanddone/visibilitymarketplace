@@ -133,3 +133,41 @@
 }
 
 /* END VIEWBID REQUEST BOARD EXPLICIT -1PT V2 */
+
+/* VIEWBID BOARD ENTRY CHOICE V2 */
+.board-entry-choice-dialog {
+  max-width: 620px;
+}
+
+.board-entry-choice-actions {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.board-entry-choice-actions p {
+  margin: 0.6rem 0 0;
+  font-size: 0.88rem;
+  opacity: 0.72;
+}
+
+.board-entry-existing-listings {
+  display: grid;
+  gap: 0.55rem;
+  padding: 1rem;
+}
+
+.board-entry-existing-listings h3 {
+  margin: 0 0 0.3rem;
+}
+
+.board-entry-existing-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  text-align: left;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.75rem;
+  cursor: pointer;
+}

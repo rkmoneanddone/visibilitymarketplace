@@ -1,5 +1,6 @@
 export type BoardStatus =
     | "requested"
+    | "awaiting_activation_payment"
     | "approved"
     | "entry_open"
     | "active"
@@ -24,6 +25,13 @@ export interface Board {
     approvedByAdminUserId?: string;
 
     status: BoardStatus;
+
+    activationFeeMinor?: number;
+    activationPaymentStatus?:
+      | "unpaid"
+      | "paid";
+    activationPaymentId?: string;
+    activatedAt?: string;
 
     listingTypeId: string;
 
@@ -63,6 +71,7 @@ export type BoardEntryStatus =
 export interface BoardEntry {
     id: string;
     boardId: string;
+    boardName?: string;
     listingId: string;
 
     submittedByUserId: string;

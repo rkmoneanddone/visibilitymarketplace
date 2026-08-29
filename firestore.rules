@@ -27,7 +27,7 @@ service cloud.firestore {
       allow create:
         if request.auth != null
         && request.resource.data.submittedByUserId == request.auth.uid
-        && request.resource.data.status == "submitted"
+        && request.resource.data.status == "payment_pending"
         && request.resource.data.externalClicks == 0
         && request.resource.data.currentBoostTotalMinor == 0
         && request.resource.data.visibilityScope in [

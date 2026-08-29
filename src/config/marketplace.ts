@@ -6,8 +6,8 @@ export const marketplaceConfig = {
   pricing: {
     freeListingEnabled: true,
     freeListingLabel: "100% FREE",
-    boardVisibilityAmountMinor: 100,
-    boardVisibilityLabel: "$1 Board Visibility",
+    boardVisibilityAmountMinor: 200,
+    boardVisibilityLabel: "$2 Board Activation",
   },
 
   terminology: {
@@ -25,6 +25,6 @@ export const marketplaceConfig = {
   promotion: {
     allowThirdPartySubmissions: true,
     allowOwnerSubmissions: true,
-    allowListingClaims: true,
+    allowListingClaims: false,
   },
 } as const;

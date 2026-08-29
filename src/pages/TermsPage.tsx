@@ -33,7 +33,7 @@ export function TermsPage() {
         </h2>
 
         <p>
-          Paid Push Ups affect visibility ranking only in the place where the Push Up is made. Public and Board rankings are separate. A Board entry fee does not improve Board rank.
+          Only verified Push Up payments affect visibility ranking. Public and Board rankings are separate. Listing submission fees, Board activation fees and Board entry fees do not improve ranking.
         </p>
 
         <h2>
@@ -41,7 +41,7 @@ export function TermsPage() {
         </h2>
 
         <p>
-          Successfully processed visibility, Board entry and Push Up payments are generally non-refundable because service, payment processing and infrastructure costs may already have been incurred, except where applicable law requires otherwise.
+          Listing submission fees may be free or paid depending on current platform configuration and pay for submission and review processing; payment does not guarantee approval. Board activation and Board entry fees pay for the applicable platform service and do not improve ranking. Displayed prices may change for new transactions when platform pricing is updated. Once a paid Listing submission is prepared, its fee is snapshotted for that transaction. Successfully processed payments are generally non-refundable once the relevant service or processing has begun, except where applicable law requires otherwise or where a platform payment error occurred.
         </p>
 
         <h2>

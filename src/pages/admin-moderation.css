@@ -498,3 +498,62 @@
 }
 
 /* END ADMIN MOBILE SURFACE V3 */
+
+/* VIEWBID ADMIN PRICING V2 */
+.admin-listing-payment,
+.admin-pricing-note,
+.admin-pricing-message {
+  font-size: 0.88rem;
+  opacity: 0.78;
+}
+
+.admin-pricing-panel {
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 16px;
+  background: #fff;
+  padding: 1rem;
+}
+
+.admin-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0;
+}
+
+.admin-pricing-grid label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.admin-pricing-grid input,
+.admin-pricing-type-row input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-pricing-types {
+  margin: 1rem 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.admin-pricing-types-head,
+.admin-pricing-type-row {
+  display: grid;
+  grid-template-columns: minmax(110px, 1fr) 140px 140px;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+@media (max-width: 620px) {
+  .admin-pricing-types-head {
+    display: none;
+  }
+
+  .admin-pricing-type-row {
+    grid-template-columns: 1fr;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  }
+}

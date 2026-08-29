@@ -14,6 +14,7 @@ import {
 
 import {
   fulfillVerifiedPayment,
+  getMarketplacePricingConfig,
   validatePaymentRequest,
 } from "./paymentCore";
 initializeApp();
@@ -261,12 +262,12 @@ export const requestBoard =
           entryFeeMinor,
         ) ||
         entryFeeMinor < 100 ||
-        entryFeeMinor > 10000 ||
+        entryFeeMinor > 99900 ||
         entryFeeMinor % 100 !== 0
       ) {
         throw new HttpsError(
           "invalid-argument",
-          "Entry fee must be a whole dollar amount between $1 and $100.",
+          "Entry fee must be a whole dollar amount between $1 and $999.",
         );
       }
 
@@ -277,14 +278,14 @@ export const requestBoard =
         minimumBoostMinor <
         100 ||
         minimumBoostMinor >
-        10000 ||
+        99900 ||
         minimumBoostMinor %
         100 !==
         0
       ) {
         throw new HttpsError(
           "invalid-argument",
-          "Minimum Push Up must be a whole dollar amount between $1 and $100.",
+          "Minimum Push Up must be a whole dollar amount between $1 and $999.",
         );
       }
 
@@ -376,6 +377,39 @@ export const requestBoard =
           "",
         );
 
+      const pricingConfig =
+        await getMarketplacePricingConfig(
+          db,
+        );
+
+      if (
+        entryFeeMinor <
+          pricingConfig
+            .boardEntryMinimumMinor ||
+        entryFeeMinor >
+          pricingConfig
+            .maximumPaymentMinor
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Board Entry fee is outside the current Admin pricing limits.",
+        );
+      }
+
+      if (
+        minimumBoostMinor <
+          pricingConfig
+            .boardPushMinimumMinor ||
+        minimumBoostMinor >
+          pricingConfig
+            .maximumPaymentMinor
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Board minimum Push Up is outside the current Admin pricing limits.",
+        );
+      }
+
       const boardRef =
         db
           .collection("boards")
@@ -428,6 +462,19 @@ export const requestBoard =
 
               status:
                 "requested",
+
+              activationFeeMinor:
+                pricingConfig
+                  .boardActivationFeeMinor,
+
+              activationPaymentStatus:
+                "unpaid",
+
+              activationPaymentId:
+                null,
+
+              activatedAt:
+                null,
 
               listingTypeId,
 
@@ -687,9 +734,11 @@ export const approveBoard =
 
           if (
             board.status ===
-            "approved" ||
+              "awaiting_activation_payment" ||
             board.status ===
-            "entry_open"
+              "approved" ||
+            board.status ===
+              "entry_open"
           ) {
             return;
           }
@@ -710,7 +759,11 @@ export const approveBoard =
           transaction.update(
             boardRef,
             {
-              status: "approved",
+              status:
+                "awaiting_activation_payment",
+
+              activationPaymentStatus:
+                "unpaid",
 
               approvedByAdminUserId:
                 request.auth!.uid,
@@ -1304,6 +1357,418 @@ const listingId =
 
 /* END VIEWBID CREATE PUSH UP INTENT V1 */
 
+/* BEGIN VIEWBID MARKETPLACE PRICING CONFIG V2 */
+
+export const getMarketplacePricing =
+  onCall(
+    {
+      region: "asia-south1",
+    },
+    async () => {
+      const pricing =
+        await getMarketplacePricingConfig(
+          db,
+        );
+
+      return {
+        success: true,
+        pricing,
+      };
+    },
+  );
+
+export const updateMarketplacePricing =
+  onCall(
+    {
+      region: "asia-south1",
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Authentication required.",
+        );
+      }
+
+      await assertAdmin(
+        request.auth.uid,
+      );
+
+      const raw =
+        request.data?.pricing ||
+        {};
+
+      const current =
+        await getMarketplacePricingConfig(
+          db,
+        );
+
+      const maximumPaymentMinor =
+        Number(
+          raw.maximumPaymentMinor ??
+          current.maximumPaymentMinor,
+        );
+
+      if (
+        !Number.isSafeInteger(
+          maximumPaymentMinor,
+        ) ||
+        maximumPaymentMinor < 100 ||
+        maximumPaymentMinor > 99900
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Maximum payment must be between $1 and $999.",
+        );
+      }
+
+      const listingFeesMinor:
+        Record<string, number> = {};
+
+      const publicPushMinimumMinor:
+        Record<string, number> = {};
+
+      for (
+        const typeId
+        of Object.keys(
+          current.listingFeesMinor,
+        )
+      ) {
+        const listingFee =
+          Number(
+            raw.listingFeesMinor?.[
+              typeId
+            ] ??
+            current.listingFeesMinor[
+              typeId
+            ],
+          );
+
+        const pushMinimum =
+          Number(
+            raw.publicPushMinimumMinor?.[
+              typeId
+            ] ??
+            current.publicPushMinimumMinor[
+              typeId
+            ],
+          );
+
+        if (
+          !Number.isSafeInteger(
+            listingFee,
+          ) ||
+          listingFee < 0 ||
+          listingFee >
+            maximumPaymentMinor
+        ) {
+          throw new HttpsError(
+            "invalid-argument",
+            `Listing fee for ${typeId} must be between $0 and $999.`,
+          );
+        }
+
+        if (
+          !Number.isSafeInteger(
+            pushMinimum,
+          ) ||
+          pushMinimum < 100 ||
+          pushMinimum >
+            maximumPaymentMinor
+        ) {
+          throw new HttpsError(
+            "invalid-argument",
+            `Public Push minimum for ${typeId} must be between $1 and $999.`,
+          );
+        }
+
+        listingFeesMinor[
+          typeId
+        ] = listingFee;
+
+        publicPushMinimumMinor[
+          typeId
+        ] = pushMinimum;
+      }
+
+      const boardActivationFeeMinor =
+        Number(
+          raw.boardActivationFeeMinor ??
+          current.boardActivationFeeMinor,
+        );
+
+      const boardEntryMinimumMinor =
+        Number(
+          raw.boardEntryMinimumMinor ??
+          current.boardEntryMinimumMinor,
+        );
+
+      const boardPushMinimumMinor =
+        Number(
+          raw.boardPushMinimumMinor ??
+          current.boardPushMinimumMinor,
+        );
+
+      for (
+        const [
+          label,
+          value,
+        ]
+        of [
+          [
+            "Board activation fee",
+            boardActivationFeeMinor,
+          ],
+          [
+            "Board Entry minimum",
+            boardEntryMinimumMinor,
+          ],
+          [
+            "Board Push minimum",
+            boardPushMinimumMinor,
+          ],
+        ] as const
+      ) {
+        if (
+          !Number.isSafeInteger(
+            value,
+          ) ||
+          value < 100 ||
+          value >
+            maximumPaymentMinor
+        ) {
+          throw new HttpsError(
+            "invalid-argument",
+            `${label} must be between $1 and $999.`,
+          );
+        }
+      }
+
+      const pricing = {
+        listingFeesMinor,
+        publicPushMinimumMinor,
+        boardActivationFeeMinor,
+        boardEntryMinimumMinor,
+        boardPushMinimumMinor,
+        maximumPaymentMinor,
+        currency:
+          "USD" as const,
+      };
+
+      await db
+        .collection(
+          "marketplaceConfig",
+        )
+        .doc("pricing")
+        .set(
+          {
+            ...pricing,
+            updatedByAdminUserId:
+              request.auth.uid,
+            updatedAt:
+              FieldValue.serverTimestamp(),
+          },
+          {
+            merge: true,
+          },
+        );
+
+      return {
+        success: true,
+        pricing,
+      };
+    },
+  );
+
+/* END VIEWBID MARKETPLACE PRICING CONFIG V2 */
+
+/* BEGIN VIEWBID LISTING SUBMISSION PREP V1 */
+
+export const prepareListingSubmission =
+  onCall(
+    {
+      region: "asia-south1",
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Authentication required.",
+        );
+      }
+
+      const listingId =
+        normalizeString(
+          request.data?.listingId,
+        );
+
+      if (!listingId) {
+        throw new HttpsError(
+          "invalid-argument",
+          "listingId is required.",
+        );
+      }
+
+      const listingRef =
+        db
+          .collection("listings")
+          .doc(listingId);
+
+      return db.runTransaction(
+        async (transaction) => {
+          const listingSnap =
+            await transaction.get(
+              listingRef,
+            );
+
+          if (!listingSnap.exists) {
+            throw new HttpsError(
+              "not-found",
+              "Listing not found.",
+            );
+          }
+
+          const listing =
+            listingSnap.data();
+
+          if (
+            normalizeString(
+              listing?.submittedByUserId,
+            ) !== request.auth!.uid
+          ) {
+            throw new HttpsError(
+              "permission-denied",
+              "You can only submit a Listing from your account.",
+            );
+          }
+
+          const status =
+            normalizeString(
+              listing?.status,
+            );
+
+          if (
+            [
+              "submitted",
+              "under_review",
+              "published",
+            ].includes(status)
+          ) {
+            return {
+              success: true,
+              listingId,
+              status,
+              paymentRequired:
+                false,
+              amountMinor:
+                0,
+              currency:
+                "USD",
+            };
+          }
+
+          if (
+            status !==
+            "payment_pending"
+          ) {
+            throw new HttpsError(
+              "failed-precondition",
+              "This Listing cannot be submitted from its current status.",
+            );
+          }
+
+          const pricingConfig =
+            await getMarketplacePricingConfig(
+              db,
+            );
+
+          const typeId =
+            normalizeString(
+              listing?.listingTypeId,
+            );
+
+          const feeMinor =
+            Number(
+              pricingConfig
+                .listingFeesMinor[
+                  typeId
+                ],
+            );
+
+          if (
+            !Number.isSafeInteger(
+              feeMinor,
+            )
+          ) {
+            throw new HttpsError(
+              "failed-precondition",
+              "Listing Type pricing is not configured.",
+            );
+          }
+
+          const now =
+            FieldValue.serverTimestamp();
+
+          if (feeMinor <= 0) {
+            transaction.update(
+              listingRef,
+              {
+                status:
+                  "submitted",
+                submissionFeeMinor:
+                  0,
+                submissionPaymentStatus:
+                  "waived",
+                updatedAt:
+                  now,
+              },
+            );
+
+            return {
+              success: true,
+              listingId,
+              status:
+                "submitted",
+              paymentRequired:
+                false,
+              amountMinor:
+                0,
+              currency:
+                "USD",
+            };
+          }
+
+          transaction.update(
+            listingRef,
+            {
+              submissionFeeMinor:
+                feeMinor,
+              submissionPaymentStatus:
+                "unpaid",
+              updatedAt:
+                now,
+            },
+          );
+
+          return {
+            success: true,
+            listingId,
+            status:
+              "payment_pending",
+            paymentRequired:
+              true,
+            amountMinor:
+              feeMinor,
+            currency:
+              "USD",
+          };
+        },
+      );
+    },
+  );
+
+/* END VIEWBID LISTING SUBMISSION PREP V1 */
+
 /* BEGIN VIEWBID CREATE BOARD ENTRY INTENT V1 */
 
 export const createBoardEntryIntent =
@@ -1511,6 +1976,7 @@ export const createBoardEntryIntent =
 
             if (
               ![
+                "payment_pending",
                 "submitted",
                 "under_review",
                 "published",
@@ -1608,6 +2074,10 @@ export const createBoardEntryIntent =
                   entryId,
 
                 boardId,
+                boardName:
+                  normalizeString(
+                    board.name,
+                  ),
                 listingId,
 
                 searchTokens:
@@ -1757,6 +2227,8 @@ export const createPaymentIntent =
         await validatePaymentRequest(
           db,
           request.data,
+          request.auth?.uid ??
+            null,
         );
 
       const paymentRef =

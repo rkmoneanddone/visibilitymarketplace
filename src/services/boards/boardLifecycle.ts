@@ -7,6 +7,7 @@ const TERMINAL_BOARD_STATUSES:
   ReadonlySet<BoardStatus> =
   new Set([
     "requested",
+    "awaiting_activation_payment",
     "rejected",
     "cancelled",
     "expired",

@@ -110,6 +110,13 @@ export interface Listing {
 
   status: ListingStatus;
 
+  submissionFeeMinor?: number;
+  submissionPaymentStatus?:
+    | "unpaid"
+    | "paid"
+    | "waived";
+  submissionPaymentId?: string;
+
   externalClicks: number;
 
   // Lifetime verified Push Up total.

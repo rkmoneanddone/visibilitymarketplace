@@ -63,6 +63,10 @@ import {
   formatMoneyMinor,
 } from "../lib/marketplace/money";
 
+import {
+  AdminPricingPanel,
+} from "../features/admin/AdminPricingPanel";
+
 
 
 export function AdminModerationPage() {
@@ -91,7 +95,9 @@ export function AdminModerationPage() {
     activeTab,
     setActiveTab,
   ] = useState<
-    "listings" | "boards"
+    "listings" |
+    "boards" |
+    "pricing"
   >("listings");
 
   const [boards, setBoards] =
@@ -434,16 +440,22 @@ export function AdminModerationPage() {
           <h1>
             {activeTab === "listings"
               ? "Pending listings"
-              : "Board requests"}
+              : activeTab === "boards"
+                ? "Board requests"
+                : "Marketplace pricing"}
           </h1>
         </div>
 
-        <span>
-          {activeTab === "listings"
-            ? listings.length
-            : boards.length}{" "}
-          pending
-        </span>
+        {activeTab !==
+          "pricing" && (
+          <span>
+            {activeTab ===
+              "listings"
+              ? listings.length
+              : boards.length}{" "}
+            pending
+          </span>
+        )}
       </header>
 
       <div className="admin-tabs">
@@ -478,7 +490,28 @@ export function AdminModerationPage() {
         >
           Board requests
         </button>
+
+        <button
+          type="button"
+          className={
+            activeTab === "pricing"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setActiveTab(
+              "pricing",
+            )
+          }
+        >
+          Pricing
+        </button>
       </div>
+
+      {activeTab ===
+        "pricing" && (
+        <AdminPricingPanel />
+      )}
 
       {activeTab === "listings" && (
         <>
@@ -582,6 +615,26 @@ export function AdminModerationPage() {
                             {
                               listing.shortDescription
                             }
+                          </p>
+
+                          <p className="admin-listing-payment">
+                            {listing.visibilityScope ===
+                              "board_only"
+                              ? "Board-only Listing"
+                              : "Public Listing"}
+                            {" · "}
+                            Listing fee{" "}
+                            {listing.submissionPaymentStatus ===
+                              "waived"
+                              ? "waived"
+                              : listing.submissionPaymentStatus ===
+                                  "paid"
+                                ? `paid ${formatMoneyMinor(
+                                    listing.submissionFeeMinor ??
+                                      0,
+                                    "USD",
+                                  )}`
+                                : "legacy / not recorded"}
                           </p>
 
                           <div className="admin-listing-links">
@@ -875,4 +928,3 @@ function BoardInfo({
     </div>
   );
 }
-

@@ -8,12 +8,15 @@ import {
 } from "firebase-functions/v2/https";
 
 export type PaymentPurpose =
+  | "listing_submission"
   | "listing_push"
+  | "board_activation"
   | "board_entry"
   | "board_entry_push";
 
 export type PaymentTargetKind =
   | "listing"
+  | "board"
   | "board_entry";
 
 export type PaymentRequestInput = {
@@ -44,56 +47,203 @@ function normalizeString(
   ).trim();
 }
 
-const publicListingPricing:
-  Record<
-    string,
-    {
-      minimumBoostMinor: number;
-      boostingEnabled: boolean;
-    }
-  > = {
-    youtube: {
-      minimumBoostMinor: 100,
-      boostingEnabled: true,
+export type MarketplacePricingConfig = {
+  listingFeesMinor:
+    Record<string, number>;
+  publicPushMinimumMinor:
+    Record<string, number>;
+  boardActivationFeeMinor:
+    number;
+  boardEntryMinimumMinor:
+    number;
+  boardPushMinimumMinor:
+    number;
+  maximumPaymentMinor:
+    number;
+  currency:
+    "USD";
+};
+
+const DEFAULT_PRICING:
+  MarketplacePricingConfig = {
+    listingFeesMinor: {
+      youtube: 100,
+      facebook: 100,
+      instagram: 100,
+      x: 100,
+      app: 299,
+      startup: 499,
+      website: 199,
+      other: 199,
     },
 
-    facebook: {
-      minimumBoostMinor: 100,
-      boostingEnabled: true,
+    publicPushMinimumMinor: {
+      youtube: 100,
+      facebook: 100,
+      instagram: 100,
+      x: 100,
+      app: 100,
+      startup: 100,
+      website: 100,
+      other: 100,
     },
 
-    instagram: {
-      minimumBoostMinor: 100,
-      boostingEnabled: true,
-    },
+    boardActivationFeeMinor:
+      200,
 
-    x: {
-      minimumBoostMinor: 100,
-      boostingEnabled: true,
-    },
+    boardEntryMinimumMinor:
+      100,
 
-    app: {
-      minimumBoostMinor: 100,
-      boostingEnabled: true,
-    },
+    boardPushMinimumMinor:
+      100,
 
-    startup: {
-      minimumBoostMinor: 100,
-      boostingEnabled: true,
-    },
+    maximumPaymentMinor:
+      99900,
 
-    website: {
-      minimumBoostMinor: 100,
-      boostingEnabled: true,
-    },
-
-    other: {
-      minimumBoostMinor: 100,
-      boostingEnabled: true,
-    },
+    currency:
+      "USD",
   };
 
-function getPublicListingPricing(
+function normalizeConfiguredMoney(
+  value: unknown,
+  fallback: number,
+  minimum: number,
+  maximum: number,
+): number {
+  const amount =
+    Number(value);
+
+  if (
+    !Number.isSafeInteger(amount) ||
+    amount < minimum ||
+    amount > maximum
+  ) {
+    return fallback;
+  }
+
+  return amount;
+}
+
+export async function getMarketplacePricingConfig(
+  db: Firestore,
+): Promise<MarketplacePricingConfig> {
+  const snapshot =
+    await db
+      .collection(
+        "marketplaceConfig",
+      )
+      .doc("pricing")
+      .get();
+
+  if (!snapshot.exists) {
+    return {
+      ...DEFAULT_PRICING,
+      listingFeesMinor: {
+        ...DEFAULT_PRICING
+          .listingFeesMinor,
+      },
+      publicPushMinimumMinor: {
+        ...DEFAULT_PRICING
+          .publicPushMinimumMinor,
+      },
+    };
+  }
+
+  const data =
+    snapshot.data() || {};
+
+  const maximumPaymentMinor =
+    normalizeConfiguredMoney(
+      data.maximumPaymentMinor,
+      DEFAULT_PRICING
+        .maximumPaymentMinor,
+      100,
+      99900,
+    );
+
+  const listingFeesMinor:
+    Record<string, number> = {};
+
+  const publicPushMinimumMinor:
+    Record<string, number> = {};
+
+  for (
+    const typeId
+    of Object.keys(
+      DEFAULT_PRICING
+        .listingFeesMinor,
+    )
+  ) {
+    listingFeesMinor[typeId] =
+      normalizeConfiguredMoney(
+        data.listingFeesMinor?.[
+          typeId
+        ],
+        DEFAULT_PRICING
+          .listingFeesMinor[
+            typeId
+          ],
+        0,
+        maximumPaymentMinor,
+      );
+
+    publicPushMinimumMinor[
+      typeId
+    ] =
+      normalizeConfiguredMoney(
+        data.publicPushMinimumMinor?.[
+          typeId
+        ],
+        DEFAULT_PRICING
+          .publicPushMinimumMinor[
+            typeId
+          ],
+        100,
+        maximumPaymentMinor,
+      );
+  }
+
+  return {
+    listingFeesMinor,
+
+    publicPushMinimumMinor,
+
+    boardActivationFeeMinor:
+      normalizeConfiguredMoney(
+        data.boardActivationFeeMinor,
+        DEFAULT_PRICING
+          .boardActivationFeeMinor,
+        100,
+        maximumPaymentMinor,
+      ),
+
+    boardEntryMinimumMinor:
+      normalizeConfiguredMoney(
+        data.boardEntryMinimumMinor,
+        DEFAULT_PRICING
+          .boardEntryMinimumMinor,
+        100,
+        maximumPaymentMinor,
+      ),
+
+    boardPushMinimumMinor:
+      normalizeConfiguredMoney(
+        data.boardPushMinimumMinor,
+        DEFAULT_PRICING
+          .boardPushMinimumMinor,
+        100,
+        maximumPaymentMinor,
+      ),
+
+    maximumPaymentMinor,
+
+    currency:
+      "USD",
+  };
+}
+
+async function getListingTypePricing(
+  db: Firestore,
   listingTypeId: unknown,
 ) {
   const typeId =
@@ -101,15 +251,48 @@ function getPublicListingPricing(
       listingTypeId,
     );
 
-  const pricing =
-    publicListingPricing[
-      typeId
-    ];
+  const config =
+    await getMarketplacePricingConfig(
+      db,
+    );
 
   if (
-    !pricing ||
-    !pricing.boostingEnabled
+    !(typeId in
+      config.listingFeesMinor)
   ) {
+    throw new HttpsError(
+      "failed-precondition",
+      "Listing Type pricing is not configured.",
+    );
+  }
+
+  return {
+    listingFeeMinor:
+      config.listingFeesMinor[
+        typeId
+      ],
+
+    minimumBoostMinor:
+      config.publicPushMinimumMinor[
+        typeId
+      ],
+
+    boostingEnabled:
+      true,
+  };
+}
+
+async function getPublicListingPricing(
+  db: Firestore,
+  listingTypeId: unknown,
+) {
+  const pricing =
+    await getListingTypePricing(
+      db,
+      listingTypeId,
+    );
+
+  if (!pricing.boostingEnabled) {
     throw new HttpsError(
       "failed-precondition",
       "Push Up is not available for this Listing Type.",
@@ -170,7 +353,7 @@ function assertMoney(
       amountMinor,
     ) ||
     amountMinor < 100 ||
-    amountMinor > 10000000
+    amountMinor > 99900
   ) {
     throw new HttpsError(
       "invalid-argument",
@@ -182,6 +365,7 @@ function assertMoney(
 export async function validatePaymentRequest(
   db: Firestore,
   rawInput: unknown,
+  actorUserId: string | null = null,
 ): Promise<ValidatedPaymentIntent> {
   const input =
     rawInput as
@@ -222,7 +406,9 @@ export async function validatePaymentRequest(
 
   if (
     ![
+      "listing_submission",
       "listing_push",
+      "board_activation",
       "board_entry",
       "board_entry_push",
     ].includes(
@@ -238,6 +424,7 @@ export async function validatePaymentRequest(
   if (
     ![
       "listing",
+      "board",
       "board_entry",
     ].includes(
       targetKind,
@@ -266,6 +453,106 @@ export async function validatePaymentRequest(
   assertMoney(
     amountMinor,
   );
+
+  if (
+    purpose ===
+    "listing_submission"
+  ) {
+    if (!actorUserId) {
+      throw new HttpsError(
+        "unauthenticated",
+        "Authentication is required to pay a Listing submission fee.",
+      );
+    }
+
+    if (targetKind !== "listing") {
+      throw new HttpsError(
+        "invalid-argument",
+        "Listing submission payment requires a Listing target.",
+      );
+    }
+
+    const listingSnap =
+      await db
+        .collection("listings")
+        .doc(targetId)
+        .get();
+
+    if (!listingSnap.exists) {
+      throw new HttpsError(
+        "not-found",
+        "Listing not found.",
+      );
+    }
+
+    const listing =
+      listingSnap.data();
+
+    if (
+      normalizeString(
+        listing?.submittedByUserId,
+      ) !== actorUserId
+    ) {
+      throw new HttpsError(
+        "permission-denied",
+        "Only the Listing creator can pay its submission fee.",
+      );
+    }
+
+    if (
+      listing?.status !==
+      "payment_pending"
+    ) {
+      throw new HttpsError(
+        "failed-precondition",
+        "This Listing is not awaiting its submission fee.",
+      );
+    }
+
+    const snapshotFeeMinor =
+      Number(
+        listing?.submissionFeeMinor,
+      );
+
+    if (
+      !Number.isSafeInteger(
+        snapshotFeeMinor,
+      ) ||
+      snapshotFeeMinor <= 0
+    ) {
+      throw new HttpsError(
+        "failed-precondition",
+        "This Listing does not have a valid submission fee snapshot.",
+      );
+    }
+
+    if (
+      amountMinor !==
+      snapshotFeeMinor
+    ) {
+      throw new HttpsError(
+        "invalid-argument",
+        "Listing submission fee does not match the configured Listing Type fee.",
+      );
+    }
+
+    return {
+      purpose,
+      targetKind,
+      targetId,
+      amountMinor,
+      currency,
+      description:
+        description ||
+        "Listing submission - " +
+          String(
+            listing?.title ||
+            "listing",
+          ),
+      listingId:
+        targetId,
+    };
+  }
 
   if (
     purpose === "listing_push"
@@ -323,7 +610,8 @@ export async function validatePaymentRequest(
     }
 
     const pricing =
-      getPublicListingPricing(
+      await getPublicListingPricing(
+        db,
         listing?.listingTypeId,
       );
 
@@ -350,6 +638,132 @@ export async function validatePaymentRequest(
           "listing",
         )}`,
       listingId:
+        targetId,
+    };
+  }
+
+  if (
+    purpose ===
+    "board_activation"
+  ) {
+    if (!actorUserId) {
+      throw new HttpsError(
+        "unauthenticated",
+        "Authentication is required to activate a Board.",
+      );
+    }
+
+    if (targetKind !== "board") {
+      throw new HttpsError(
+        "invalid-argument",
+        "Board activation requires a Board target.",
+      );
+    }
+
+    const boardSnap =
+      await db
+        .collection("boards")
+        .doc(targetId)
+        .get();
+
+    if (!boardSnap.exists) {
+      throw new HttpsError(
+        "not-found",
+        "Board not found.",
+      );
+    }
+
+    const board =
+      boardSnap.data();
+
+    if (
+      normalizeString(
+        board?.createdByUserId,
+      ) !== actorUserId
+    ) {
+      throw new HttpsError(
+        "permission-denied",
+        "Only the Board creator can activate this Board.",
+      );
+    }
+
+    if (
+      board?.status !==
+      "awaiting_activation_payment"
+    ) {
+      throw new HttpsError(
+        "failed-precondition",
+        "This Board is not awaiting activation payment.",
+      );
+    }
+
+    const activationFeeMinor =
+      Number(
+        board?.activationFeeMinor,
+      );
+
+    if (
+      !Number.isSafeInteger(
+        activationFeeMinor,
+      ) ||
+      activationFeeMinor < 100 ||
+      amountMinor !==
+        activationFeeMinor
+    ) {
+      throw new HttpsError(
+        "invalid-argument",
+        "Board activation fee does not match the Board.",
+      );
+    }
+
+    const entryClosesAt =
+      new Date(
+        String(
+          board?.entryClosesAt ||
+          "",
+        ),
+      ).getTime();
+
+    const endsAt =
+      new Date(
+        String(
+          board?.endsAt ||
+          "",
+        ),
+      ).getTime();
+
+    if (
+      Number.isNaN(
+        entryClosesAt,
+      ) ||
+      Number.isNaN(
+        endsAt,
+      ) ||
+      Date.now() >=
+        entryClosesAt ||
+      Date.now() >=
+        endsAt
+    ) {
+      throw new HttpsError(
+        "failed-precondition",
+        "This Board can no longer be activated because its entry window has closed.",
+      );
+    }
+
+    return {
+      purpose,
+      targetKind,
+      targetId,
+      amountMinor,
+      currency,
+      description:
+        description ||
+        "Activate Board - " +
+          String(
+            board?.name ||
+            "Board",
+          ),
+      boardId:
         targetId,
     };
   }
@@ -424,6 +838,24 @@ export async function validatePaymentRequest(
     purpose ===
     "board_entry"
   ) {
+    if (!actorUserId) {
+      throw new HttpsError(
+        "unauthenticated",
+        "Authentication is required to pay a Board Entry fee.",
+      );
+    }
+
+    if (
+      normalizeString(
+        entry?.submittedByUserId,
+      ) !== actorUserId
+    ) {
+      throw new HttpsError(
+        "permission-denied",
+        "Only the Listing creator can pay this Board Entry fee.",
+      );
+    }
+
     if (
       entry?.status !==
       "pending_payment"
@@ -712,6 +1144,155 @@ export async function fulfillVerifiedPayment(
 
       if (
         purpose ===
+        "listing_submission"
+      ) {
+        const listingRef =
+          db
+            .collection(
+              "listings",
+            )
+            .doc(targetId);
+
+        const listingSnap =
+          await transaction.get(
+            listingRef,
+          );
+
+        if (!listingSnap.exists) {
+          throw new Error(
+            "Listing not found during submission payment fulfillment.",
+          );
+        }
+
+        const listing =
+          listingSnap.data();
+
+        if (
+          listing?.status !==
+          "payment_pending"
+        ) {
+          throw new Error(
+            "Listing is no longer awaiting submission payment.",
+          );
+        }
+
+        if (
+          Number(
+            listing?.submissionFeeMinor,
+          ) !== amountMinor
+        ) {
+          throw new Error(
+            "Listing submission amount changed before fulfillment.",
+          );
+        }
+
+        transaction.update(
+          listingRef,
+          {
+            status:
+              "submitted",
+            submissionPaymentStatus:
+              "paid",
+            submissionPaymentId:
+              providerPaymentId,
+            updatedAt:
+              FieldValue.serverTimestamp(),
+          },
+        );
+      } else if (
+        purpose ===
+        "board_activation"
+      ) {
+        const boardRef =
+          db
+            .collection(
+              "boards",
+            )
+            .doc(targetId);
+
+        const boardSnap =
+          await transaction.get(
+            boardRef,
+          );
+
+        if (!boardSnap.exists) {
+          throw new Error(
+            "Board not found during activation payment fulfillment.",
+          );
+        }
+
+        const board =
+          boardSnap.data();
+
+        if (
+          board?.status !==
+          "awaiting_activation_payment"
+        ) {
+          throw new Error(
+            "Board is no longer awaiting activation payment.",
+          );
+        }
+
+        if (
+          Number(
+            board?.activationFeeMinor,
+          ) !== amountMinor
+        ) {
+          throw new Error(
+            "Board activation amount changed before fulfillment.",
+          );
+        }
+
+        const entryClosesAt =
+          new Date(
+            String(
+              board?.entryClosesAt ||
+              "",
+            ),
+          ).getTime();
+
+        const endsAt =
+          new Date(
+            String(
+              board?.endsAt ||
+              "",
+            ),
+          ).getTime();
+
+        if (
+          Number.isNaN(
+            entryClosesAt,
+          ) ||
+          Number.isNaN(
+            endsAt,
+          ) ||
+          Date.now() >=
+            entryClosesAt ||
+          Date.now() >=
+            endsAt
+        ) {
+          throw new Error(
+            "Board activation window is closed.",
+          );
+        }
+
+        transaction.update(
+          boardRef,
+          {
+            status:
+              "approved",
+            activationPaymentStatus:
+              "paid",
+            activationPaymentId:
+              providerPaymentId,
+            activatedAt:
+              FieldValue.serverTimestamp(),
+            updatedAt:
+              FieldValue.serverTimestamp(),
+          },
+        );
+      } else if (
+        purpose ===
         "listing_push"
       ) {
         const listingRef =
@@ -926,6 +1507,94 @@ export async function fulfillVerifiedPayment(
               "boardEntries",
             )
             .doc(targetId);
+
+        const entrySnap =
+          await transaction.get(
+            entryRef,
+          );
+
+        if (!entrySnap.exists) {
+          throw new Error(
+            "Board Entry not found during Push Up fulfillment.",
+          );
+        }
+
+        const entry =
+          entrySnap.data();
+
+        if (
+          entry?.status !==
+          "entered"
+        ) {
+          throw new Error(
+            "Board Entry is no longer active.",
+          );
+        }
+
+        const boardId =
+          normalizeString(
+            entry?.boardId,
+          );
+
+        if (!boardId) {
+          throw new Error(
+            "Board Entry is missing boardId.",
+          );
+        }
+
+        const boardRef =
+          db
+            .collection(
+              "boards",
+            )
+            .doc(boardId);
+
+        const boardSnap =
+          await transaction.get(
+            boardRef,
+          );
+
+        if (!boardSnap.exists) {
+          throw new Error(
+            "Board not found during Push Up fulfillment.",
+          );
+        }
+
+        const board =
+          boardSnap.data();
+
+        const startsAt =
+          new Date(
+            String(
+              board?.startsAt ||
+              "",
+            ),
+          ).getTime();
+
+        const endsAt =
+          new Date(
+            String(
+              board?.endsAt ||
+              "",
+            ),
+          ).getTime();
+
+        if (
+          Number.isNaN(
+            startsAt,
+          ) ||
+          Number.isNaN(
+            endsAt,
+          ) ||
+          Date.now() <
+            startsAt ||
+          Date.now() >=
+            endsAt
+        ) {
+          throw new Error(
+            "Board Push Up window is closed.",
+          );
+        }
 
         transaction.update(
           entryRef,

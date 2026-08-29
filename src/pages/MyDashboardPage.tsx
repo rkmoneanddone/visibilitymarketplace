@@ -28,8 +28,16 @@ import {
 } from "../features/listings/ListingLauncher";
 
 import {
-  BoardEntryPaymentButton,
-} from "../features/boards/BoardEntryPaymentButton";
+  ListingSubmissionPaymentButton,
+} from "../features/listings/ListingSubmissionPaymentButton";
+
+import {
+  MyBoardsSection,
+} from "../features/boards/MyBoardsSection";
+
+import {
+  MyBoardEntriesSection,
+} from "../features/boards/MyBoardEntriesSection";
 
 import {
   getMyListings,
@@ -274,6 +282,8 @@ export function MyDashboardPage() {
         listings.filter(
           (listing) =>
             listing.status ===
+            "payment_pending" ||
+            listing.status ===
             "submitted" ||
             listing.status ===
             "under_review",
@@ -312,6 +322,8 @@ export function MyDashboardPage() {
       if (filter === "pending") {
         return listings.filter(
           (listing) =>
+            listing.status ===
+            "payment_pending" ||
             listing.status ===
             "submitted" ||
             listing.status ===
@@ -462,12 +474,6 @@ export function MyDashboardPage() {
         <div className="dashboard-list">
           {visibleListings.map(
             (listing) => {
-              const boardEntry =
-                boardEntries.find(
-                  (entry) =>
-                    entry.listingId ===
-                    listing.id,
-                );
 
               const typeName =
                 getListingTypeName(
@@ -583,17 +589,12 @@ export function MyDashboardPage() {
                     </a>
 
                     {listing.status ===
-                      "published" &&
-                      boardEntry && (
-                        <BoardEntryPaymentButton
-                          entry={
-                            boardEntry
-                          }
-                          listing={
-                            listing
-                          }
+                      "payment_pending" && (
+                        <ListingSubmissionPaymentButton
+                          listing={listing}
                         />
                       )}
+
 
                     {listing.status ===
                       "published" && (
@@ -639,6 +640,15 @@ export function MyDashboardPage() {
           )}
         </div>
       )}
+
+      <MyBoardEntriesSection
+        entries={boardEntries}
+        listings={listings}
+      />
+
+      <MyBoardsSection
+        userId={profile!.uid}
+      />
     </main>
   );
 }

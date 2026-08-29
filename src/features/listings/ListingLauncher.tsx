@@ -31,6 +31,18 @@ import type {
   Listing,
 } from "../../types/marketplace";
 
+import {
+  prepareListingSubmission,
+} from "../../services/listings/listingSubmissionClient";
+
+import {
+  PaymentDialog,
+} from "../payment/PaymentDialog";
+
+import type {
+  PaymentRequest,
+} from "../payment/types";
+
 type ListingLauncherProps = {
   children: (
     openListing: () => void,
@@ -54,6 +66,14 @@ export function ListingLauncher({
 
   const [authOpen, setAuthOpen] =
     useState(false);
+
+  const [
+    paymentRequest,
+    setPaymentRequest,
+  ] =
+    useState<PaymentRequest | null>(
+      null,
+    );
 
   const [
     continueAfterAuth,
@@ -101,8 +121,38 @@ export function ListingLauncher({
         form: data,
       });
 
+    const submission =
+      await prepareListingSubmission(
+        createdListing.id,
+      );
+
     onCreated?.(
       createdListing,
+    );
+
+    if (submission.paymentRequired) {
+      setPaymentRequest({
+        purpose:
+          "listing_submission",
+        targetKind:
+          "listing",
+        targetId:
+          createdListing.id,
+        amountMinor:
+          submission.amountMinor,
+        currency:
+          submission.currency,
+        title:
+          `Submit ${createdListing.title} for review`,
+        description:
+          "The Listing fee submits this Listing for Admin review. Approval is required and the fee does not affect ranking.",
+      });
+
+      return;
+    }
+
+    window.alert(
+      "Listing submitted for Admin review.",
     );
   }
 
@@ -126,6 +176,16 @@ export function ListingLauncher({
         }
         onSubmit={handleSubmit}
       />
+
+      {paymentRequest && (
+        <PaymentDialog
+          open={true}
+          request={paymentRequest}
+          onClose={() =>
+            setPaymentRequest(null)
+          }
+        />
+      )}
     </>
   );
 }

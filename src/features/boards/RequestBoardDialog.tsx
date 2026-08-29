@@ -231,10 +231,10 @@ export function RequestBoardDialog({
         entryFeeDollars,
       ) ||
       entryFeeDollars < 1 ||
-      entryFeeDollars > 100
+      entryFeeDollars > 999
     ) {
       setError(
-        "Entry fee must be a whole dollar amount between $1 and $100.",
+        "Entry fee must be a whole dollar amount between $1 and $999.",
       );
       return;
     }
@@ -244,10 +244,10 @@ export function RequestBoardDialog({
         minimumBoostDollars,
       ) ||
       minimumBoostDollars < 1 ||
-      minimumBoostDollars > 100
+      minimumBoostDollars > 999
     ) {
       setError(
-        "Minimum Push Up must be a whole dollar amount between $1 and $100.",
+        "Minimum Push Up must be a whole dollar amount between $1 and $999.",
       );
       return;
     }
@@ -365,7 +365,7 @@ export function RequestBoardDialog({
             <Sparkles
               size={13}
             />
-            Admin approval required.
+            Request is free. After Admin approval, the creator pays the configured Board activation fee (default $2).
           </span>
         </div>
 
@@ -453,7 +453,7 @@ export function RequestBoardDialog({
                   if (
                     !Number.isSafeInteger(amount) ||
                     amount < 1 ||
-                    amount > 100
+                    amount > 999
                   ) {
                     return;
                   }
@@ -492,7 +492,7 @@ export function RequestBoardDialog({
                   if (
                     !Number.isSafeInteger(amount) ||
                     amount < 1 ||
-                    amount > 100
+                    amount > 999
                   ) {
                     return;
                   }
