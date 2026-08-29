@@ -572,28 +572,14 @@ export function HomePage() {
               ))}
             </div>
 
-            <div className="mobile-stats">
-              <span>
-                <strong>{boardStats.listed}</strong>
-                listed
-              </span>
-              <span>
-                <strong>{boardStats.today}</strong>
-                new today
-              </span>
-              <span>
-                <strong>{formatMoneyMinor(boardStats.pushedMinor)}</strong>
-                pushed
-              </span>
-            </div>
 
             <div className="board-heading">
               <div>
                 <p className="eyebrow">
                   <Flame size={14} />
                   {selectedType === "All"
-                    ? "TOP BOARD"
-                    : `${selectedType.toUpperCase()} BOARD`}
+                    ? "PUBLIC LEADERBOARD"
+                    : `${selectedType.toUpperCase()} LEADERBOARD`}
                 </p>
                 <h2>Move a listing higher</h2>
               </div>

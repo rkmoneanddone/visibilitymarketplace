@@ -5863,3 +5863,371 @@ button.board-card-add-listing {
 }
 
 /* END VISIBILITY MARKETPLACE HOMEPAGE LISTING DISPLAY V1 */
+
+/* BEGIN VISIBILITY MARKETPLACE BLOCK HIERARCHY V1 */
+
+/* Category discovery block */
+.type-strip {
+  margin: 10px 0 16px;
+  padding: 11px 12px;
+  border: 1px solid #dfe5ec;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 8px 24px rgba(15, 23, 42, 0.035);
+}
+
+/* Main public leaderboard: strongest visual block */
+.board-heading {
+  margin-top: 0;
+  padding:
+    16px
+    18px
+    10px;
+  border:
+    1px solid
+    #dbe3ec;
+  border-bottom: 0;
+  border-radius:
+    16px
+    16px
+    0
+    0;
+  background: #ffffff;
+}
+
+.home-search-only {
+  margin: 0;
+  padding:
+    0
+    18px
+    12px;
+  border-left:
+    1px solid
+    #dbe3ec;
+  border-right:
+    1px solid
+    #dbe3ec;
+  background: #ffffff;
+}
+
+.marketplace-listing-list,
+.board-list {
+  margin-top: 0;
+  padding:
+    0
+    18px
+    18px;
+  border:
+    1px solid
+    #dbe3ec;
+  border-top: 0;
+  border-radius:
+    0
+    0
+    16px
+    16px;
+  background: #ffffff;
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.04),
+    0 14px 34px rgba(15, 23, 42, 0.07);
+}
+
+.marketplace-listing-row {
+  border-color: #dfe4ea;
+}
+
+.marketplace-listing-row:hover {
+  border-color: #cbd5df;
+  box-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.055);
+}
+
+/* Featured Boards: distinct secondary block */
+.home-boards-preview {
+  margin-top: 18px !important;
+  padding: 16px !important;
+  border:
+    1px solid
+    #d8e3de !important;
+  border-radius:
+    16px !important;
+  background:
+    #fbfefc !important;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.03),
+    0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.home-boards-preview-heading {
+  margin-bottom: 10px;
+}
+
+.home-board-preview-row {
+  border-color: #d9e4df !important;
+  background: #ffffff !important;
+}
+
+/* Visibility/pricing information: useful, but below leaderboard/Boards */
+.market-model-strip {
+  margin-top: 16px !important;
+  margin-bottom: 0 !important;
+  padding: 13px 14px !important;
+  border:
+    1px solid
+    #eadfb8 !important;
+  border-left:
+    4px solid
+    #d6ad30 !important;
+  border-radius:
+    14px !important;
+  background:
+    #fffdf7 !important;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.025);
+}
+
+.board-bottom {
+  margin-top: 10px;
+  padding: 11px 4px 0;
+  border-top: 1px solid #e8edf2;
+}
+
+/* Right rail should support the page, not compete with the leaderboard */
+.side-panel {
+  gap: 14px;
+  border-left-color: #e7ebef;
+}
+
+.side-panel .visibility-cta,
+.side-panel .new-today-card,
+.side-panel .how-card,
+.side-panel .board-summary {
+  box-shadow: none;
+  opacity: 0.96;
+}
+
+/* Period selector feels like one control */
+.market-ranking-periods {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid #d9e0e7;
+  border-radius: 10px;
+  background: #f5f7f9;
+}
+
+.market-ranking-periods button {
+  min-height: 30px;
+  border: 0;
+  border-radius: 7px;
+  padding: 5px 10px;
+  background: transparent;
+  color: #667085;
+  font-size: 12px;
+}
+
+.market-ranking-periods button.active {
+  background: #ffffff;
+  color: #172033;
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
+@media (max-width: 700px) {
+  .type-strip {
+    margin:
+      8px
+      0
+      12px;
+    padding:
+      9px
+      8px;
+    border-radius: 12px;
+  }
+
+  .board-heading {
+    padding:
+      13px
+      12px
+      9px;
+    border-radius:
+      13px
+      13px
+      0
+      0;
+  }
+
+  .home-search-only {
+    padding:
+      0
+      12px
+      10px;
+  }
+
+  .marketplace-listing-list,
+  .board-list {
+    padding:
+      0
+      10px
+      12px;
+    border-radius:
+      0
+      0
+      13px
+      13px;
+    box-shadow:
+      0 8px 22px rgba(15, 23, 42, 0.055);
+  }
+
+  .home-boards-preview {
+    margin-top: 14px !important;
+    padding: 12px !important;
+    border-radius: 13px !important;
+  }
+
+  .market-model-strip {
+    margin-top: 12px !important;
+    padding: 11px 10px !important;
+    border-radius: 12px !important;
+  }
+
+  .board-bottom {
+    margin-top: 8px;
+  }
+}
+
+/* END VISIBILITY MARKETPLACE BLOCK HIERARCHY V1 */
+
+/* BEGIN VISIBILITY MARKETPLACE RESTRAINED SECTION ACCENTS V1 */
+
+/* Public leaderboard */
+.board-heading {
+  border-top:
+    3px solid
+    #4d79c7;
+}
+
+.board-heading .eyebrow {
+  color: #4667a6;
+}
+
+.marketplace-listing-list,
+.board-list {
+  border-color: #d5dee8;
+}
+
+/* Featured Boards */
+.home-boards-preview {
+  border-top:
+    3px solid
+    #4f9a7e !important;
+}
+
+.home-boards-preview-heading > div > span {
+  color: #3f8069 !important;
+}
+
+/* Visibility/pricing */
+.market-model-strip {
+  border-left:
+    4px solid
+    #c8922f !important;
+  border-top-color:
+    #e1c889 !important;
+}
+
+/* Keep the category strip clean and lightly defined. */
+.type-strip {
+  border-color: #d9e2ec;
+  box-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.035);
+}
+
+/* END VISIBILITY MARKETPLACE RESTRAINED SECTION ACCENTS V1 */
+
+/* BEGIN VISIBILITY MARKETPLACE LEFT SECTION RIBBONS V1 */
+
+.board-heading {
+  border-top-width: 1px !important;
+  border-left: 5px solid #4d79c7 !important;
+}
+
+.home-search-only {
+  border-left: 5px solid #4d79c7 !important;
+}
+
+.marketplace-listing-list {
+  border-left: 5px solid #4d79c7 !important;
+}
+
+.home-boards-preview {
+  border-top-width: 1px !important;
+  border-left: 5px solid #4f9a7e !important;
+}
+
+/* END VISIBILITY MARKETPLACE LEFT SECTION RIBBONS V1 */
+
+/* BEGIN VISIBILITY MARKETPLACE LISTING SCORE INLINE V1 */
+
+/* Desktop: keep pushed amount and click count on one line. */
+.marketplace-listing-row .listing-score {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: baseline !important;
+  justify-content: flex-end !important;
+  gap: 4px !important;
+  min-width: 118px !important;
+  white-space: nowrap !important;
+}
+
+.marketplace-listing-row .listing-score strong,
+.marketplace-listing-row .listing-score > span {
+  display: inline !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+}
+
+.marketplace-listing-row .listing-score .listing-click-count {
+  margin: 0 !important;
+}
+
+.marketplace-listing-row .listing-score .listing-click-count::before {
+  content: "\00b7";
+  margin-right: 4px;
+  color: #98a2b3;
+}
+
+/* Mobile: keep score compact but ensure clicks remain visible. */
+@media (max-width: 700px) {
+  .marketplace-listing-row .listing-score {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: baseline !important;
+    justify-content: flex-start !important;
+    gap: 2px 4px !important;
+    min-width: 0 !important;
+    white-space: normal !important;
+  }
+
+  .marketplace-listing-row .listing-score strong,
+  .marketplace-listing-row .listing-score > span {
+    display: inline !important;
+    white-space: nowrap !important;
+  }
+
+  .marketplace-listing-row .listing-score .listing-click-count {
+    display: inline !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  .marketplace-listing-row .listing-score .listing-click-count::before {
+    content: "\00b7";
+    margin-right: 4px;
+  }
+}
+
+/* END VISIBILITY MARKETPLACE LISTING SCORE INLINE V1 */
