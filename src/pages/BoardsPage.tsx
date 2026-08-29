@@ -19,6 +19,7 @@ import {
 } from "../lib/marketplace/listing";
 
 import {
+  getPublicBoardHistory,
   getPublicBoards,
 } from "../services/boards/boards";
 
@@ -35,8 +36,13 @@ import "./boards.css";
 import {
   BoardEntryLauncher,
 } from "../features/boards/BoardEntryLauncher";
-function formatBoardDate(value: string) {
-  return new Date(value).toLocaleString(
+
+function formatBoardDate(
+  value: string,
+) {
+  return new Date(
+    value,
+  ).toLocaleString(
     undefined,
     {
       day: "numeric",
@@ -54,20 +60,59 @@ function getStatusLabel(
     .replace(/_/g, " ")
     .replace(
       /\b\w/g,
-      (value) => value.toUpperCase(),
+      (value) =>
+        value.toUpperCase(),
     );
 }
 
+function isBoardClosed(
+  board: Board,
+): boolean {
+  if (
+    board.status === "expired" ||
+    board.status === "archived"
+  ) {
+    return true;
+  }
 
+  const endsAt =
+    new Date(
+      board.endsAt,
+    ).getTime();
 
-async function shareBoard(board: Board) {
+  return (
+    !Number.isNaN(endsAt) &&
+    Date.now() >= endsAt
+  );
+}
+
+function boardSortTime(
+  board: Board,
+): number {
+  const value =
+    new Date(
+      board.endsAt ||
+        board.createdAt,
+    ).getTime();
+
+  return Number.isNaN(value)
+    ? 0
+    : value;
+}
+
+async function shareBoard(
+  board: Board,
+) {
   const boardUrl =
     `${window.location.origin}/boards/${board.id}`;
 
   const shareData = {
-    title: board.name,
-    text: `${board.name} on Visibility Marketplace`,
-    url: boardUrl,
+    title:
+      board.name,
+    text:
+      `${board.name} on Visibility Marketplace`,
+    url:
+      boardUrl,
   };
 
   try {
@@ -96,6 +141,179 @@ async function shareBoard(board: Board) {
   }
 }
 
+type BoardCardProps = {
+  board: Board;
+  closed: boolean;
+};
+
+function BoardCard({
+  board,
+  closed,
+}: BoardCardProps) {
+  return (
+    <article
+      className={
+        closed
+          ? "board-card board-card-closed"
+          : "board-card"
+      }
+    >
+      <div className="board-card-top">
+        <div className="board-card-copy">
+          <h2>
+            {board.name}
+          </h2>
+
+          <p>
+            {getListingTypeName(
+              board.listingTypeId,
+            )}
+          </p>
+        </div>
+
+        <span
+          className={
+            closed
+              ? "board-status board-status-closed"
+              : `board-status board-status-${board.status}`
+          }
+        >
+          {closed
+            ? "Closed"
+            : getStatusLabel(
+                board.status,
+              )}
+        </span>
+      </div>
+
+      <div className="board-card-timing">
+        {closed ? (
+          <>
+            <span>
+              Started{" "}
+              <strong>
+                {formatBoardDate(
+                  board.startsAt,
+                )}
+              </strong>
+            </span>
+
+            <span className="board-card-separator">
+              |
+            </span>
+
+            <span>
+              Closed{" "}
+              <strong>
+                {formatBoardDate(
+                  board.endsAt,
+                )}
+              </strong>
+            </span>
+          </>
+        ) : (
+          <>
+            <span>
+              Entry closes{" "}
+              <strong>
+                {formatBoardDate(
+                  board.entryClosesAt,
+                )}
+              </strong>
+            </span>
+
+            <span className="board-card-separator">
+              |
+            </span>
+
+            <span>
+              Ends{" "}
+              <strong>
+                {formatBoardDate(
+                  board.endsAt,
+                )}
+              </strong>
+            </span>
+          </>
+        )}
+      </div>
+
+      <div className="board-card-bottom">
+        <div className="board-card-pricing">
+          <span>
+            <strong>
+              {formatMoneyMinor(
+                board.entryFeeMinor,
+                board.currency,
+              )}
+            </strong>
+            <small>
+              Entry
+            </small>
+          </span>
+
+          <span>
+            <strong>
+              {formatMoneyMinor(
+                board.minimumBoostMinor,
+                board.currency,
+              )}
+            </strong>
+            <small>
+              Push from
+            </small>
+          </span>
+        </div>
+
+        <div className="board-card-actions">
+          <button
+            className="board-share-button"
+            type="button"
+            onClick={() =>
+              void shareBoard(
+                board,
+              )
+            }
+            aria-label={`Share ${board.name}`}
+          >
+            <Share2 size={15} />
+          </button>
+
+          {!closed && (
+            <BoardEntryLauncher
+              board={board}
+            >
+              {(openEntry) => (
+                <button
+                  className="board-card-add-listing"
+                  type="button"
+                  onClick={openEntry}
+                >
+                  Enter This Board
+                </button>
+              )}
+            </BoardEntryLauncher>
+          )}
+
+          <Link
+            className={
+              closed
+                ? "board-card-link board-card-final-link"
+                : "board-card-link"
+            }
+            to={`/boards/${board.id}`}
+          >
+            {closed
+              ? "View Final Ranking"
+              : "View Board"}
+            <ArrowRight size={16} />
+          </Link>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 export function BoardsPage() {
   const [boards, setBoards] =
     useState<Board[]>([]);
@@ -104,7 +322,9 @@ export function BoardsPage() {
     useState(true);
 
   const [error, setError] =
-    useState<string | null>(null);
+    useState<string | null>(
+      null,
+    );
 
   const [search, setSearch] =
     useState("");
@@ -117,11 +337,40 @@ export function BoardsPage() {
         setLoading(true);
         setError(null);
 
-        const result =
-          await getPublicBoards();
+        const [
+          openResult,
+          historyResult,
+        ] =
+          await Promise.all([
+            getPublicBoards(),
+            getPublicBoardHistory(),
+          ]);
+
+        const merged =
+          new Map<
+            string,
+            Board
+          >();
+
+        for (
+          const board
+          of [
+            ...openResult,
+            ...historyResult,
+          ]
+        ) {
+          merged.set(
+            board.id,
+            board,
+          );
+        }
 
         if (active) {
-          setBoards(result);
+          setBoards(
+            Array.from(
+              merged.values(),
+            ),
+          );
         }
       } catch (error) {
         console.error(
@@ -148,27 +397,70 @@ export function BoardsPage() {
     };
   }, []);
 
-  const visibleBoards =
+  const {
+    openBoards,
+    closedBoards,
+  } =
     useMemo(() => {
       const query =
         search
           .trim()
           .toLowerCase();
 
-      if (!query) {
-        return boards;
-      }
+      const searched =
+        query
+          ? boards.filter(
+              (board) =>
+                board.name
+                  .toLowerCase()
+                  .includes(
+                    query,
+                  ),
+            )
+          : boards;
 
-      return boards.filter(
-        (board) =>
-          board.name
-            .toLowerCase()
-            .includes(query),
-      );
+      const open =
+        searched
+          .filter(
+            (board) =>
+              !isBoardClosed(
+                board,
+              ),
+          )
+          .sort(
+            (a, b) =>
+              boardSortTime(a) -
+              boardSortTime(b),
+          );
+
+      const closed =
+        searched
+          .filter(
+            (board) =>
+              isBoardClosed(
+                board,
+              ),
+          )
+          .sort(
+            (a, b) =>
+              boardSortTime(b) -
+              boardSortTime(a),
+          );
+
+      return {
+        openBoards:
+          open,
+        closedBoards:
+          closed,
+      };
     }, [
       boards,
       search,
     ]);
+
+  const noResults =
+    openBoards.length === 0 &&
+    closedBoards.length === 0;
 
   return (
     <main className="boards-page">
@@ -178,10 +470,12 @@ export function BoardsPage() {
             BOARDS
           </p>
 
-          <h1>Find a board</h1>
+          <h1>
+            Find a board
+          </h1>
 
           <p className="boards-intro">
-            Enter while open. Compete for visibility.
+            Enter while open. Closed Boards keep their final ranking.
           </p>
         </div>
 
@@ -209,123 +503,74 @@ export function BoardsPage() {
         <div className="boards-state">
           {error}
         </div>
-      ) : visibleBoards.length === 0 ? (
+      ) : noResults ? (
         <div className="boards-state">
-          No open boards found.
+          No boards found.
         </div>
       ) : (
-        <div className="boards-list">
-          {visibleBoards.map(
-            (board) => (
-              <article
-                className="board-card"
-                key={board.id}
-              >
-                <div className="board-card-top">
-                  <div className="board-card-copy">
-                    <h2>
-                      {board.name}
-                    </h2>
-
-                    <p>
-                      {getListingTypeName(
-                        board.listingTypeId,
-                      )}
-                    </p>
-                  </div>
-
-                  <span
-                    className={`board-status board-status-${board.status}`}
-                  >
-                    {getStatusLabel(
-                      board.status,
-                    )}
+        <div className="boards-sections">
+          {openBoards.length > 0 && (
+            <section className="boards-group">
+              <div className="boards-group-heading">
+                <div>
+                  <span>
+                    OPEN BOARDS
                   </span>
+
+                  <h2>
+                    Compete now
+                  </h2>
                 </div>
 
-                <div className="board-card-timing">
-                  <span>
-                    Entry closes{" "}
-                    <strong>
-                      {formatBoardDate(
-                        board.entryClosesAt,
-                      )}
-                    </strong>
-                  </span>
+                <small>
+                  {openBoards.length}
+                </small>
+              </div>
 
-                  <span className="board-card-separator">
-                    |
-                  </span>
-
-                  <span>
-                    Ends{" "}
-                    <strong>
-                      {formatBoardDate(
-                        board.endsAt,
-                      )}
-                    </strong>
-                  </span>
-                </div>
-
-                <div className="board-card-bottom">
-                  <div className="board-card-pricing">
-                    <span>
-                      <strong>
-                        {formatMoneyMinor(
-                          board.entryFeeMinor,
-                          board.currency,
-                        )}
-                      </strong>
-                      <small>Entry</small>
-                    </span>
-
-                    <span>
-                      <strong>
-                        {formatMoneyMinor(
-                          board.minimumBoostMinor,
-                          board.currency,
-                        )}
-                      </strong>
-                      <small>Push from</small>
-                    </span>
-                  </div>
-
-                  <div className="board-card-actions">
-                    <button
-                      className="board-share-button"
-                      type="button"
-                      onClick={() =>
-                        void shareBoard(
-                          board,
-                        )
-                      }
-                      aria-label={`Share ${board.name}`}
-                    >
-                      <Share2 size={15} />
-                    </button>
-
-                                        <BoardEntryLauncher
+              <div className="boards-list">
+                {openBoards.map(
+                  (board) => (
+                    <BoardCard
+                      key={board.id}
                       board={board}
-                    >
-                      {(openEntry) => (
-                        <button
-                          className="board-card-add-listing"
-                          type="button"
-                          onClick={openEntry}
-                        >Enter This Board</button>
-                      )}
-                    </BoardEntryLauncher>
-<Link
-                      className="board-card-link"
-                      to={`/boards/${board.id}`}
-                    >
-                      View Board
-                      <ArrowRight size={16} />
-                    </Link>
-                  </div>
+                      closed={false}
+                    />
+                  ),
+                )}
+              </div>
+            </section>
+          )}
+
+          {closedBoards.length > 0 && (
+            <section className="boards-group boards-group-history">
+              <div className="boards-group-heading">
+                <div>
+                  <span>
+                    CLOSED BOARDS
+                  </span>
+
+                  <h2>
+                    Past competitions
+                  </h2>
                 </div>
-              </article>
-            ),
+
+                <small>
+                  {closedBoards.length}
+                </small>
+              </div>
+
+              <div className="boards-list">
+                {closedBoards.map(
+                  (board) => (
+                    <BoardCard
+                      key={board.id}
+                      board={board}
+                      closed={true}
+                    />
+                  ),
+                )}
+              </div>
+            </section>
           )}
         </div>
       )}

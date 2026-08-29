@@ -44,3 +44,27 @@ export async function getPublicBoards(): Promise<
     ],
   );
 }
+export async function getPublicBoardHistory(): Promise<
+  Board[]
+> {
+  return dbQueryCollection<Board>(
+    "boards",
+    [
+      where(
+        "status",
+        "in",
+        [
+          "expired",
+          "archived",
+        ],
+      ),
+
+      orderBy(
+        "createdAt",
+        "desc",
+      ),
+
+      limit(50),
+    ],
+  );
+}
