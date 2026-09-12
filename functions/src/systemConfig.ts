@@ -4,20 +4,9 @@ import {
 } from "firebase-functions/v2/https";
 
 import {
-  getApps,
-  initializeApp,
-} from "firebase-admin/app";
-
-import {
   FieldValue,
   getFirestore,
 } from "firebase-admin/firestore";
-
-if (getApps().length === 0) {
-  initializeApp();
-}
-
-const db = getFirestore();
 
 const CONFIG_COLLECTION =
   "systemConfig";
@@ -609,6 +598,8 @@ export function normalizeSystemConfig(
 async function assertAdmin(
   uid: string,
 ) {
+  const db = getFirestore();
+
   const userSnap =
     await db
       .collection("users")
@@ -638,6 +629,8 @@ export async function getRuntimeSystemConfig(
   ) {
     return cachedConfig;
   }
+
+  const db = getFirestore();
 
   const snap =
     await db
@@ -709,6 +702,8 @@ export const updateAdminSystemConfig =
         normalizeSystemConfig(
           request.data?.config,
         );
+
+      const db = getFirestore();
 
       const configRef =
         db
