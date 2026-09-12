@@ -24,6 +24,10 @@ import {
   matchesSearch,
 } from "../search/searchTokens";
 
+import {
+  getPublicRuntimeConfig,
+} from "../config/runtimeConfig";
+
 export type PublicRankingPeriod =
   | "this-week"
   | "this-month";
@@ -34,17 +38,9 @@ type PublicCursorDocument =
 export type PublicListingCursor =
   | {
       phase:
-        "ranked";
-
-      rankedCursor:
-        PublicCursorDocument | null;
-
-      fallbackCursor:
-        PublicCursorDocument | null;
-    }
-  | {
-      phase:
-        "fallback";
+        | "ranked"
+        | "fallback"
+        | "unranked";
 
       rankedCursor:
         PublicCursorDocument | null;
@@ -268,6 +264,54 @@ async function getRankedPage(
   return snapshot.docs;
 }
 
+async function getUnrankedPage(
+  options: {
+    listingTypeId?: string;
+    cursor:
+      PublicCursorDocument | null;
+    pageSize: number;
+  },
+) {
+  const constraints =
+    commonPublicConstraints(
+      options.listingTypeId,
+    );
+
+  constraints.push(
+    orderBy(
+      "publishedAt",
+      "desc",
+    ),
+  );
+
+  if (options.cursor) {
+    constraints.push(
+      startAfter(
+        options.cursor,
+      ),
+    );
+  }
+
+  constraints.push(
+    limit(
+      options.pageSize,
+    ),
+  );
+
+  const snapshot =
+    await getDocs(
+      query(
+        collection(
+          db,
+          "listings",
+        ),
+        ...constraints,
+      ),
+    );
+
+  return snapshot.docs;
+}
+
 async function getFallbackPage(
   options: {
     fields:
@@ -281,6 +325,9 @@ async function getFallbackPage(
 
     needed:
       number;
+
+    maxReadSize:
+      number;
   },
 ): Promise<{
   items: Listing[];
@@ -292,6 +339,7 @@ async function getFallbackPage(
     fields,
     listingTypeId,
     needed,
+    maxReadSize,
   } = options;
 
   let cursor =
@@ -327,10 +375,16 @@ async function getFallbackPage(
       );
     }
 
+    const remaining =
+      needed - items.length;
+
     const chunkSize =
       Math.max(
-        20,
-        needed * 2,
+        remaining,
+        Math.min(
+          maxReadSize,
+          remaining * 2,
+        ),
       );
 
     constraints.push(
@@ -425,12 +479,69 @@ export async function getPublicListingsPage(
       number;
   },
 ): Promise<PublicListingPageResult> {
+  const runtime =
+    await getPublicRuntimeConfig();
+
   const {
     period,
     listingTypeId,
     cursor = null,
-    pageSize = 20,
   } = options;
+
+  const requestedPageSize =
+    options.pageSize ??
+    runtime.limits.publicPageSize;
+
+  const pageSize =
+    Math.max(
+      1,
+      Math.min(
+        requestedPageSize,
+        runtime.limits.publicPageSize,
+      ),
+    );
+
+  const rankingEnabled =
+    period === "this-week"
+      ? runtime.ranking
+          .publicWeeklyEnabled
+      : runtime.ranking
+          .publicMonthlyEnabled;
+
+  if (!rankingEnabled) {
+    const documents =
+      await getUnrankedPage({
+        listingTypeId,
+        cursor:
+          cursor?.fallbackCursor ??
+          null,
+        pageSize,
+      });
+
+    const nextCursor =
+      documents.at(-1) ?? null;
+
+    return {
+      items:
+        documents.map(
+          listingFromDocument,
+        ),
+      cursor:
+        documents.length ===
+        pageSize
+          ? {
+              phase:
+                "unranked",
+              rankedCursor: null,
+              fallbackCursor:
+                nextCursor,
+            }
+          : null,
+      hasMore:
+        documents.length ===
+        pageSize,
+    };
+  }
 
   const fields =
     periodFields(
@@ -449,6 +560,9 @@ export async function getPublicListingsPage(
           cursor.fallbackCursor,
         needed:
           pageSize,
+        maxReadSize:
+          runtime.limits
+            .publicPageSize,
       });
 
     return {
@@ -479,8 +593,9 @@ export async function getPublicListingsPage(
       fields,
       listingTypeId,
       cursor:
-        cursor?.rankedCursor ??
-        null,
+        cursor?.phase === "ranked"
+          ? cursor.rankedCursor
+          : null,
       pageSize,
     });
 
@@ -491,8 +606,9 @@ export async function getPublicListingsPage(
 
   const rankedCursor =
     rankedDocuments.at(-1) ??
-    cursor?.rankedCursor ??
-    null;
+    (cursor?.phase === "ranked"
+      ? cursor.rankedCursor
+      : null);
 
   if (
     rankedItems.length ===
@@ -531,6 +647,9 @@ export async function getPublicListingsPage(
         null,
       needed:
         remaining,
+      maxReadSize:
+        runtime.limits
+          .publicPageSize,
     });
 
   const items = [
@@ -571,11 +690,26 @@ export async function searchPublicListings(
       number;
   },
 ): Promise<Listing[]> {
+  const runtime =
+    await getPublicRuntimeConfig();
+
   const {
     searchText,
     listingTypeId,
-    maxResults = 20,
   } = options;
+
+  const requestedMaxResults =
+    options.maxResults ??
+    runtime.limits.searchResultLimit;
+
+  const maxResults =
+    Math.max(
+      1,
+      Math.min(
+        requestedMaxResults,
+        runtime.limits.searchResultLimit,
+      ),
+    );
 
   const token =
     getPrimarySearchToken(
