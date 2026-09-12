@@ -16,3 +16,6 @@ export {
 export {
   sendPaymentStatusEmail,
 } from "./paymentEmailFunctions";
+export {
+  getMyPaymentHistory,
+} from "./paymentHistory";
