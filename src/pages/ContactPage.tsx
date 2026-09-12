@@ -2,9 +2,25 @@ import {
   siteConfig,
 } from "../config/site";
 
+import {
+  useRuntimeConfig,
+} from "../features/config/RuntimeConfigProvider";
+
 import "./legal-pages.css";
 
 export function ContactPage() {
+  const {
+    config,
+  } = useRuntimeConfig();
+
+  const brandName =
+    config?.general.brandName ??
+    siteConfig.name;
+
+  const supportEmail =
+    config?.general.supportEmail ??
+    siteConfig.supportEmail;
+
   return (
     <main className="legal-page">
       <section className="legal-card">
@@ -17,14 +33,14 @@ export function ContactPage() {
         </h1>
 
         <p>
-          For general questions about {siteConfig.name}, listings, Boards or the website, email us at:
+          For general questions about {brandName}, listings, Boards or the website, email us at:
         </p>
 
         <p className="legal-contact-email">
           <a
-            href={`mailto:${siteConfig.supportEmail}`}
+            href={`mailto:${supportEmail}`}
           >
-            {siteConfig.supportEmail}
+            {supportEmail}
           </a>
         </p>
       </section>
