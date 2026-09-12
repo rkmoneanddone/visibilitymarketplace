@@ -327,6 +327,49 @@ export const dodoWebhook =
             );
           }
 
+          const webhookAmountMinor =
+            Number(
+              paymentData.total_amount ??
+              paymentData.amount,
+            );
+
+          const webhookCurrency =
+            normalizeString(
+              paymentData.currency,
+            ).toUpperCase();
+
+          const expectedAmountMinor =
+            Number(
+              payment?.amountMinor,
+            );
+
+          const expectedCurrency =
+            normalizeString(
+              payment?.currency,
+            ).toUpperCase();
+
+          if (
+            !Number.isSafeInteger(
+              webhookAmountMinor,
+            ) ||
+            webhookAmountMinor !==
+              expectedAmountMinor
+          ) {
+            throw new Error(
+              "Dodo payment amount does not match the ViewBid payment intent.",
+            );
+          }
+
+          if (
+            !webhookCurrency ||
+            webhookCurrency !==
+              expectedCurrency
+          ) {
+            throw new Error(
+              "Dodo payment currency does not match the ViewBid payment intent.",
+            );
+          }
+
           await fulfillVerifiedPayment(
             db,
             paymentIntentId,
