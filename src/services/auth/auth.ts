@@ -1,6 +1,7 @@
 import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -35,6 +36,12 @@ export async function registerWithEmail(
       email,
       password,
     );
+
+  if (!result.user.emailVerified) {
+    await sendEmailVerification(
+      result.user,
+    );
+  }
 
   return result.user;
 }
