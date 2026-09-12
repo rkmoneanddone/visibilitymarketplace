@@ -71,29 +71,19 @@ function listingFromEntry(
   }
 
   return {
-    id:
-      entry.listingId,
-
-    title:
-      entry.listingTitle,
-
+    id: entry.listingId,
+    title: entry.listingTitle,
     ...(entry.listingHandle
-      ? {
-          handle:
-            entry.listingHandle,
-        }
+      ? { handle: entry.listingHandle }
       : {}),
-
     ...(entry.listingFeaturedImageUrl
       ? {
           featuredImageUrl:
             entry.listingFeaturedImageUrl,
         }
       : {}),
-
     externalUrl:
       entry.listingExternalUrl,
-
     listingTypeId:
       entry.listingTypeId,
   };
@@ -101,19 +91,14 @@ function listingFromEntry(
 
 async function hydrateEntry(
   entry: BoardEntry,
-): Promise<
-  PagedBoardEntryItem | null
-> {
+): Promise<PagedBoardEntryItem | null> {
   const cached =
-    listingFromEntry(
-      entry,
-    );
+    listingFromEntry(entry);
 
   if (cached) {
     return {
       entry,
-      listing:
-        cached,
+      listing: cached,
     };
   }
 
@@ -131,20 +116,16 @@ async function hydrateEntry(
   }
 
   const listing = {
-    id:
-      listingSnap.id,
+    id: listingSnap.id,
     ...listingSnap.data(),
   } as Listing;
 
   return {
     entry,
     listing: {
-      id:
-        listing.id,
-      title:
-        listing.title,
-      handle:
-        listing.handle,
+      id: listing.id,
+      title: listing.title,
+      handle: listing.handle,
       featuredImageUrl:
         listing.featuredImageUrl,
       externalUrl:
@@ -163,8 +144,7 @@ async function hydrateDocs(
       docs.map(
         (item) =>
           hydrateEntry({
-            id:
-              item.id,
+            id: item.id,
             ...item.data(),
           } as BoardEntry),
       ),
@@ -195,6 +175,12 @@ export async function getBoardEntriesPage(
       ),
     );
 
+  const tieBreak =
+    runtime.ranking.tieBreakRule ===
+      "earliest_reached_total"
+      ? orderBy("updatedAt", "asc")
+      : orderBy("approvedAt", "desc");
+
   const q =
     query(
       collection(
@@ -215,16 +201,11 @@ export async function getBoardEntriesPage(
         "boostTotalMinor",
         "desc",
       ),
+      tieBreak,
       ...(cursor
-        ? [
-            startAfter(
-              cursor,
-            ),
-          ]
+        ? [startAfter(cursor)]
         : []),
-      limit(
-        pageSize,
-      ),
+      limit(pageSize),
     );
 
   const snapshot =
@@ -236,11 +217,9 @@ export async function getBoardEntriesPage(
         snapshot.docs,
       ),
     cursor:
-      snapshot.docs.at(-1) ??
-      null,
+      snapshot.docs.at(-1) ?? null,
     hasMore:
-      snapshot.docs.length ===
-      pageSize,
+      snapshot.docs.length === pageSize,
   };
 }
 
@@ -291,9 +270,7 @@ export async function searchBoardEntries(
         "array-contains",
         token,
       ),
-      limit(
-        maxResults,
-      ),
+      limit(maxResults),
     );
 
   const snapshot =
