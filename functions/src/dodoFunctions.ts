@@ -1,4 +1,8 @@
 import {
+  randomUUID,
+} from "node:crypto";
+
+import {
   onCall,
   onRequest,
   HttpsError,
@@ -59,6 +63,9 @@ export const createDodoPaymentIntent =
           .collection("paymentIntents")
           .doc();
 
+      const clientStatusToken =
+        randomUUID();
+
       const now =
         FieldValue.serverTimestamp();
 
@@ -70,6 +77,7 @@ export const createDodoPaymentIntent =
         providerPaymentId: null,
         providerCheckoutSessionId: null,
         checkoutUrl: null,
+        clientStatusToken,
         createdByUserId:
           request.auth?.uid ?? null,
         createdAt: now,
@@ -83,6 +91,7 @@ export const createDodoPaymentIntent =
           await createDodoCheckout({
             paymentIntentId:
               paymentRef.id,
+            clientStatusToken,
             purpose:
               validated.purpose,
             targetKind:
