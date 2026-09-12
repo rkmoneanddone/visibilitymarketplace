@@ -25,3 +25,6 @@ export {
 export {
   lockBoardRulesOnFirstEntry,
 } from "./boardRuleLock";
+export {
+  getAdminAuditHistory,
+} from "./adminAuditHistory";
