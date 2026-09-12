@@ -84,6 +84,7 @@ export interface BoardEntry {
 
     boostTotalMinor: number;
     supporterCount: number;
+    pushCount?: number;
 
     externalClicks?: number;
 
