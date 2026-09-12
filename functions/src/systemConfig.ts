@@ -4,9 +4,18 @@ import {
 } from "firebase-functions/v2/https";
 
 import {
+  getApps,
+  initializeApp,
+} from "firebase-admin/app";
+
+import {
   FieldValue,
   getFirestore,
 } from "firebase-admin/firestore";
+
+if (getApps().length === 0) {
+  initializeApp();
+}
 
 const db = getFirestore();
 
@@ -15,9 +24,6 @@ const CONFIG_COLLECTION =
 
 const CONFIG_DOCUMENT =
   "runtime";
-
-const CACHE_TTL_MS =
-  5 * 60 * 1000;
 
 export type EmailTemplateConfig = {
   enabled: boolean;
