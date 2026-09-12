@@ -171,7 +171,6 @@ export const sendPaymentStatusEmail =
         "paymentIntents/{paymentIntentId}",
       region: "asia-south1",
       secrets: [resendApiKey],
-      retry: false,
     },
     async (event) => {
       const before =
