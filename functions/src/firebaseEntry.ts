@@ -22,3 +22,6 @@ export {
 export {
   finalizeExpiredBoards,
 } from "./boardLifecycle";
+export {
+  lockBoardRulesOnFirstEntry,
+} from "./boardRuleLock";
