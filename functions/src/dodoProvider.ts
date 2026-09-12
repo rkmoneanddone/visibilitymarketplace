@@ -132,6 +132,17 @@ export async function createDodoCheckout(
     );
   }
 
+  const currency =
+    input.currency
+      .trim()
+      .toUpperCase();
+
+  if (currency !== "USD") {
+    throw new Error(
+      "ViewBid Dodo checkout currently supports USD only.",
+    );
+  }
+
   const publicUrl =
     viewBidPublicUrl
       .value()
@@ -159,6 +170,8 @@ export async function createDodoCheckout(
                 input.amountMinor,
             },
           ],
+          billing_currency:
+            currency,
           return_url:
             publicUrl
               ? `${publicUrl}/?payment=return`
