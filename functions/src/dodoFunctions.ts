@@ -327,11 +327,20 @@ export const dodoWebhook =
             );
           }
 
-          const webhookAmountMinor =
+          const webhookGrossAmountMinor =
             Number(
               paymentData.total_amount ??
               paymentData.amount,
             );
+
+          const webhookTaxMinor =
+            Number(
+              paymentData.tax ?? 0,
+            );
+
+          const webhookServiceAmountMinor =
+            webhookGrossAmountMinor -
+            webhookTaxMinor;
 
           const webhookCurrency =
             normalizeString(
@@ -350,13 +359,19 @@ export const dodoWebhook =
 
           if (
             !Number.isSafeInteger(
-              webhookAmountMinor,
+              webhookGrossAmountMinor,
             ) ||
-            webhookAmountMinor !==
+            !Number.isSafeInteger(
+              webhookTaxMinor,
+            ) ||
+            !Number.isSafeInteger(
+              webhookServiceAmountMinor,
+            ) ||
+            webhookServiceAmountMinor !==
               expectedAmountMinor
           ) {
             throw new Error(
-              "Dodo payment amount does not match the ViewBid payment intent.",
+              "Dodo payment pre-tax amount does not match the ViewBid payment intent.",
             );
           }
 
