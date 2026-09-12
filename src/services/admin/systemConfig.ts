@@ -107,12 +107,42 @@ const updateConfigCallable =
     "updateAdminSystemConfig",
   );
 
-export async function getAdminSystemConfig():
-  Promise<ViewBidSystemConfig> {
-  const result =
-    await getConfigCallable({});
+let cachedConfig:
+  ViewBidSystemConfig | null = null;
 
-  return result.data.config;
+let pendingLoad:
+  Promise<ViewBidSystemConfig> | null = null;
+
+export async function getAdminSystemConfig(
+  forceRefresh = false,
+): Promise<ViewBidSystemConfig> {
+  if (
+    !forceRefresh &&
+    cachedConfig
+  ) {
+    return cachedConfig;
+  }
+
+  if (
+    !forceRefresh &&
+    pendingLoad
+  ) {
+    return pendingLoad;
+  }
+
+  pendingLoad =
+    getConfigCallable({})
+      .then((result) => {
+        cachedConfig =
+          result.data.config;
+
+        return cachedConfig;
+      })
+      .finally(() => {
+        pendingLoad = null;
+      });
+
+  return pendingLoad;
 }
 
 export async function updateAdminSystemConfig(
@@ -123,5 +153,8 @@ export async function updateAdminSystemConfig(
       config,
     });
 
-  return result.data.config;
+  cachedConfig =
+    result.data.config;
+
+  return cachedConfig;
 }
