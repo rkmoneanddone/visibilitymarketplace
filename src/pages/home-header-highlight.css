@@ -1,0 +1,37 @@
+/* ViewBid top ribbon highlight + hero edge refinement. Presentation only. */
+
+/* Top navigation ribbon: clearer branded separation without becoming heavy. */
+.site-header {
+  margin-top: 8px;
+  padding: 8px 14px;
+  border: 1px solid rgba(37, 99, 235, 0.14) !important;
+  border-radius: 14px;
+  background:
+    linear-gradient(90deg, #ffffff 0%, #f7fbff 58%, #f2fbf9 100%) !important;
+  box-shadow:
+    0 2px 5px rgba(15, 23, 42, 0.035),
+    0 8px 22px rgba(37, 99, 235, 0.065);
+}
+
+.site-header .brand {
+  color: #0f2f55 !important;
+  font-weight: 700;
+}
+
+.site-header .brand-icon {
+  background: #e7f0ff !important;
+  color: #2563eb !important;
+}
+
+/* Hero: keep the soft outline, remove the heavy blue left ribbon. */
+.compact-intro {
+  border-left: 1px solid #8fb8ea !important;
+}
+
+@media (max-width: 700px) {
+  .site-header {
+    margin-top: 5px;
+    padding: 6px 8px;
+    border-radius: 11px;
+  }
+}
