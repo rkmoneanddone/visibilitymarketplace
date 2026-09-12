@@ -59,13 +59,11 @@ Write-Host "[OK] Firebase project: $configuredProject" -ForegroundColor Green
 
 $functionsEnv = Join-Path $repoRoot "functions\.env.visibilitymarketplace"
 @"
-DODO_ENVIRONMENT=test_mode
-DODO_PRODUCT_ID=pdt_0NnQUn7YwN7JhAgOyPXCr
 DODO_API_BASE_URL=
-VIEWBID_PUBLIC_URL=https://visibilitymarketplace.web.app
 "@ | Set-Content -Path $functionsEnv -Encoding UTF8
 
-Write-Host "[OK] Wrote non-secret Firebase Functions configuration." -ForegroundColor Green
+Write-Host "[OK] Runtime business settings now come from the ViewBid Admin Control Center." -ForegroundColor Green
+Write-Host "[OK] Wrote infrastructure-only Firebase Functions configuration." -ForegroundColor Green
 Invoke-CheckedCommand firebase use $expectedProject
 
 if (-not $SkipSecrets) {
