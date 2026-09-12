@@ -8,3 +8,7 @@ typings/
 # Node.js dependency directory
 node_modules/
 *.local
+
+# Firebase Functions local parameter/config files and secrets
+.env*
+!.env.example
