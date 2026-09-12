@@ -14,6 +14,17 @@ import {
   type MarketplacePricing,
 } from "../../services/pricing/marketplacePricing";
 
+import {
+  AdminSystemConfigPanel,
+} from "./AdminSystemConfigPanel";
+
+type ControlTab =
+  | "pricing"
+  | "payments"
+  | "email"
+  | "ranking"
+  | "system";
+
 function dollarsToMinor(
   value: string,
 ): number {
@@ -41,6 +52,11 @@ function minorToDollars(
 }
 
 export function AdminPricingPanel() {
+  const [activeTab, setActiveTab] =
+    useState<ControlTab>(
+      "pricing",
+    );
+
   const [
     pricing,
     setPricing,
@@ -104,15 +120,6 @@ export function AdminPricingPanel() {
           ),
       [],
     );
-
-  if (!pricing) {
-    return (
-      <div className="admin-state">
-        {message ||
-          "Loading pricing..."}
-      </div>
-    );
-  }
 
   function updateListingFee(
     typeId: string,
@@ -212,190 +219,230 @@ export function AdminPricingPanel() {
   }
 
   return (
-    <section className="admin-pricing-panel">
-      <div className="admin-pricing-note">
-        Listing fees may be $0-$999.
-        Board and Push minimums must
-        be $1-$999. Prices are
-        enforced by the server.
-      </div>
-
-      <div className="admin-pricing-grid">
-        <label>
-          Board activation fee ($)
-          <input
-            type="number"
-            min="1"
-            max="999"
-            step="0.01"
-            value={minorToDollars(
-              pricing
-                .boardActivationFeeMinor,
-            )}
-            onChange={(event) =>
-              setPricing({
-                ...pricing,
-                boardActivationFeeMinor:
-                  dollarsToMinor(
-                    event.target.value,
-                  ),
-              })
-            }
-          />
-        </label>
-
-        <label>
-          Board Entry minimum ($)
-          <input
-            type="number"
-            min="1"
-            max="999"
-            step="0.01"
-            value={minorToDollars(
-              pricing
-                .boardEntryMinimumMinor,
-            )}
-            onChange={(event) =>
-              setPricing({
-                ...pricing,
-                boardEntryMinimumMinor:
-                  dollarsToMinor(
-                    event.target.value,
-                  ),
-              })
-            }
-          />
-        </label>
-
-        <label>
-          Board Push minimum ($)
-          <input
-            type="number"
-            min="1"
-            max="999"
-            step="0.01"
-            value={minorToDollars(
-              pricing
-                .boardPushMinimumMinor,
-            )}
-            onChange={(event) =>
-              setPricing({
-                ...pricing,
-                boardPushMinimumMinor:
-                  dollarsToMinor(
-                    event.target.value,
-                  ),
-              })
-            }
-          />
-        </label>
-
-        <label>
-          Maximum payment ($)
-          <input
-            type="number"
-            min="1"
-            max="999"
-            step="0.01"
-            value={minorToDollars(
-              pricing
-                .maximumPaymentMinor,
-            )}
-            onChange={(event) =>
-              setPricing({
-                ...pricing,
-                maximumPaymentMinor:
-                  dollarsToMinor(
-                    event.target.value,
-                  ),
-              })
-            }
-          />
-        </label>
-      </div>
-
-      <div className="admin-pricing-types">
-        <div className="admin-pricing-types-head">
-          <span>Listing Type</span>
-          <span>Listing fee</span>
-          <span>Public Push min</span>
-        </div>
-
-        {listingTypes.map(
-          (type) => (
-            <div
-              className="admin-pricing-type-row"
-              key={type.id}
+    <section className="admin-control-center">
+      <div className="admin-control-tabs">
+        {([
+          ["pricing", "Pricing"],
+          ["payments", "Payments"],
+          ["email", "Email & Notifications"],
+          ["ranking", "Ranking"],
+          ["system", "System"],
+        ] as const).map(
+          ([key, label]) => (
+            <button
+              type="button"
+              key={key}
+              className={
+                activeTab === key
+                  ? "active"
+                  : ""
+              }
+              onClick={() =>
+                setActiveTab(key)
+              }
             >
-              <strong>
-                {type.name}
-              </strong>
+              {label}
+            </button>
+          ),
+        )}
+      </div>
 
-              <input
-                aria-label={
-                  `${type.name} Listing fee`
-                }
-                type="number"
-                min="0"
-                max="999"
-                step="0.01"
-                value={minorToDollars(
-                  pricing
-                    .listingFeesMinor[
-                      type.id
-                    ] ?? 0,
-                )}
-                onChange={(event) =>
-                  updateListingFee(
-                    type.id,
-                    event.target.value,
-                  )
-                }
-              />
+      {activeTab !== "pricing" ? (
+        <AdminSystemConfigPanel
+          section={activeTab}
+        />
+      ) : !pricing ? (
+        <div className="admin-state">
+          {message ||
+            "Loading pricing..."}
+        </div>
+      ) : (
+        <section className="admin-pricing-panel">
+          <div className="admin-pricing-note">
+            Listing fees may be $0-$999.
+            Board and Push minimums must
+            be $1-$999. Prices are
+            enforced by the server.
+          </div>
 
+          <div className="admin-pricing-grid">
+            <label>
+              Board activation fee ($)
               <input
-                aria-label={
-                  `${type.name} Public Push minimum`
-                }
                 type="number"
                 min="1"
                 max="999"
                 step="0.01"
                 value={minorToDollars(
                   pricing
-                    .publicPushMinimumMinor[
-                      type.id
-                    ] ?? 100,
+                    .boardActivationFeeMinor,
                 )}
                 onChange={(event) =>
-                  updatePushMinimum(
-                    type.id,
-                    event.target.value,
-                  )
+                  setPricing({
+                    ...pricing,
+                    boardActivationFeeMinor:
+                      dollarsToMinor(
+                        event.target.value,
+                      ),
+                  })
                 }
               />
+            </label>
+
+            <label>
+              Board Entry minimum ($)
+              <input
+                type="number"
+                min="1"
+                max="999"
+                step="0.01"
+                value={minorToDollars(
+                  pricing
+                    .boardEntryMinimumMinor,
+                )}
+                onChange={(event) =>
+                  setPricing({
+                    ...pricing,
+                    boardEntryMinimumMinor:
+                      dollarsToMinor(
+                        event.target.value,
+                      ),
+                  })
+                }
+              />
+            </label>
+
+            <label>
+              Board Push minimum ($)
+              <input
+                type="number"
+                min="1"
+                max="999"
+                step="0.01"
+                value={minorToDollars(
+                  pricing
+                    .boardPushMinimumMinor,
+                )}
+                onChange={(event) =>
+                  setPricing({
+                    ...pricing,
+                    boardPushMinimumMinor:
+                      dollarsToMinor(
+                        event.target.value,
+                      ),
+                  })
+                }
+              />
+            </label>
+
+            <label>
+              Maximum payment ($)
+              <input
+                type="number"
+                min="1"
+                max="999"
+                step="0.01"
+                value={minorToDollars(
+                  pricing
+                    .maximumPaymentMinor,
+                )}
+                onChange={(event) =>
+                  setPricing({
+                    ...pricing,
+                    maximumPaymentMinor:
+                      dollarsToMinor(
+                        event.target.value,
+                      ),
+                  })
+                }
+              />
+            </label>
+          </div>
+
+          <div className="admin-pricing-types">
+            <div className="admin-pricing-types-head">
+              <span>Listing Type</span>
+              <span>Listing fee</span>
+              <span>Public Push min</span>
             </div>
-          ),
-        )}
-      </div>
 
-      <button
-        type="button"
-        className="admin-publish-button"
-        disabled={saving}
-        onClick={() =>
-          void save()
-        }
-      >
-        {saving
-          ? "Saving..."
-          : "Save Pricing"}
-      </button>
+            {listingTypes.map(
+              (type) => (
+                <div
+                  className="admin-pricing-type-row"
+                  key={type.id}
+                >
+                  <strong>
+                    {type.name}
+                  </strong>
 
-      {message && (
-        <p className="admin-pricing-message">
-          {message}
-        </p>
+                  <input
+                    aria-label={
+                      `${type.name} Listing fee`
+                    }
+                    type="number"
+                    min="0"
+                    max="999"
+                    step="0.01"
+                    value={minorToDollars(
+                      pricing
+                        .listingFeesMinor[
+                          type.id
+                        ] ?? 0,
+                    )}
+                    onChange={(event) =>
+                      updateListingFee(
+                        type.id,
+                        event.target.value,
+                      )
+                    }
+                  />
+
+                  <input
+                    aria-label={
+                      `${type.name} Public Push minimum`
+                    }
+                    type="number"
+                    min="1"
+                    max="999"
+                    step="0.01"
+                    value={minorToDollars(
+                      pricing
+                        .publicPushMinimumMinor[
+                          type.id
+                        ] ?? 100,
+                    )}
+                    onChange={(event) =>
+                      updatePushMinimum(
+                        type.id,
+                        event.target.value,
+                      )
+                    }
+                  />
+                </div>
+              ),
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="admin-publish-button"
+            disabled={saving}
+            onClick={() =>
+              void save()
+            }
+          >
+            {saving
+              ? "Saving..."
+              : "Save Pricing"}
+          </button>
+
+          {message && (
+            <p className="admin-pricing-message">
+              {message}
+            </p>
+          )}
+        </section>
       )}
     </section>
   );
