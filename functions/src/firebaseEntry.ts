@@ -19,3 +19,6 @@ export {
 export {
   getMyPaymentHistory,
 } from "./paymentHistory";
+export {
+  finalizeExpiredBoards,
+} from "./boardLifecycle";
