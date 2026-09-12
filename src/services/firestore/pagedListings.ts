@@ -32,6 +32,10 @@ export type PublicRankingPeriod =
   | "this-week"
   | "this-month";
 
+type TieBreakRule =
+  | "earliest_reached_total"
+  | "newest_published";
+
 type PublicCursorDocument =
   QueryDocumentSnapshot<DocumentData>;
 
@@ -204,6 +208,9 @@ async function getRankedPage(
 
     pageSize:
       number;
+
+    tieBreakRule:
+      TieBreakRule;
   },
 ) {
   const {
@@ -211,6 +218,7 @@ async function getRankedPage(
     listingTypeId,
     cursor,
     pageSize,
+    tieBreakRule,
   } = options;
 
   const constraints =
@@ -230,10 +238,16 @@ async function getRankedPage(
       "desc",
     ),
 
-    orderBy(
-      "publishedAt",
-      "desc",
-    ),
+    tieBreakRule ===
+      "earliest_reached_total"
+      ? orderBy(
+          "updatedAt",
+          "asc",
+        )
+      : orderBy(
+          "publishedAt",
+          "desc",
+        ),
   );
 
   if (cursor) {
@@ -597,6 +611,8 @@ export async function getPublicListingsPage(
           ? cursor.rankedCursor
           : null,
       pageSize,
+      tieBreakRule:
+        runtime.ranking.tieBreakRule,
     });
 
   const rankedItems =
