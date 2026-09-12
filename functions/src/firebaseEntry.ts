@@ -32,3 +32,6 @@ export {
   sendListingStatusEmail,
   sendBoardStatusEmail,
 } from "./moderationEmailFunctions";
+export {
+  reconcileBoardSupporterMetrics,
+} from "./boardSupporterMetrics";
