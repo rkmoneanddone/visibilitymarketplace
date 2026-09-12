@@ -37,6 +37,17 @@
       "fields": [
         {"fieldPath": "status", "order": "ASCENDING"},
         {"fieldPath": "visibilityScope", "order": "ASCENDING"},
+        {"fieldPath": "weeklyBoostKey", "order": "ASCENDING"},
+        {"fieldPath": "weeklyBoostTotalMinor", "order": "DESCENDING"},
+        {"fieldPath": "updatedAt", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "listings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "visibilityScope", "order": "ASCENDING"},
         {"fieldPath": "listingTypeId", "order": "ASCENDING"},
         {"fieldPath": "weeklyBoostKey", "order": "ASCENDING"},
         {"fieldPath": "weeklyBoostTotalMinor", "order": "DESCENDING"},
@@ -49,6 +60,41 @@
       "fields": [
         {"fieldPath": "status", "order": "ASCENDING"},
         {"fieldPath": "visibilityScope", "order": "ASCENDING"},
+        {"fieldPath": "listingTypeId", "order": "ASCENDING"},
+        {"fieldPath": "weeklyBoostKey", "order": "ASCENDING"},
+        {"fieldPath": "weeklyBoostTotalMinor", "order": "DESCENDING"},
+        {"fieldPath": "updatedAt", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "listings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "visibilityScope", "order": "ASCENDING"},
+        {"fieldPath": "monthlyBoostKey", "order": "ASCENDING"},
+        {"fieldPath": "monthlyBoostTotalMinor", "order": "DESCENDING"},
+        {"fieldPath": "publishedAt", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "listings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "visibilityScope", "order": "ASCENDING"},
+        {"fieldPath": "monthlyBoostKey", "order": "ASCENDING"},
+        {"fieldPath": "monthlyBoostTotalMinor", "order": "DESCENDING"},
+        {"fieldPath": "updatedAt", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "listings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "visibilityScope", "order": "ASCENDING"},
+        {"fieldPath": "listingTypeId", "order": "ASCENDING"},
         {"fieldPath": "monthlyBoostKey", "order": "ASCENDING"},
         {"fieldPath": "monthlyBoostTotalMinor", "order": "DESCENDING"},
         {"fieldPath": "publishedAt", "order": "DESCENDING"}
@@ -63,7 +109,7 @@
         {"fieldPath": "listingTypeId", "order": "ASCENDING"},
         {"fieldPath": "monthlyBoostKey", "order": "ASCENDING"},
         {"fieldPath": "monthlyBoostTotalMinor", "order": "DESCENDING"},
-        {"fieldPath": "publishedAt", "order": "DESCENDING"}
+        {"fieldPath": "updatedAt", "order": "ASCENDING"}
       ]
     },
     {
@@ -135,6 +181,26 @@
         {"fieldPath": "boardId", "order": "ASCENDING"},
         {"fieldPath": "status", "order": "ASCENDING"},
         {"fieldPath": "boostTotalMinor", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "boardEntries",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "boardId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "boostTotalMinor", "order": "DESCENDING"},
+        {"fieldPath": "updatedAt", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "boardEntries",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "boardId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "boostTotalMinor", "order": "DESCENDING"},
+        {"fieldPath": "approvedAt", "order": "DESCENDING"}
       ]
     },
     {
