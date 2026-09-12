@@ -1,0 +1,45 @@
+.maintenance-page {
+  min-height: calc(100vh - 120px);
+  display: grid;
+  place-items: center;
+  padding: 32px 16px;
+}
+
+.maintenance-card {
+  width: min(520px, 100%);
+  padding: 28px;
+  border: 1px solid #dce7ea;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgb(31 75 88 / 8%);
+  text-align: center;
+}
+
+.maintenance-kicker {
+  margin: 0 0 6px;
+  color: #167f91;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.maintenance-card h1 {
+  margin: 0;
+  color: #294b59;
+  font-size: 28px;
+}
+
+.maintenance-card > p:not(.maintenance-kicker) {
+  margin: 12px auto 0;
+  color: #60757e;
+  line-height: 1.55;
+}
+
+.maintenance-card a {
+  display: inline-block;
+  margin-top: 16px;
+  color: #167f91;
+  font-weight: 600;
+  text-decoration: none;
+}
