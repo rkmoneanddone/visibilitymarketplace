@@ -4,12 +4,15 @@ import './index.css'
 import './features/admin/admin-control-center.css'
 import App from './App.tsx'
 import { AuthProvider } from "./features/auth/AuthProvider";
+import { RuntimeConfigProvider } from "./features/config/RuntimeConfigProvider";
 
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-  <AuthProvider>
-    <App />
-  </AuthProvider>
-</StrictMode>,
+    <RuntimeConfigProvider>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </RuntimeConfigProvider>
+  </StrictMode>,
 )
