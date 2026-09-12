@@ -5,6 +5,11 @@ import {
 } from "firebase-functions/v2/https";
 
 import {
+  getApps,
+  initializeApp,
+} from "firebase-admin/app";
+
+import {
   getFirestore,
   FieldValue,
 } from "firebase-admin/firestore";
@@ -22,6 +27,10 @@ import {
   fulfillVerifiedPayment,
   validatePaymentRequest,
 } from "./paymentCore";
+
+if (getApps().length === 0) {
+  initializeApp();
+}
 
 const db = getFirestore();
 
@@ -327,20 +336,10 @@ export const dodoWebhook =
             );
           }
 
-          const webhookGrossAmountMinor =
+          const webhookAmountMinor =
             Number(
-              paymentData.total_amount ??
               paymentData.amount,
             );
-
-          const webhookTaxMinor =
-            Number(
-              paymentData.tax ?? 0,
-            );
-
-          const webhookServiceAmountMinor =
-            webhookGrossAmountMinor -
-            webhookTaxMinor;
 
           const webhookCurrency =
             normalizeString(
@@ -359,19 +358,13 @@ export const dodoWebhook =
 
           if (
             !Number.isSafeInteger(
-              webhookGrossAmountMinor,
+              webhookAmountMinor,
             ) ||
-            !Number.isSafeInteger(
-              webhookTaxMinor,
-            ) ||
-            !Number.isSafeInteger(
-              webhookServiceAmountMinor,
-            ) ||
-            webhookServiceAmountMinor !==
+            webhookAmountMinor !==
               expectedAmountMinor
           ) {
             throw new Error(
-              "Dodo payment pre-tax amount does not match the ViewBid payment intent.",
+              "Dodo payment amount does not match the ViewBid payment intent.",
             );
           }
 
