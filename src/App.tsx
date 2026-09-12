@@ -1,5 +1,9 @@
 import "./App.css";
 
+import type {
+  ReactNode,
+} from "react";
+
 import {
   BrowserRouter,
   Route,
@@ -55,7 +59,7 @@ import {
 } from "./features/config/MaintenanceGuard";
 
 function guarded(
-  element: React.ReactNode,
+  element: ReactNode,
 ) {
   return (
     <MaintenanceGuard>
