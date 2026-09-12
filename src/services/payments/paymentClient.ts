@@ -32,6 +32,7 @@ if (useFirebaseEmulators) {
 }
 
 /* END VIEWBID FUNCTIONS EMULATOR WIRING V1 */
+
 const completeEmulatorPaymentCallable =
   httpsCallable<
     {
@@ -43,7 +44,7 @@ const completeEmulatorPaymentCallable =
     "completeEmulatorPayment",
   );
 
-const createPaymentIntentCallable =
+const createDodoPaymentIntentCallable =
   httpsCallable<
     Omit<
       PaymentRequest,
@@ -52,14 +53,14 @@ const createPaymentIntentCallable =
     PaymentIntentResult
   >(
     functions,
-    "createPaymentIntent",
+    "createDodoPaymentIntent",
   );
 
 export async function createPaymentIntent(
   request: PaymentRequest,
 ): Promise<PaymentIntentResult> {
   const result =
-    await createPaymentIntentCallable({
+    await createDodoPaymentIntentCallable({
       purpose:
         request.purpose,
 
