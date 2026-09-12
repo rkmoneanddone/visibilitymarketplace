@@ -11,12 +11,16 @@ import {
 import {
   HashScroll,
 } from "./HashScroll";
+import {
+  PaymentReturnNotice,
+} from "../../features/payment/PaymentReturnNotice";
 
 export function AppLayout() {
   return (
     <>
       <HashScroll />
       <SiteHeader />
+      <PaymentReturnNotice />
       <PageBreadcrumb />
       <Outlet />
     </>
