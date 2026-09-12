@@ -30,6 +30,7 @@ export const dodoApiBaseUrl =
 
 type DodoCheckoutInput = {
   paymentIntentId: string;
+  clientStatusToken: string;
   purpose: string;
   targetKind: string;
   targetId: string;
@@ -119,6 +120,15 @@ export async function createDodoCheckout(
       .trim()
       .replace(/\/$/, "");
 
+  const returnUrl =
+    publicUrl
+      ? `${publicUrl}/?payment=return&intent=${encodeURIComponent(
+          input.paymentIntentId,
+        )}&token=${encodeURIComponent(
+          input.clientStatusToken,
+        )}`
+      : undefined;
+
   const response =
     await fetch(
       `${resolveApiBaseUrl(
@@ -145,11 +155,7 @@ export async function createDodoCheckout(
           billing_currency:
             currency,
           return_url:
-            publicUrl
-              ? `${publicUrl}/?payment=return&intent=${encodeURIComponent(
-                  input.paymentIntentId,
-                )}`
-              : undefined,
+            returnUrl,
           metadata: {
             viewbid_payment_intent_id:
               input.paymentIntentId,
