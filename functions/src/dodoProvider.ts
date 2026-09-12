@@ -81,6 +81,30 @@ export async function createDodoCheckout(
     );
   }
 
+  if (
+    input.purpose ===
+      "listing_push" &&
+    !config.ranking
+      .publicWeeklyEnabled &&
+    !config.ranking
+      .publicMonthlyEnabled
+  ) {
+    throw new Error(
+      "Public Push Up payments are disabled because Public ranking is disabled.",
+    );
+  }
+
+  if (
+    input.purpose ===
+      "board_entry_push" &&
+    !config.ranking
+      .boardRankingEnabled
+  ) {
+    throw new Error(
+      "Board Push Up payments are disabled because Board ranking is disabled.",
+    );
+  }
+
   const productId =
     config.payments.dodoProductId.trim();
 
