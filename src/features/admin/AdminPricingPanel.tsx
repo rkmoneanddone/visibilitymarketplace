@@ -22,65 +22,48 @@ import {
   AdminEmailConfigPanel,
 } from "./AdminEmailConfigPanel";
 
+import {
+  AdminAuditPanel,
+} from "./AdminAuditPanel";
+
 type ControlTab =
   | "pricing"
   | "payments"
   | "email"
   | "ranking"
-  | "system";
+  | "system"
+  | "audit";
 
 function dollarsToMinor(
   value: string,
 ): number {
-  const amount =
-    Number(value);
+  const amount = Number(value);
 
-  if (
-    !Number.isFinite(amount)
-  ) {
+  if (!Number.isFinite(amount)) {
     return -1;
   }
 
-  return Math.round(
-    amount * 100,
-  );
+  return Math.round(amount * 100);
 }
 
 function minorToDollars(
   value: number,
 ): string {
-  return (
-    value /
-    100
-  ).toFixed(2);
+  return (value / 100).toFixed(2);
 }
 
 export function AdminPricingPanel() {
   const [activeTab, setActiveTab] =
-    useState<ControlTab>(
-      "pricing",
-    );
+    useState<ControlTab>("pricing");
 
-  const [
-    pricing,
-    setPricing,
-  ] =
-    useState<MarketplacePricing | null>(
-      null,
-    );
+  const [pricing, setPricing] =
+    useState<MarketplacePricing | null>(null);
 
-  const [
-    saving,
-    setSaving,
-  ] = useState(false);
+  const [saving, setSaving] =
+    useState(false);
 
-  const [
-    message,
-    setMessage,
-  ] =
-    useState<string | null>(
-      null,
-    );
+  const [message, setMessage] =
+    useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -113,14 +96,10 @@ export function AdminPricingPanel() {
     useMemo(
       () =>
         initialListingTypes
-          .filter(
-            (type) =>
-              type.enabled,
-          )
+          .filter((type) => type.enabled)
           .sort(
             (a, b) =>
-              a.sortOrder -
-              b.sortOrder,
+              a.sortOrder - b.sortOrder,
           ),
       [],
     );
@@ -130,9 +109,7 @@ export function AdminPricingPanel() {
     value: string,
   ) {
     const minor =
-      dollarsToMinor(
-        value,
-      );
+      dollarsToMinor(value);
 
     if (minor < 0) {
       return;
@@ -144,10 +121,8 @@ export function AdminPricingPanel() {
           ? {
               ...current,
               listingFeesMinor: {
-                ...current
-                  .listingFeesMinor,
-                [typeId]:
-                  minor,
+                ...current.listingFeesMinor,
+                [typeId]: minor,
               },
             }
           : current,
@@ -159,9 +134,7 @@ export function AdminPricingPanel() {
     value: string,
   ) {
     const minor =
-      dollarsToMinor(
-        value,
-      );
+      dollarsToMinor(value);
 
     if (minor < 0) {
       return;
@@ -172,28 +145,19 @@ export function AdminPricingPanel() {
         current
           ? {
               ...current,
-              publicPushMinimumMinor:
-                {
-                  ...current
-                    .publicPushMinimumMinor,
-                  [typeId]:
-                    minor,
-                },
+              publicPushMinimumMinor: {
+                ...current.publicPushMinimumMinor,
+                [typeId]: minor,
+              },
             }
           : current,
     );
   }
 
   async function save() {
-    if (
-      saving ||
-      !pricing
-    ) {
+    if (saving || !pricing) {
       return;
     }
-
-    const pricingToSave =
-      pricing;
 
     try {
       setSaving(true);
@@ -201,13 +165,11 @@ export function AdminPricingPanel() {
 
       const saved =
         await updateMarketplacePricing(
-          pricingToSave,
+          pricing,
         );
 
       setPricing(saved);
-      setMessage(
-        "Pricing saved.",
-      );
+      setMessage("Pricing saved.");
     } catch (error) {
       console.error(
         "Unable to save pricing:",
@@ -231,6 +193,7 @@ export function AdminPricingPanel() {
           ["email", "Email & Notifications"],
           ["ranking", "Ranking"],
           ["system", "System"],
+          ["audit", "Audit"],
         ] as const).map(
           ([key, label]) => (
             <button
@@ -253,14 +216,15 @@ export function AdminPricingPanel() {
 
       {activeTab === "email" ? (
         <AdminEmailConfigPanel />
+      ) : activeTab === "audit" ? (
+        <AdminAuditPanel />
       ) : activeTab !== "pricing" ? (
         <AdminSystemConfigPanel
           section={activeTab}
         />
       ) : !pricing ? (
         <div className="admin-state">
-          {message ||
-            "Loading pricing..."}
+          {message || "Loading pricing..."}
         </div>
       ) : (
         <section className="admin-pricing-panel">
@@ -280,8 +244,7 @@ export function AdminPricingPanel() {
                 max="999"
                 step="0.01"
                 value={minorToDollars(
-                  pricing
-                    .boardActivationFeeMinor,
+                  pricing.boardActivationFeeMinor,
                 )}
                 onChange={(event) =>
                   setPricing({
@@ -303,8 +266,7 @@ export function AdminPricingPanel() {
                 max="999"
                 step="0.01"
                 value={minorToDollars(
-                  pricing
-                    .boardEntryMinimumMinor,
+                  pricing.boardEntryMinimumMinor,
                 )}
                 onChange={(event) =>
                   setPricing({
@@ -326,8 +288,7 @@ export function AdminPricingPanel() {
                 max="999"
                 step="0.01"
                 value={minorToDollars(
-                  pricing
-                    .boardPushMinimumMinor,
+                  pricing.boardPushMinimumMinor,
                 )}
                 onChange={(event) =>
                   setPricing({
@@ -349,8 +310,7 @@ export function AdminPricingPanel() {
                 max="999"
                 step="0.01"
                 value={minorToDollars(
-                  pricing
-                    .maximumPaymentMinor,
+                  pricing.maximumPaymentMinor,
                 )}
                 onChange={(event) =>
                   setPricing({
@@ -378,23 +338,18 @@ export function AdminPricingPanel() {
                   className="admin-pricing-type-row"
                   key={type.id}
                 >
-                  <strong>
-                    {type.name}
-                  </strong>
+                  <strong>{type.name}</strong>
 
                   <input
-                    aria-label={
-                      `${type.name} Listing fee`
-                    }
+                    aria-label={`${type.name} Listing fee`}
                     type="number"
                     min="0"
                     max="999"
                     step="0.01"
                     value={minorToDollars(
-                      pricing
-                        .listingFeesMinor[
-                          type.id
-                        ] ?? 0,
+                      pricing.listingFeesMinor[
+                        type.id
+                      ] ?? 0,
                     )}
                     onChange={(event) =>
                       updateListingFee(
@@ -405,18 +360,15 @@ export function AdminPricingPanel() {
                   />
 
                   <input
-                    aria-label={
-                      `${type.name} Public Push minimum`
-                    }
+                    aria-label={`${type.name} Public Push minimum`}
                     type="number"
                     min="1"
                     max="999"
                     step="0.01"
                     value={minorToDollars(
-                      pricing
-                        .publicPushMinimumMinor[
-                          type.id
-                        ] ?? 100,
+                      pricing.publicPushMinimumMinor[
+                        type.id
+                      ] ?? 100,
                     )}
                     onChange={(event) =>
                       updatePushMinimum(
@@ -434,9 +386,7 @@ export function AdminPricingPanel() {
             type="button"
             className="admin-publish-button"
             disabled={saving}
-            onClick={() =>
-              void save()
-            }
+            onClick={() => void save()}
           >
             {saving
               ? "Saving..."
