@@ -578,3 +578,51 @@
 .dashboard-my-board-entries {
   margin-top: 2rem;
 }
+
+/* VIEWBID PAYMENT HISTORY V1 */
+.dashboard-payment-history {
+  margin-top: 2rem;
+}
+
+.dashboard-payment-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.dashboard-payment-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(130px, 0.8fr) minmax(160px, 1fr);
+  gap: 1rem;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border: 1px solid #dde8eb;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.dashboard-payment-row > div {
+  min-width: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.dashboard-payment-row strong {
+  color: #294b59;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.dashboard-payment-row span {
+  overflow: hidden;
+  color: #748991;
+  font-size: 0.76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .dashboard-payment-row {
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+  }
+}
