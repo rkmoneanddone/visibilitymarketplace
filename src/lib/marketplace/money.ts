@@ -38,9 +38,9 @@ function trimZeros(value: string) {
 }
 
 /**
- * ViewBid's base pricing is INR. For customer-facing UI we use the fixed
- * product display mapping approved for V1: Rs 100 = US$1. This is not a live
- * FX quote; Dodo remains authoritative for the actual checkout currency.
+ * ViewBid V1 customer-facing display mapping:
+ * Rs 100 = US$1. This is a fixed product display rule, not live FX.
+ * Dodo remains authoritative for the actual checkout currency/amount.
  */
 export function formatInrBaseMinorForViewer(
   amountMinor: number,
@@ -116,8 +116,18 @@ export function formatMoneyMinor(
   amountMinor: number,
   currency = "INR",
 ) {
-  if (currency.toUpperCase() === "INR") {
+  const normalizedCurrency = currency.toUpperCase();
+
+  if (normalizedCurrency === "INR") {
     return formatInrBaseMinorForViewer(amountMinor);
+  }
+
+  // Legacy ViewBid data used USD minor units. Preserve international display,
+  // but show the approved fixed India equivalent ($1 = ₹100) to Indian users.
+  if (normalizedCurrency === "USD" && isIndianViewer()) {
+    return `₹${trimZeros(
+      Number(amountMinor).toFixed(2),
+    )}`;
   }
 
   const prefix = currency.length === 1
