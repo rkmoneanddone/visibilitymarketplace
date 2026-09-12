@@ -29,6 +29,10 @@ import {
   matchesSearch,
 } from "../search/searchTokens";
 
+import {
+  getPublicRuntimeConfig,
+} from "../config/runtimeConfig";
+
 export type BoardEntryListingView =
   Pick<
     Listing,
@@ -177,8 +181,20 @@ async function hydrateDocs(
 export async function getBoardEntriesPage(
   boardId: string,
   cursor: BoardEntryPageCursor = null,
-  pageSize = 20,
+  requestedPageSize = 20,
 ): Promise<BoardEntryPageResult> {
+  const runtime =
+    await getPublicRuntimeConfig();
+
+  const pageSize =
+    Math.max(
+      1,
+      Math.min(
+        requestedPageSize,
+        runtime.limits.boardPageSize,
+      ),
+    );
+
   const q =
     query(
       collection(
@@ -231,8 +247,20 @@ export async function getBoardEntriesPage(
 export async function searchBoardEntries(
   boardId: string,
   searchText: string,
-  maxResults = 20,
+  requestedMaxResults = 20,
 ): Promise<PagedBoardEntryItem[]> {
+  const runtime =
+    await getPublicRuntimeConfig();
+
+  const maxResults =
+    Math.max(
+      1,
+      Math.min(
+        requestedMaxResults,
+        runtime.limits.searchResultLimit,
+      ),
+    );
+
   const token =
     getPrimarySearchToken(
       searchText,
