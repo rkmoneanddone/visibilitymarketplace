@@ -384,3 +384,78 @@ body {
     border-radius: 14px !important;
   }
 }
+
+/* --- Requested refinement: softer chrome, clearer Board meta --- */
+
+/* Hero should float as a soft banner, without the blue ribbon on the left. */
+.compact-intro {
+  border-left: 1px solid rgba(76, 126, 184, 0.20) !important;
+  border-color: rgba(76, 126, 184, 0.20) !important;
+  box-shadow: 0 10px 26px rgba(37, 99, 235, 0.075) !important;
+}
+
+/* Board pricing/type line needs stronger readability. */
+.home-board-preview-meta {
+  color: #334155 !important;
+  font-weight: 500 !important;
+}
+
+/* Reduce the visual noise from outlines: let surfaces and spacing separate sections. */
+.type-strip,
+.board-heading,
+.home-search-only,
+.marketplace-listing-list,
+.home-boards-preview,
+.home-trust-strip,
+.home-board-preview-row,
+.marketplace-listing-row,
+.side-panel .visibility-cta,
+.side-panel .new-today-card,
+.side-panel .how-card,
+.side-panel .board-summary {
+  border-color: rgba(88, 116, 146, 0.18) !important;
+}
+
+/* Keep only the meaningful section ribbons, but make them slimmer/softer. */
+.board-heading,
+.home-search-only,
+.marketplace-listing-list {
+  border-left-color: rgba(51, 108, 200, 0.72) !important;
+  border-left-width: 4px !important;
+}
+
+.home-boards-preview {
+  border-left-color: rgba(35, 134, 95, 0.76) !important;
+  border-left-width: 4px !important;
+}
+
+.side-panel .visibility-cta {
+  border-left-color: rgba(234, 88, 12, 0.78) !important;
+  border-left-width: 4px !important;
+}
+
+.side-panel .new-today-card {
+  border-left-color: rgba(44, 154, 104, 0.78) !important;
+  border-left-width: 4px !important;
+}
+
+.side-panel .how-card {
+  border-left-color: rgba(124, 77, 204, 0.76) !important;
+  border-left-width: 4px !important;
+}
+
+.side-panel .board-summary {
+  border-left-color: rgba(199, 150, 21, 0.76) !important;
+  border-left-width: 4px !important;
+}
+
+.home-search-only .search-field,
+.market-ranking-periods {
+  border-color: rgba(88, 116, 146, 0.24) !important;
+}
+
+@media (max-width: 900px) {
+  .compact-intro {
+    border-left-width: 1px !important;
+  }
+}
