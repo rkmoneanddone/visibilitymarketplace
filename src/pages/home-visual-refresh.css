@@ -1,360 +1,338 @@
 /*
- * ViewBid homepage visual hierarchy refresh.
- * Presentation-only overrides. No application behaviour, ranking,
- * payment, or data logic is changed here.
+ * ViewBid homepage theme — Modern Marketplace V3
+ * Presentation only. No behavior, ranking, payment, or data changes.
  */
 
-/* Page canvas */
+:root {
+  --vb-navy: #10233f;
+  --vb-text: #334155;
+  --vb-muted: #64748b;
+  --vb-cobalt: #2563eb;
+  --vb-cobalt-soft: #eef4ff;
+  --vb-teal: #0f9f92;
+  --vb-green: #218b63;
+  --vb-amber: #f59e0b;
+  --vb-orange: #ea580c;
+  --vb-surface: #ffffff;
+  --vb-canvas: #f7f8fa;
+  --vb-line: rgba(15, 35, 63, 0.09);
+  --vb-shadow: 0 8px 24px rgba(16, 35, 63, 0.07);
+}
+
 body {
-  background: #eef3f8 !important;
+  background: var(--vb-canvas) !important;
+  color: var(--vb-text);
 }
 
 .page-shell {
-  background: transparent;
+  background: transparent !important;
 }
 
-/* Hero: stronger brand presence instead of a pale banner. */
+/* Hero — clean brand band, no left ribbon. */
 .compact-intro {
   margin-top: 14px;
-  padding: 18px 22px !important;
-  border: 1px solid #8fb8ea !important;
-  border-left: 6px solid #2563eb !important;
-  border-radius: 18px;
-  background:
-    linear-gradient(115deg, #dcecff 0%, #edf6ff 50%, #daf6ef 100%) !important;
-  box-shadow:
-    0 2px 4px rgba(15, 23, 42, 0.05),
-    0 14px 32px rgba(37, 99, 235, 0.10);
+  padding: 20px 24px !important;
+  border: 1px solid var(--vb-line) !important;
+  border-left: 1px solid var(--vb-line) !important;
+  border-radius: 18px !important;
+  background: linear-gradient(110deg, #ffffff 0%, #f5f8ff 58%, #effaf8 100%) !important;
+  box-shadow: var(--vb-shadow) !important;
 }
 
 .compact-intro h1 {
-  color: #0d355f !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.04em !important;
+  color: var(--vb-navy) !important;
+  font-weight: 750 !important;
+  letter-spacing: -0.045em !important;
 }
 
 .compact-intro .intro-side p {
-  color: #315472 !important;
-  font-weight: 500;
+  color: #486078 !important;
+  font-weight: 500 !important;
 }
 
-/* Category navigation: crisp, saturated filter chips. */
+/* Category navigation — white rail, colourful chips. */
 .type-strip {
   margin-top: 12px;
   padding: 9px 10px 11px !important;
-  border: 1px solid #c5d5e5 !important;
-  border-radius: 16px;
-  background: #ffffff !important;
-  box-shadow:
-    0 2px 4px rgba(15, 23, 42, 0.04),
-    0 8px 20px rgba(26, 55, 92, 0.07);
+  border: 1px solid var(--vb-line) !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  box-shadow: 0 5px 18px rgba(16, 35, 63, 0.045) !important;
 }
 
 .type-strip .type-link {
-  border-width: 1px !important;
-  border-style: solid !important;
   border-radius: 999px !important;
-  font-weight: 600 !important;
-  transition:
-    transform 120ms ease,
-    box-shadow 120ms ease,
-    border-color 120ms ease;
-}
-
-.type-strip .type-link:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(27, 52, 86, 0.10);
+  font-weight: 650 !important;
 }
 
 .type-strip .type-link.active {
-  border-color: #1696aa !important;
-  background: #bff2f6 !important;
-  color: #066b7b !important;
-  box-shadow:
-    0 0 0 2px rgba(22, 150, 170, 0.10),
-    0 5px 12px rgba(22, 150, 170, 0.14) !important;
+  border-color: rgba(15, 159, 146, 0.35) !important;
+  background: #dff8f4 !important;
+  color: #087d73 !important;
+  box-shadow: 0 3px 10px rgba(15, 159, 146, 0.12) !important;
 }
 
-/* Public leaderboard: unmistakably the primary working surface. */
+/* Public leaderboard — white body with cobalt identity, not a giant pastel panel. */
 .board-heading {
-  margin-top: 14px !important;
-  padding: 16px 18px 11px !important;
-  border: 1px solid #86a9db !important;
+  margin-top: 16px !important;
+  padding: 16px 18px 12px !important;
+  border: 1px solid var(--vb-line) !important;
   border-bottom: 0 !important;
-  border-left: 6px solid #336cc8 !important;
-  border-radius: 18px 18px 0 0 !important;
-  background:
-    linear-gradient(135deg, #dfeaff 0%, #edf4ff 70%) !important;
+  border-left: 4px solid var(--vb-cobalt) !important;
+  border-radius: 16px 16px 0 0 !important;
+  background: #fff !important;
 }
 
 .board-heading .eyebrow {
-  color: #285aa5 !important;
-  font-weight: 700 !important;
+  color: var(--vb-cobalt) !important;
+  font-weight: 750 !important;
 }
 
 .board-heading h2 {
-  color: #0d3768 !important;
-  font-weight: 700 !important;
+  color: var(--vb-navy) !important;
+  font-weight: 750 !important;
 }
 
 .market-ranking-periods {
-  border: 1px solid #9db4d5 !important;
-  background: #cfdcf0 !important;
-  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06) !important;
+  border: 0 !important;
+  background: #eef2f7 !important;
+  box-shadow: none !important;
 }
 
 .market-ranking-periods button {
-  color: #3d5f89 !important;
+  color: #5a6c80 !important;
 }
 
 .market-ranking-periods button.active {
-  color: #163f76 !important;
-  background: #ffffff !important;
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.10),
-    0 4px 10px rgba(40, 73, 118, 0.12) !important;
+  color: #174ea6 !important;
+  background: #fff !important;
+  box-shadow: 0 2px 7px rgba(16, 35, 63, 0.10) !important;
 }
 
 .home-search-only {
   margin-bottom: 0 !important;
   padding: 0 18px 14px !important;
-  border-right: 1px solid #86a9db !important;
-  border-left: 6px solid #336cc8 !important;
-  background: #edf4ff !important;
+  border-right: 1px solid var(--vb-line) !important;
+  border-left: 4px solid var(--vb-cobalt) !important;
+  background: #fff !important;
 }
 
 .home-search-only .search-field {
-  border: 1px solid #9fb9d8 !important;
+  border: 1px solid rgba(37, 99, 235, 0.20) !important;
   border-radius: 12px !important;
-  background: #ffffff !important;
-  box-shadow:
-    inset 0 1px 2px rgba(24, 54, 89, 0.03),
-    0 2px 5px rgba(31, 67, 111, 0.04);
+  background: #f9fbff !important;
+  box-shadow: none !important;
 }
 
 .home-search-only .search-field:focus-within {
-  border-color: #3974cb !important;
-  box-shadow: 0 0 0 3px rgba(57, 116, 203, 0.13) !important;
+  border-color: #6e9bf1 !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.09) !important;
 }
 
 .marketplace-listing-list {
   margin-top: 0 !important;
-  padding: 12px 14px 14px !important;
-  border: 1px solid #86a9db !important;
+  padding: 11px 14px 14px !important;
+  border: 1px solid var(--vb-line) !important;
   border-top: 0 !important;
-  border-left: 6px solid #336cc8 !important;
-  border-radius: 0 0 18px 18px !important;
-  background: #f6f9ff !important;
-  box-shadow:
-    0 4px 7px rgba(15, 23, 42, 0.04),
-    0 14px 30px rgba(35, 68, 111, 0.10) !important;
+  border-left: 4px solid var(--vb-cobalt) !important;
+  border-radius: 0 0 16px 16px !important;
+  background: #fff !important;
+  box-shadow: var(--vb-shadow) !important;
 }
 
 .marketplace-listing-row {
-  border-color: #c5d5e7 !important;
-  background: #ffffff !important;
-  box-shadow: 0 3px 9px rgba(32, 60, 94, 0.05) !important;
+  border-color: var(--vb-line) !important;
+  background: #fff !important;
+  box-shadow: 0 2px 7px rgba(16, 35, 63, 0.035) !important;
 }
 
 .marketplace-listing-row:hover {
-  border-color: #7aa0cf !important;
-  background: #f4f8ff !important;
-  box-shadow: 0 7px 17px rgba(32, 60, 94, 0.10) !important;
+  border-color: rgba(37, 99, 235, 0.22) !important;
+  background: #fbfdff !important;
+  box-shadow: 0 7px 16px rgba(16, 35, 63, 0.07) !important;
 }
 
 .empty-board {
-  color: #34577b !important;
-  font-weight: 500;
+  color: #3f5874 !important;
+  font-weight: 600 !important;
 }
 
-/* Boards: visibly separate product area in a richer green family. */
+/* Boards — white card, restrained green identity. */
 .home-boards-preview {
-  margin-top: 26px !important;
+  margin-top: 24px !important;
   padding: 17px !important;
-  border: 1px solid #78b89a !important;
-  border-left: 6px solid #23865f !important;
-  border-radius: 18px !important;
-  background:
-    linear-gradient(130deg, #dff4e9 0%, #edf9f3 70%) !important;
-  box-shadow:
-    0 3px 5px rgba(24, 80, 58, 0.05),
-    0 14px 28px rgba(24, 80, 58, 0.11) !important;
+  border: 1px solid var(--vb-line) !important;
+  border-left: 4px solid var(--vb-green) !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  box-shadow: var(--vb-shadow) !important;
 }
 
 .home-boards-preview-heading > div > span {
-  color: #176746 !important;
+  color: var(--vb-green) !important;
   font-weight: 800 !important;
 }
 
 .home-boards-preview-heading h2 {
-  color: #123d2e !important;
-  font-weight: 700 !important;
+  color: #173f35 !important;
+  font-weight: 750 !important;
 }
 
 .home-board-preview-row {
-  border-color: #9ecfb8 !important;
-  background: #ffffff !important;
-  box-shadow: 0 3px 9px rgba(37, 91, 70, 0.06) !important;
+  border-color: rgba(33, 139, 99, 0.16) !important;
+  background: #f8fcfa !important;
+  box-shadow: none !important;
 }
 
 .home-board-preview-row:hover {
-  border-color: #65aa8a !important;
-  box-shadow: 0 7px 16px rgba(37, 91, 70, 0.11) !important;
+  border-color: rgba(33, 139, 99, 0.30) !important;
+  background: #f3faf7 !important;
 }
 
-/* Trust strip should read as a deliberate information band. */
+.home-board-preview-title {
+  color: var(--vb-navy) !important;
+  font-weight: 700 !important;
+}
+
+.home-board-preview-meta {
+  color: #26384d !important;
+  font-weight: 600 !important;
+}
+
+/* Trust strip — neutral, quiet. */
 .home-trust-strip {
   margin-top: 16px !important;
-  padding: 12px 16px !important;
-  border: 1px solid #c2d0df !important;
-  border-radius: 14px !important;
-  background: #eaf0f6 !important;
-  color: #445c73 !important;
-  box-shadow: 0 3px 10px rgba(31, 55, 81, 0.045);
+  padding: 11px 15px !important;
+  border: 1px solid var(--vb-line) !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+  color: #55677b !important;
+  box-shadow: 0 3px 12px rgba(16, 35, 63, 0.035) !important;
 }
 
-/* Right rail: stronger, unmistakable card families. */
+/* Sidebar — white cards with colour accents instead of full pastel fills. */
 .side-panel {
   gap: 18px !important;
   padding-left: 28px !important;
-  border-left: 2px solid #c8d4e0 !important;
+  border-left: 1px solid rgba(16, 35, 63, 0.08) !important;
 }
 
 .side-panel .visibility-cta,
 .side-panel .new-today-card,
 .side-panel .how-card,
 .side-panel .board-summary {
-  border-radius: 18px !important;
-  box-shadow:
-    0 4px 8px rgba(15, 23, 42, 0.05),
-    0 13px 28px rgba(32, 50, 76, 0.10) !important;
+  border: 1px solid var(--vb-line) !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  box-shadow: var(--vb-shadow) !important;
 }
 
 .side-panel .visibility-cta {
-  border-color: #ee8c4c !important;
-  border-left: 6px solid #ea580c !important;
-  background:
-    linear-gradient(135deg, #ffd9bd 0%, #ffeadd 58%, #fff4ec 100%) !important;
+  border-top: 4px solid var(--vb-orange) !important;
 }
 
 .side-panel .visibility-icon {
-  background: #ffc899 !important;
-  color: #c94805 !important;
+  background: #fff1e8 !important;
+  color: var(--vb-orange) !important;
 }
 
 .side-panel .visibility-cta .eyebrow {
-  color: #94411b !important;
-  font-weight: 700 !important;
+  color: #a94715 !important;
+  font-weight: 750 !important;
 }
 
 .side-panel .visibility-cta h3 {
-  color: #7f2f0f !important;
-  font-weight: 700 !important;
+  color: #6f2f12 !important;
+  font-weight: 750 !important;
 }
 
 .side-panel .visibility-cta > p:not(.eyebrow) {
-  color: #744027 !important;
+  color: #604c42 !important;
 }
 
 .side-panel .visibility-cta button {
-  background: #f05a0b !important;
-  color: #ffffff !important;
-  box-shadow: 0 7px 15px rgba(234, 88, 12, 0.27) !important;
-}
-
-.side-panel .visibility-cta button:hover {
-  background: #d94e06 !important;
+  background: linear-gradient(135deg, #f97316, #ea580c) !important;
+  color: #fff !important;
+  box-shadow: 0 6px 14px rgba(234, 88, 12, 0.20) !important;
 }
 
 .side-panel .new-today-card {
-  border-color: #74c49d !important;
-  border-left: 6px solid #2c9a68 !important;
-  background:
-    linear-gradient(135deg, #d7f1e4 0%, #eaf8f1 65%, #f5fcf8 100%) !important;
+  border-top: 4px solid var(--vb-green) !important;
 }
 
 .side-panel .new-icon {
-  background: #bde7cf !important;
-  color: #176c49 !important;
+  background: #e6f7ef !important;
+  color: var(--vb-green) !important;
 }
 
 .side-panel .new-today-card .eyebrow {
-  color: #246a4e !important;
-  font-weight: 700 !important;
+  color: #276a52 !important;
+  font-weight: 750 !important;
 }
 
 .side-panel .how-card {
-  border-color: #a88add !important;
-  border-left: 6px solid #7c4dcc !important;
-  background:
-    linear-gradient(135deg, #e3d7fb 0%, #efe8ff 62%, #f8f5ff 100%) !important;
+  border-top: 4px solid #7c5ce0 !important;
 }
 
 .side-panel .how-icon {
-  background: #d0bcf6 !important;
-  color: #5e31aa !important;
+  background: #f0ecff !important;
+  color: #6c4fd3 !important;
 }
 
 .side-panel .how-card .eyebrow {
-  color: #6b52a0 !important;
-  font-weight: 700 !important;
+  color: #6d59a6 !important;
+  font-weight: 750 !important;
 }
 
 .side-panel .how-card h3 {
-  color: #3f286d !important;
-  font-weight: 700 !important;
+  color: #3d3262 !important;
+  font-weight: 750 !important;
 }
 
 .side-panel .board-summary {
-  border-color: #d9b84f !important;
-  border-left: 6px solid #c79615 !important;
-  background:
-    linear-gradient(135deg, #ffedb5 0%, #fff4cf 65%, #fffaf0 100%) !important;
+  border-top: 4px solid var(--vb-amber) !important;
 }
 
-/* Stronger hierarchy for key action buttons. */
 .push-button,
 .home-board-preview-row .view-board-button,
 .home-board-preview-row a[href*="/boards/"] {
   font-weight: 700 !important;
 }
 
-/* Smaller screens: retain the hierarchy without creating bulk. */
 @media (max-width: 900px) {
   .compact-intro {
     margin-top: 10px;
     padding: 14px 16px !important;
-    border-left-width: 5px !important;
-    border-radius: 15px;
+    border-radius: 15px !important;
   }
 
   .type-strip {
     margin-top: 9px;
-    border-radius: 13px;
+    border-radius: 13px !important;
   }
 
   .board-heading {
     margin-top: 10px !important;
     padding: 13px 13px 9px !important;
-    border-left-width: 5px !important;
+    border-left-width: 3px !important;
     border-radius: 15px 15px 0 0 !important;
   }
 
   .home-search-only {
     padding: 0 13px 11px !important;
-    border-left-width: 5px !important;
+    border-left-width: 3px !important;
   }
 
   .marketplace-listing-list {
     padding: 8px 9px 11px !important;
-    border-left-width: 5px !important;
+    border-left-width: 3px !important;
     border-radius: 0 0 15px 15px !important;
   }
 
   .home-boards-preview {
     margin-top: 16px !important;
     padding: 13px !important;
-    border-left-width: 5px !important;
+    border-left-width: 3px !important;
     border-radius: 15px !important;
   }
 
@@ -366,7 +344,7 @@ body {
 
 @media (max-width: 700px) {
   body {
-    background: #f4f7fa !important;
+    background: #f8f9fb !important;
   }
 
   .compact-intro {
@@ -375,87 +353,5 @@ body {
 
   .type-strip {
     padding-inline: 6px !important;
-  }
-
-  .side-panel .visibility-cta,
-  .side-panel .new-today-card,
-  .side-panel .how-card,
-  .side-panel .board-summary {
-    border-radius: 14px !important;
-  }
-}
-
-/* --- Requested refinement: softer chrome, clearer Board meta --- */
-
-/* Hero should float as a soft banner, without the blue ribbon on the left. */
-.compact-intro {
-  border-left: 1px solid rgba(76, 126, 184, 0.20) !important;
-  border-color: rgba(76, 126, 184, 0.20) !important;
-  box-shadow: 0 10px 26px rgba(37, 99, 235, 0.075) !important;
-}
-
-/* Board pricing/type line needs stronger readability. */
-.home-board-preview-meta {
-  color: #334155 !important;
-  font-weight: 500 !important;
-}
-
-/* Reduce the visual noise from outlines: let surfaces and spacing separate sections. */
-.type-strip,
-.board-heading,
-.home-search-only,
-.marketplace-listing-list,
-.home-boards-preview,
-.home-trust-strip,
-.home-board-preview-row,
-.marketplace-listing-row,
-.side-panel .visibility-cta,
-.side-panel .new-today-card,
-.side-panel .how-card,
-.side-panel .board-summary {
-  border-color: rgba(88, 116, 146, 0.18) !important;
-}
-
-/* Keep only the meaningful section ribbons, but make them slimmer/softer. */
-.board-heading,
-.home-search-only,
-.marketplace-listing-list {
-  border-left-color: rgba(51, 108, 200, 0.72) !important;
-  border-left-width: 4px !important;
-}
-
-.home-boards-preview {
-  border-left-color: rgba(35, 134, 95, 0.76) !important;
-  border-left-width: 4px !important;
-}
-
-.side-panel .visibility-cta {
-  border-left-color: rgba(234, 88, 12, 0.78) !important;
-  border-left-width: 4px !important;
-}
-
-.side-panel .new-today-card {
-  border-left-color: rgba(44, 154, 104, 0.78) !important;
-  border-left-width: 4px !important;
-}
-
-.side-panel .how-card {
-  border-left-color: rgba(124, 77, 204, 0.76) !important;
-  border-left-width: 4px !important;
-}
-
-.side-panel .board-summary {
-  border-left-color: rgba(199, 150, 21, 0.76) !important;
-  border-left-width: 4px !important;
-}
-
-.home-search-only .search-field,
-.market-ranking-periods {
-  border-color: rgba(88, 116, 146, 0.24) !important;
-}
-
-@media (max-width: 900px) {
-  .compact-intro {
-    border-left-width: 1px !important;
   }
 }
