@@ -6,10 +6,11 @@ import {
   Routes,
 } from "react-router-dom";
 
-
 import {
   HowItWorksPage,
-} from "./pages/HowItWorksPage";import {
+} from "./pages/HowItWorksPage";
+
+import {
   BoardDetailPage,
 } from "./pages/BoardDetailPage";
 
@@ -49,6 +50,20 @@ import {
   AppLayout,
 } from "./components/layout/AppLayout";
 
+import {
+  MaintenanceGuard,
+} from "./features/config/MaintenanceGuard";
+
+function guarded(
+  element: React.ReactNode,
+) {
+  return (
+    <MaintenanceGuard>
+      {element}
+    </MaintenanceGuard>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -56,51 +71,72 @@ function App() {
         <Route element={<AppLayout />}>
           <Route
             path="/"
-            element={<HomePage />}
+            element={guarded(
+              <HomePage />,
+            )}
           />
 
           <Route
             path="/boards"
-            element={<BoardsPage />}
+            element={guarded(
+              <BoardsPage />,
+            )}
           />
+
           <Route
             path="/how-it-works"
-            element={<HowItWorksPage />}
+            element={guarded(
+              <HowItWorksPage />,
+            )}
           />
 
           <Route
             path="/boards/:boardId"
-            element={<BoardDetailPage />}
+            element={guarded(
+              <BoardDetailPage />,
+            )}
           />
 
           <Route
             path="/about"
-            element={<AboutPage />}
+            element={guarded(
+              <AboutPage />,
+            )}
           />
 
           <Route
             path="/privacy"
-            element={<PrivacyPage />}
+            element={guarded(
+              <PrivacyPage />,
+            )}
           />
 
           <Route
             path="/terms"
-            element={<TermsPage />}
+            element={guarded(
+              <TermsPage />,
+            )}
           />
 
           <Route
             path="/contact"
-            element={<ContactPage />}
+            element={guarded(
+              <ContactPage />,
+            )}
           />
 
           <Route
             path="/dashboard"
-            element={<MyDashboardPage />}
+            element={guarded(
+              <MyDashboardPage />,
+            )}
           />
 
           <Route
             path="/admin/moderation"
-            element={<AdminModerationPage />}
+            element={
+              <AdminModerationPage />
+            }
           />
         </Route>
       </Routes>
