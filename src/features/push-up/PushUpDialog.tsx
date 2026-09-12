@@ -27,14 +27,12 @@ import type {
 } from "./types";
 
 import "./push-up.css";
+import "./push-up-custom.css";
 
 type PushUpDialogProps = {
   targets: PushUpTarget[];
-
   initialTargetId?: string;
-
   contextLabel: string;
-
   onClose: () => void;
 };
 
@@ -45,31 +43,62 @@ const quickAmountsMinor = [
   2500,
 ];
 
+function dollarsFromMinor(
+  amountMinor: number,
+) {
+  return (amountMinor / 100).toFixed(2);
+}
+
+function minorFromDollars(
+  value: string,
+): number | null {
+  const normalized = value.trim();
+
+  if (!/^\d+(?:\.\d{0,2})?$/.test(normalized)) {
+    return null;
+  }
+
+  const parsed = Number(normalized);
+
+  if (!Number.isFinite(parsed)) {
+    return null;
+  }
+
+  const minor = Math.round(parsed * 100);
+
+  return Number.isSafeInteger(minor)
+    ? minor
+    : null;
+}
+
 export function PushUpDialog({
   targets,
   initialTargetId,
   contextLabel,
   onClose,
 }: PushUpDialogProps) {
+  const initialMinimum =
+    targets.find(
+      (target) =>
+        target.id === initialTargetId,
+    )?.minimumAmountMinor ?? 100;
+
   const [query, setQuery] =
     useState("");
 
   const [
     selectedTargetId,
     setSelectedTargetId,
-  ] =
-    useState(
-      initialTargetId ?? "",
-    );
+  ] = useState(
+    initialTargetId ?? "",
+  );
 
   const [amountMinor, setAmountMinor] =
+    useState(initialMinimum);
+
+  const [amountInput, setAmountInput] =
     useState(
-      targets.find(
-        (target) =>
-          target.id ===
-          initialTargetId,
-      )?.minimumAmountMinor ??
-      100,
+      dollarsFromMinor(initialMinimum),
     );
 
   const [paymentOpen, setPaymentOpen] =
@@ -78,8 +107,7 @@ export function PushUpDialog({
   const selectedTarget =
     targets.find(
       (target) =>
-        target.id ===
-        selectedTargetId,
+        target.id === selectedTargetId,
     ) ?? null;
 
   useEffect(() => {
@@ -93,6 +121,11 @@ export function PushUpDialog({
     ) {
       setAmountMinor(
         selectedTarget.minimumAmountMinor,
+      );
+      setAmountInput(
+        dollarsFromMinor(
+          selectedTarget.minimumAmountMinor,
+        ),
       );
     }
   }, [
@@ -114,8 +147,7 @@ export function PushUpDialog({
 
         return targets.filter(
           (target) =>
-            target.id ===
-            initialTargetId,
+            target.id === initialTargetId,
         );
       }
 
@@ -138,50 +170,74 @@ export function PushUpDialog({
     useMemo(() => {
       const minimum =
         selectedTarget
-          ?.minimumAmountMinor ??
-        100;
+          ?.minimumAmountMinor ?? 100;
 
       return Array.from(
         new Set([
           minimum,
           ...quickAmountsMinor.filter(
-            (value) =>
-              value >= minimum,
+            (value) => value >= minimum,
           ),
         ]),
-      ).sort(
-        (a, b) =>
-          a - b,
-      );
-    }, [
-      selectedTarget,
-    ]);
+      ).sort((a, b) => a - b);
+    }, [selectedTarget]);
+
+  const minimumAmountMinor =
+    selectedTarget
+      ?.minimumAmountMinor ?? 100;
+
+  const amountValid =
+    Boolean(selectedTarget) &&
+    amountMinor >= minimumAmountMinor;
 
   const paymentRequest:
     PaymentRequest | null =
-      selectedTarget
+      selectedTarget && amountValid
         ? {
             purpose:
               selectedTarget.purpose,
-
             targetKind:
               selectedTarget.paymentTargetKind,
-
             targetId:
               selectedTarget.paymentTargetId,
-
             amountMinor,
-
             currency:
               selectedTarget.currency,
-
             title:
               `Push Up ${selectedTarget.title}`,
-
             description:
               `${contextLabel} - ${selectedTarget.title}`,
           }
         : null;
+
+  function selectAmount(
+    value: number,
+  ) {
+    setAmountMinor(value);
+    setAmountInput(
+      dollarsFromMinor(value),
+    );
+  }
+
+  function updateCustomAmount(
+    value: string,
+  ) {
+    if (
+      value &&
+      !/^\d*(?:\.\d{0,2})?$/.test(value)
+    ) {
+      return;
+    }
+
+    setAmountInput(value);
+
+    const parsed =
+      minorFromDollars(value);
+
+    setAmountMinor(
+      parsed ?? 0,
+    );
+  }
 
   return (
     <>
@@ -241,14 +297,10 @@ export function PushUpDialog({
                 type="search"
                 value={query}
                 onChange={(event) =>
-                  setQuery(
-                    event.target.value,
-                  )
+                  setQuery(event.target.value)
                 }
                 placeholder="Search listing or @handle"
-                autoFocus={
-                  !initialTargetId
-                }
+                autoFocus={!initialTargetId}
               />
             </label>
           )}
@@ -258,15 +310,12 @@ export function PushUpDialog({
               filteredTargets.map(
                 (target) => {
                   const selected =
-                    target.id ===
-                    selectedTargetId;
+                    target.id === selectedTargetId;
 
                   return (
                     <button
                       type="button"
-                      key={
-                        target.id
-                      }
+                      key={target.id}
                       className={`pushup-listing ${
                         selected
                           ? "selected"
@@ -281,7 +330,7 @@ export function PushUpDialog({
                           amountMinor <
                           target.minimumAmountMinor
                         ) {
-                          setAmountMinor(
+                          selectAmount(
                             target.minimumAmountMinor,
                           );
                         }
@@ -290,9 +339,7 @@ export function PushUpDialog({
                       <span className="pushup-listing-mark">
                         {target.imageUrl ? (
                           <img
-                            src={
-                              target.imageUrl
-                            }
+                            src={target.imageUrl}
                             alt=""
                           />
                         ) : (
@@ -322,9 +369,7 @@ export function PushUpDialog({
                           )}
                         </strong>
 
-                        <small>
-                          pushed
-                        </small>
+                        <small>pushed</small>
                       </span>
                     </button>
                   );
@@ -342,19 +387,40 @@ export function PushUpDialog({
           <div className="pushup-amount-panel">
             <div className="pushup-amount-row">
               <div className="pushup-current-amount">
-                <span>
-                  Push Up
-                </span>
+                <span>Push Up</span>
 
                 <strong>
                   {formatMoneyMinor(
                     amountMinor,
                     selectedTarget
-                      ?.currency ??
-                    "USD",
+                      ?.currency ?? "USD",
                   )}
                 </strong>
               </div>
+
+              <label className="pushup-custom-amount">
+                <span>Custom amount</span>
+                <div>
+                  <span>$</span>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={amountInput}
+                    onChange={(event) =>
+                      updateCustomAmount(
+                        event.target.value,
+                      )
+                    }
+                    aria-label="Custom Push Up amount in dollars"
+                  />
+                </div>
+                <small>
+                  Minimum {formatMoneyMinor(
+                    minimumAmountMinor,
+                    selectedTarget?.currency ?? "USD",
+                  )}
+                </small>
+              </label>
 
               <div className="pushup-amounts">
                 {availableAmounts.map(
@@ -363,34 +429,38 @@ export function PushUpDialog({
                       type="button"
                       key={value}
                       className={
-                        amountMinor ===
-                        value
+                        amountMinor === value
                           ? "active"
                           : ""
                       }
                       onClick={() =>
-                        setAmountMinor(
-                          value,
-                        )
+                        selectAmount(value)
                       }
                     >
                       {formatMoneyMinor(
                         value,
                         selectedTarget
-                          ?.currency ??
-                        "USD",
+                          ?.currency ?? "USD",
                       )}
                     </button>
                   ),
                 )}
               </div>
             </div>
-<button
+
+            {!amountValid && selectedTarget && (
+              <p className="pushup-amount-error">
+                Enter at least {formatMoneyMinor(
+                  minimumAmountMinor,
+                  selectedTarget.currency,
+                )}.
+              </p>
+            )}
+
+            <button
               className="pushup-pay"
               type="button"
-              disabled={
-                !selectedTarget
-              }
+              disabled={!paymentRequest}
               onClick={() =>
                 setPaymentOpen(true)
               }
@@ -400,8 +470,7 @@ export function PushUpDialog({
               {formatMoneyMinor(
                 amountMinor,
                 selectedTarget
-                  ?.currency ??
-                "USD",
+                  ?.currency ?? "USD",
               )}
             </button>
 
