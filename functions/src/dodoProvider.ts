@@ -8,32 +8,15 @@ import {
   defineString,
 } from "firebase-functions/params";
 
+import {
+  getRuntimeSystemConfig,
+} from "./systemConfig";
+
 export const dodoApiKey =
   defineSecret("DODO_API_KEY");
 
 export const dodoWebhookKey =
   defineSecret("DODO_WEBHOOK_KEY");
-
-export const dodoEnvironment =
-  defineString(
-    "DODO_ENVIRONMENT",
-    {
-      default: "test_mode",
-      description:
-        "Dodo environment: test_mode or live_mode.",
-    },
-  );
-
-export const dodoProductId =
-  defineString(
-    "DODO_PRODUCT_ID",
-    {
-      default:
-        "pdt_0NnQUn7YwN7JhAgOyPXCr",
-      description:
-        "Single Pay What You Want Dodo product used for ViewBid payments.",
-    },
-  );
 
 export const dodoApiBaseUrl =
   defineString(
@@ -41,18 +24,7 @@ export const dodoApiBaseUrl =
     {
       default: "",
       description:
-        "Optional Dodo API base URL override. Leave empty to derive it from DODO_ENVIRONMENT.",
-    },
-  );
-
-export const viewBidPublicUrl =
-  defineString(
-    "VIEWBID_PUBLIC_URL",
-    {
-      default:
-        "https://visibilitymarketplace.web.app",
-      description:
-        "Public ViewBid URL used for payment return redirects.",
+        "Optional Dodo API base URL override for infrastructure testing only.",
     },
   );
 
@@ -70,23 +42,11 @@ type DodoCheckoutResult = {
   checkoutUrl: string;
 };
 
-function normalizeEnvironment() {
-  const value =
-    dodoEnvironment.value().trim();
-
-  if (
-    value !== "test_mode" &&
-    value !== "live_mode"
-  ) {
-    throw new Error(
-      "DODO_ENVIRONMENT must be test_mode or live_mode.",
-    );
-  }
-
-  return value;
-}
-
-function resolveApiBaseUrl() {
+function resolveApiBaseUrl(
+  environment:
+    | "test_mode"
+    | "live_mode",
+) {
   const override =
     dodoApiBaseUrl.value().trim();
 
@@ -94,8 +54,7 @@ function resolveApiBaseUrl() {
     return override.replace(/\/$/, "");
   }
 
-  return normalizeEnvironment() ===
-    "live_mode"
+  return environment === "live_mode"
     ? "https://live.dodopayments.com"
     : "https://test.dodopayments.com";
 }
@@ -106,18 +65,27 @@ export async function createDodoCheckout(
   const apiKey =
     dodoApiKey.value().trim();
 
-  const productId =
-    dodoProductId.value().trim();
-
   if (!apiKey) {
     throw new Error(
       "DODO_API_KEY is not configured.",
     );
   }
 
+  const config =
+    await getRuntimeSystemConfig();
+
+  if (!config.payments.enabled) {
+    throw new Error(
+      "ViewBid payments are currently disabled by system configuration.",
+    );
+  }
+
+  const productId =
+    config.payments.dodoProductId.trim();
+
   if (!productId) {
     throw new Error(
-      "DODO_PRODUCT_ID is not configured.",
+      "Dodo Product ID is not configured.",
     );
   }
 
@@ -137,21 +105,25 @@ export async function createDodoCheckout(
       .trim()
       .toUpperCase();
 
-  if (currency !== "USD") {
+  if (
+    currency !==
+    config.general.currency
+  ) {
     throw new Error(
-      "ViewBid Dodo checkout currently supports USD only.",
+      `ViewBid checkout currently supports ${config.general.currency} only.`,
     );
   }
 
   const publicUrl =
-    viewBidPublicUrl
-      .value()
+    config.general.publicUrl
       .trim()
       .replace(/\/$/, "");
 
   const response =
     await fetch(
-      `${resolveApiBaseUrl()}/checkouts`,
+      `${resolveApiBaseUrl(
+        config.payments.environment,
+      )}/checkouts`,
       {
         method: "POST",
         headers: {
@@ -174,7 +146,9 @@ export async function createDodoCheckout(
             currency,
           return_url:
             publicUrl
-              ? `${publicUrl}/?payment=return`
+              ? `${publicUrl}/?payment=return&intent=${encodeURIComponent(
+                  input.paymentIntentId,
+                )}`
               : undefined,
           metadata: {
             viewbid_payment_intent_id:
@@ -185,6 +159,8 @@ export async function createDodoCheckout(
               input.targetKind,
             viewbid_target_id:
               input.targetId,
+            viewbid_config_version:
+              String(config.version),
           },
         }),
       },
