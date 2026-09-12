@@ -51,6 +51,8 @@ export const getPublicSystemConfig =
               config.ranking.publicMonthlyEnabled,
             boardRankingEnabled:
               config.ranking.boardRankingEnabled,
+            tieBreakRule:
+              config.ranking.tieBreakRule,
           },
           limits: {
             publicPageSize:
