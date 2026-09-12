@@ -48,6 +48,44 @@ function normalizeString(
   return String(value ?? "").trim();
 }
 
+function normalizeEmail(
+  value: unknown,
+): string | null {
+  const email =
+    normalizeString(value)
+      .toLowerCase();
+
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+    email,
+  )
+    ? email
+    : null;
+}
+
+function customerEmailFromPaymentData(
+  paymentData: Record<string, unknown>,
+): string | null {
+  const customer =
+    paymentData.customer &&
+    typeof paymentData.customer === "object"
+      ? paymentData.customer as
+          Record<string, unknown>
+      : {};
+
+  const billing =
+    paymentData.billing &&
+    typeof paymentData.billing === "object"
+      ? paymentData.billing as
+          Record<string, unknown>
+      : {};
+
+  return (
+    normalizeEmail(customer.email) ||
+    normalizeEmail(billing.email) ||
+    normalizeEmail(paymentData.email)
+  );
+}
+
 export const createDodoPaymentIntent =
   onCall(
     {
@@ -70,6 +108,11 @@ export const createDodoPaymentIntent =
       const clientStatusToken =
         randomUUID();
 
+      const authenticatedEmail =
+        normalizeEmail(
+          request.auth?.token.email,
+        );
+
       const now =
         FieldValue.serverTimestamp();
 
@@ -82,6 +125,8 @@ export const createDodoPaymentIntent =
         providerCheckoutSessionId: null,
         checkoutUrl: null,
         clientStatusToken,
+        customerEmail:
+          authenticatedEmail,
         createdByUserId:
           request.auth?.uid ?? null,
         createdAt: now,
@@ -261,6 +306,11 @@ export const dodoWebhook =
           paymentData.id,
         );
 
+      const webhookCustomerEmail =
+        customerEmailFromPaymentData(
+          paymentData,
+        );
+
       if (!paymentIntentId) {
         console.warn(
           "Ignoring Dodo webhook without ViewBid payment metadata",
@@ -339,6 +389,25 @@ export const dodoWebhook =
       );
 
       try {
+        if (
+          webhookCustomerEmail &&
+          normalizeEmail(
+            payment?.customerEmail,
+          ) !== webhookCustomerEmail
+        ) {
+          await paymentRef.set(
+            {
+              customerEmail:
+                webhookCustomerEmail,
+              updatedAt:
+                FieldValue.serverTimestamp(),
+            },
+            {
+              merge: true,
+            },
+          );
+        }
+
         if (
           eventType ===
           "payment.succeeded"
@@ -444,6 +513,12 @@ export const dodoWebhook =
                 payment
                   ?.providerPaymentId ||
                 null,
+              ...(webhookCustomerEmail
+                ? {
+                    customerEmail:
+                      webhookCustomerEmail,
+                  }
+                : {}),
               updatedAt:
                 FieldValue.serverTimestamp(),
             });
@@ -472,6 +547,12 @@ export const dodoWebhook =
                 payment
                   ?.providerPaymentId ||
                 null,
+              ...(webhookCustomerEmail
+                ? {
+                    customerEmail:
+                      webhookCustomerEmail,
+                  }
+                : {}),
               updatedAt:
                 FieldValue.serverTimestamp(),
             });
