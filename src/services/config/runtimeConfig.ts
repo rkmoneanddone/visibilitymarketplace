@@ -27,6 +27,9 @@ export type PublicRuntimeConfig = {
     publicWeeklyEnabled: boolean;
     publicMonthlyEnabled: boolean;
     boardRankingEnabled: boolean;
+    tieBreakRule:
+      | "earliest_reached_total"
+      | "newest_published";
   };
   limits: {
     publicPageSize: number;
