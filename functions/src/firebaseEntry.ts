@@ -10,3 +10,6 @@ export {
 export {
   getPublicSystemConfig,
 } from "./publicConfig";
+export {
+  getPaymentStatus,
+} from "./paymentStatus";
