@@ -44,7 +44,7 @@ export function listingToPushUpTarget(
 
   const minimumAmountMinor =
     listingType?.minimumBoostMinor ??
-    100;
+    10_000;
 
   return {
     id:
@@ -74,6 +74,6 @@ export function listingToPushUpTarget(
     minimumAmountMinor,
 
     currency:
-      "USD",
+      "INR",
   };
 }
