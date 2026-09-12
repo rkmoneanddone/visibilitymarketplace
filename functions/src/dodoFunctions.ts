@@ -32,6 +32,10 @@ import {
   validatePaymentRequest,
 } from "./paymentCore";
 
+import {
+  reverseVerifiedPaymentForRefund,
+} from "./paymentReversal";
+
 if (getApps().length === 0) {
   initializeApp();
 }
@@ -458,14 +462,28 @@ export const dodoWebhook =
           eventType ===
           "refund.succeeded"
         ) {
-          await paymentRef.set(
+          const providerRefundId =
+            normalizeString(
+              paymentData.refund_id ||
+              paymentData.id,
+            );
+
+          const reversal =
+            await reverseVerifiedPaymentForRefund(
+              db,
+              paymentIntentId,
+              providerRefundId ||
+                undefined,
+            );
+
+          await webhookEventRef.set(
             {
-              refundStatus:
-                "succeeded",
-              refundUpdatedAt:
+              processedAt:
                 FieldValue.serverTimestamp(),
-              updatedAt:
-                FieldValue.serverTimestamp(),
+              processingStatus:
+                reversal.rankingReversed
+                  ? "refunded_and_reversed"
+                  : "refund_recorded",
             },
             {
               merge: true,
@@ -483,6 +501,18 @@ export const dodoWebhook =
                 FieldValue.serverTimestamp(),
               updatedAt:
                 FieldValue.serverTimestamp(),
+            },
+            {
+              merge: true,
+            },
+          );
+
+          await webhookEventRef.set(
+            {
+              processedAt:
+                FieldValue.serverTimestamp(),
+              processingStatus:
+                "refund_failed",
             },
             {
               merge: true,
