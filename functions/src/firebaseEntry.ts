@@ -13,3 +13,6 @@ export {
 export {
   getPaymentStatus,
 } from "./paymentStatus";
+export {
+  sendPaymentStatusEmail,
+} from "./paymentEmailFunctions";
