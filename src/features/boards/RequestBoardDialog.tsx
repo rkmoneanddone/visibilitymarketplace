@@ -14,6 +14,13 @@ import {
 } from "../../config/listingTypes";
 
 import {
+  inrMinorToViewerInput,
+  isIndianViewer,
+  viewerCurrencySymbol,
+  viewerMajorToInrMinor,
+} from "../../lib/marketplace/money";
+
+import {
   requestBoard,
 } from "../../services/boards/boardRequestClient";
 
@@ -26,93 +33,54 @@ type RequestBoardDialogProps = {
   onRequested?: () => void;
 };
 
+const DEFAULT_BOARD_AMOUNT_MINOR = 10_000;
+
 export function RequestBoardDialog({
   open,
   onClose,
   onRequested,
 }: RequestBoardDialogProps) {
-  const [name, setName] =
-    useState("");
-
-  const [
-    listingTypeId,
-    setListingTypeId,
-  ] = useState("");
-
-  const [
-    startsAt,
-    setStartsAt,
-  ] = useState("");
-
-  const [
-    entryStartsAt,
-    setEntryStartsAt,
-  ] = useState("");
-
-  const [
-    entryClosesAt,
-    setEntryClosesAt,
-  ] = useState("");
-
-  const [
-    endsAt,
-    setEndsAt,
-  ] = useState("");
-
-  const [
-    entryFee,
-    setEntryFee,
-  ] = useState("1");
-
-  const [
-    minimumBoost,
-    setMinimumBoost,
-  ] = useState("1");
-
-  const [
-    submitting,
-    setSubmitting,
-  ] = useState(false);
-
-  const [
-    error,
-    setError,
-  ] = useState<string | null>(
-    null,
+  const [name, setName] = useState("");
+  const [listingTypeId, setListingTypeId] = useState("");
+  const [startsAt, setStartsAt] = useState("");
+  const [entryStartsAt, setEntryStartsAt] = useState("");
+  const [entryClosesAt, setEntryClosesAt] = useState("");
+  const [endsAt, setEndsAt] = useState("");
+  const [entryFee, setEntryFee] = useState(
+    inrMinorToViewerInput(DEFAULT_BOARD_AMOUNT_MINOR),
   );
+  const [minimumBoost, setMinimumBoost] = useState(
+    inrMinorToViewerInput(DEFAULT_BOARD_AMOUNT_MINOR),
+  );
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const enabledListingTypes =
-    useMemo(
-      () =>
-        initialListingTypes
-          .filter(
-            (type) =>
-              type.enabled,
-          )
-          .sort(
-            (a, b) =>
-              a.sortOrder -
-              b.sortOrder,
-          ),
-      [],
-    );
+  const enabledListingTypes = useMemo(
+    () =>
+      initialListingTypes
+        .filter((type) => type.enabled)
+        .sort((a, b) => a.sortOrder - b.sortOrder),
+    [],
+  );
 
   if (!open) {
     return null;
   }
 
+  const currencySymbol = viewerCurrencySymbol();
+  const defaultActivationDisplay = isIndianViewer()
+    ? "₹200"
+    : "$2.00";
+
   function resetForm() {
     setName("");
     setListingTypeId("");
-
     setStartsAt("");
     setEntryStartsAt("");
     setEntryClosesAt("");
     setEndsAt("");
-
-    setEntryFee("1");
-    setMinimumBoost("1");
-
+    setEntryFee(inrMinorToViewerInput(DEFAULT_BOARD_AMOUNT_MINOR));
+    setMinimumBoost(inrMinorToViewerInput(DEFAULT_BOARD_AMOUNT_MINOR));
     setError(null);
   }
 
@@ -125,10 +93,7 @@ export function RequestBoardDialog({
     onClose();
   }
 
-
-  async function handleSubmit(
-    event: FormEvent,
-  ) {
+  async function handleSubmit(event: FormEvent) {
     event.preventDefault();
 
     if (submitting) {
@@ -136,170 +101,102 @@ export function RequestBoardDialog({
     }
 
     if (!name.trim()) {
-      setError(
-        "Please enter a board name.",
-      );
+      setError("Please enter a board name.");
       return;
     }
 
     if (!listingTypeId) {
-      setError(
-        "Please select a listing type.",
-      );
+      setError("Please select a listing type.");
       return;
     }
 
-    if (
-      !startsAt ||
-      !entryStartsAt ||
-      !entryClosesAt ||
-      !endsAt
-    ) {
-      setError(
-        "Please complete all board dates.",
-      );
+    if (!startsAt || !entryStartsAt || !entryClosesAt || !endsAt) {
+      setError("Please complete all board dates.");
       return;
     }
 
-    const boardStart =
-      new Date(startsAt);
-
-    const entryStart =
-      new Date(entryStartsAt);
-
-    const entryClose =
-      new Date(entryClosesAt);
-
-    const boardEnd =
-      new Date(endsAt);
+    const boardStart = new Date(startsAt);
+    const entryStart = new Date(entryStartsAt);
+    const entryClose = new Date(entryClosesAt);
+    const boardEnd = new Date(endsAt);
 
     if (
-      Number.isNaN(
-        boardStart.getTime(),
-      ) ||
-      Number.isNaN(
-        entryStart.getTime(),
-      ) ||
-      Number.isNaN(
-        entryClose.getTime(),
-      ) ||
-      Number.isNaN(
-        boardEnd.getTime(),
+      [boardStart, entryStart, entryClose, boardEnd].some(
+        (value) => Number.isNaN(value.getTime()),
       )
     ) {
+      setError("Please enter valid dates.");
+      return;
+    }
+
+    if (entryStart <= boardStart) {
+      setError("Entry start must be after the board start.");
+      return;
+    }
+
+    if (entryClose <= entryStart) {
+      setError("Entry close must be after entry start.");
+      return;
+    }
+
+    if (boardEnd <= entryClose) {
+      setError("Board end must be after entry close.");
+      return;
+    }
+
+    const entryFeeMinor = viewerMajorToInrMinor(entryFee);
+    const minimumBoostMinor = viewerMajorToInrMinor(minimumBoost);
+
+    if (
+      entryFeeMinor === null ||
+      entryFeeMinor < 10_000 ||
+      entryFeeMinor > 9_990_000 ||
+      entryFeeMinor % 100 !== 0
+    ) {
       setError(
-        "Please enter valid dates.",
+        isIndianViewer()
+          ? "Entry fee must be between ₹100 and ₹99,900."
+          : "Entry fee must be between $1 and $999.",
       );
       return;
     }
 
     if (
-      entryStart <= boardStart
+      minimumBoostMinor === null ||
+      minimumBoostMinor < 10_000 ||
+      minimumBoostMinor > 9_990_000 ||
+      minimumBoostMinor % 100 !== 0
     ) {
       setError(
-        "Entry start must be after the board start.",
+        isIndianViewer()
+          ? "Minimum Push Up must be between ₹100 and ₹99,900."
+          : "Minimum Push Up must be between $1 and $999.",
       );
       return;
     }
-
-    if (
-      entryClose <= entryStart
-    ) {
-      setError(
-        "Entry close must be after entry start.",
-      );
-      return;
-    }
-
-    if (
-      boardEnd <= entryClose
-    ) {
-      setError(
-        "Board end must be after entry close.",
-      );
-      return;
-    }
-
-    const entryFeeDollars =
-      Number(entryFee);
-
-    const minimumBoostDollars =
-      Number(minimumBoost);
-
-    if (
-      !Number.isSafeInteger(
-        entryFeeDollars,
-      ) ||
-      entryFeeDollars < 1 ||
-      entryFeeDollars > 999
-    ) {
-      setError(
-        "Entry fee must be a whole dollar amount between $1 and $999.",
-      );
-      return;
-    }
-
-    if (
-      !Number.isSafeInteger(
-        minimumBoostDollars,
-      ) ||
-      minimumBoostDollars < 1 ||
-      minimumBoostDollars > 999
-    ) {
-      setError(
-        "Minimum Push Up must be a whole dollar amount between $1 and $999.",
-      );
-      return;
-    }
-
-    const entryFeeMinor =
-      entryFeeDollars * 100;
-
-    const minimumBoostMinor =
-      minimumBoostDollars *
-      100;
 
     try {
       setSubmitting(true);
       setError(null);
 
       await requestBoard({
-        name:
-          name.trim(),
-
+        name: name.trim(),
         listingTypeId,
-
-        startsAt:
-          boardStart.toISOString(),
-
-        entryStartsAt:
-          entryStart.toISOString(),
-
-        entryClosesAt:
-          entryClose.toISOString(),
-
-        endsAt:
-          boardEnd.toISOString(),
-
+        startsAt: boardStart.toISOString(),
+        entryStartsAt: entryStart.toISOString(),
+        entryClosesAt: entryClose.toISOString(),
+        endsAt: boardEnd.toISOString(),
         entryFeeMinor,
         minimumBoostMinor,
-
-        currency: "USD",
+        currency: "INR",
       });
 
       resetForm();
-
       onRequested?.();
       onClose();
-    } catch (error) {
-      console.error(
-        "Board request failed:",
-        error,
-      );
-
-      setError(
-        "Unable to submit board request.",
-      );
+    } catch (requestError) {
+      console.error("Board request failed:", requestError);
+      setError("Unable to submit board request.");
     } finally {
       setSubmitting(false);
     }
@@ -309,11 +206,7 @@ export function RequestBoardDialog({
     <div
       className="listing-dialog-overlay"
       onMouseDown={(event) => {
-        if (
-          event.target ===
-          event.currentTarget &&
-          !submitting
-        ) {
+        if (event.target === event.currentTarget && !submitting) {
           closeDialog();
         }
       }}
@@ -327,19 +220,11 @@ export function RequestBoardDialog({
         <header className="listing-dialog-header">
           <div className="listing-dialog-heading">
             <span className="listing-heading-icon">
-              <LayoutGrid
-                size={17}
-              />
+              <LayoutGrid size={17} />
             </span>
-
             <div>
-              <p className="eyebrow">
-                BOARD ON DEMAND
-              </p>
-
-              <h2>
-                Request a board
-              </h2>
+              <p className="eyebrow">BOARD ON DEMAND</p>
+              <h2>Request a board</h2>
             </div>
           </div>
 
@@ -347,9 +232,7 @@ export function RequestBoardDialog({
             type="button"
             className="listing-dialog-close"
             disabled={submitting}
-            onClick={
-              closeDialog
-            }
+            onClick={closeDialog}
             aria-label="Close"
           >
             ×
@@ -357,36 +240,20 @@ export function RequestBoardDialog({
         </header>
 
         <div className="listing-status-strip">
-          <span className="listing-status-badge free">
-            REQUEST
-          </span>
-
+          <span className="listing-status-badge free">REQUEST</span>
           <span className="listing-status-copy">
-            <Sparkles
-              size={13}
-            />
-            Request is free. After Admin approval, the creator pays the configured Board activation fee (default $2).
+            <Sparkles size={13} />
+            Request is free. After Admin approval, the creator pays the configured Board activation fee (default {defaultActivationDisplay}).
           </span>
         </div>
 
-        <form
-          className="listing-form"
-          onSubmit={
-            handleSubmit
-          }
-        >
+        <form className="listing-form" onSubmit={handleSubmit}>
           <label>
             Board name *
-
             <input
               type="text"
               value={name}
-              onChange={(event) =>
-                setName(
-                  event.target
-                    .value,
-                )
-              }
+              onChange={(event) => setName(event.target.value)}
               maxLength={80}
               placeholder="Example: Top Finance YouTube Channels"
               required
@@ -395,111 +262,39 @@ export function RequestBoardDialog({
 
           <label>
             Listing type *
-
             <select
-              value={
-                listingTypeId
-              }
-              onChange={(event) =>
-                setListingTypeId(
-                  event.target
-                    .value,
-                )
-              }
+              value={listingTypeId}
+              onChange={(event) => setListingTypeId(event.target.value)}
               required
             >
-              <option value="">
-                Select listing type
-              </option>
-
-              {enabledListingTypes.map(
-                (type) => (
-                  <option
-                    key={type.id}
-                    value={type.id}
-                  >
-                    {type.name}
-                  </option>
-                ),
-              )}
+              <option value="">Select listing type</option>
+              {enabledListingTypes.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.name}
+                </option>
+              ))}
             </select>
           </label>
 
           <div className="listing-form-row">
             <label>
-              Entry fee ($) *
-
+              Entry fee ({currencySymbol}) *
               <input
                 type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
+                inputMode="decimal"
                 value={entryFee}
-                onChange={(event) => {
-                  const value =
-                    event.target.value;
-
-                  if (value === "") {
-                    setEntryFee("");
-                    return;
-                  }
-
-                  if (!/^\d+$/.test(value)) {
-                    return;
-                  }
-
-                  const amount =
-                    Number(value);
-
-                  if (
-                    !Number.isSafeInteger(amount) ||
-                    amount < 1 ||
-                    amount > 999
-                  ) {
-                    return;
-                  }
-
-                  setEntryFee(value);
-                }}
-                maxLength={3}
+                onChange={(event) => setEntryFee(event.target.value)}
                 required
               />
             </label>
 
             <label>
-              Minimum Push Up ($) *
-
+              Minimum Push Up ({currencySymbol}) *
               <input
                 type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
+                inputMode="decimal"
                 value={minimumBoost}
-                onChange={(event) => {
-                  const value =
-                    event.target.value;
-
-                  if (value === "") {
-                    setMinimumBoost("");
-                    return;
-                  }
-
-                  if (!/^\d+$/.test(value)) {
-                    return;
-                  }
-
-                  const amount =
-                    Number(value);
-
-                  if (
-                    !Number.isSafeInteger(amount) ||
-                    amount < 1 ||
-                    amount > 999
-                  ) {
-                    return;
-                  }
-
-                  setMinimumBoost(value);
-                }}
-                maxLength={3}
+                onChange={(event) => setMinimumBoost(event.target.value)}
                 required
               />
             </label>
@@ -508,34 +303,20 @@ export function RequestBoardDialog({
           <div className="listing-form-row">
             <label>
               Starts *
-
               <input
                 type="datetime-local"
                 value={startsAt}
-                onChange={(event) =>
-                  setStartsAt(
-                    event.target
-                      .value,
-                  )
-                }
+                onChange={(event) => setStartsAt(event.target.value)}
                 required
               />
             </label>
 
             <label>
               Entry starts *
-
               <input
                 type="datetime-local"
-                value={
-                  entryStartsAt
-                }
-                onChange={(event) =>
-                  setEntryStartsAt(
-                    event.target
-                      .value,
-                  )
-                }
+                value={entryStartsAt}
+                onChange={(event) => setEntryStartsAt(event.target.value)}
                 required
               />
             </label>
@@ -544,60 +325,37 @@ export function RequestBoardDialog({
           <div className="listing-form-row">
             <label>
               Entry closes *
-
               <input
                 type="datetime-local"
-                value={
-                  entryClosesAt
-                }
-                onChange={(event) =>
-                  setEntryClosesAt(
-                    event.target
-                      .value,
-                  )
-                }
+                value={entryClosesAt}
+                onChange={(event) => setEntryClosesAt(event.target.value)}
                 required
               />
             </label>
 
             <label>
               Ends *
-
               <input
                 type="datetime-local"
                 value={endsAt}
-                onChange={(event) =>
-                  setEndsAt(
-                    event.target
-                      .value,
-                  )
-                }
+                onChange={(event) => setEndsAt(event.target.value)}
                 required
               />
             </label>
           </div>
 
-          {error && (
-            <p className="listing-form-error">
-              {error}
-            </p>
-          )}
+          {error && <p className="listing-form-error">{error}</p>}
 
           <div className="listing-form-actions">
             <span className="listing-submit-note">
               Reviewed before going live.
             </span>
-
             <div>
               <button
                 type="button"
                 className="listing-cancel-button"
-                disabled={
-                  submitting
-                }
-                onClick={
-                  closeDialog
-                }
+                disabled={submitting}
+                onClick={closeDialog}
               >
                 Cancel
               </button>
@@ -605,13 +363,9 @@ export function RequestBoardDialog({
               <button
                 type="submit"
                 className="listing-form-primary"
-                disabled={
-                  submitting
-                }
+                disabled={submitting}
               >
-                {submitting
-                  ? "Submitting..."
-                  : "Request Board"}
+                {submitting ? "Submitting..." : "Request Board"}
               </button>
             </div>
           </div>
