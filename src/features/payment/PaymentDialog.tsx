@@ -17,6 +17,10 @@ import {
   createPaymentIntent,
 } from "../../services/payments/paymentClient";
 
+import {
+  useRuntimeConfig,
+} from "../config/RuntimeConfigProvider";
+
 import type {
   PaymentRequest,
 } from "./types";
@@ -34,6 +38,10 @@ export function PaymentDialog({
   request,
   onClose,
 }: PaymentDialogProps) {
+  const {
+    config,
+  } = useRuntimeConfig();
+
   const [submitting, setSubmitting] =
     useState(false);
 
@@ -55,8 +63,15 @@ export function PaymentDialog({
     return null;
   }
 
+  const paymentsEnabled =
+    import.meta.env.DEV ||
+    (config?.payments.enabled ?? true);
+
   async function handleContinue() {
-    if (submitting) {
+    if (
+      submitting ||
+      !paymentsEnabled
+    ) {
       return;
     }
 
@@ -87,12 +102,12 @@ export function PaymentDialog({
       setMessage(
         import.meta.env.DEV
           ? "Payment intent is ready. Complete it through the local Firebase Emulator test control below."
-          : `Payment intent ${result.paymentIntentId} is ready. The payment gateway adapter is not connected yet.`,
+          : `Payment intent ${result.paymentIntentId} is ready.`,
       );
-    } catch (error) {
+    } catch (paymentError) {
       console.error(
         "Unable to prepare payment:",
-        error,
+        paymentError,
       );
 
       setError(
@@ -133,10 +148,10 @@ export function PaymentDialog({
         },
         650,
       );
-    } catch (error) {
+    } catch (paymentError) {
       console.error(
         "Unable to complete emulator payment:",
-        error,
+        paymentError,
       );
 
       setError(
@@ -158,6 +173,10 @@ export function PaymentDialog({
             "board_activation"
           ? "The activation fee starts an Admin-approved Board. It does not improve Board ranking."
           : "Only verified Push Up payments affect ranking.";
+
+  const refundPolicyText =
+    config?.payments.refundPolicyText ??
+    "Payments are non-refundable after successful processing, except where required by law.";
 
   return (
     <div
@@ -226,17 +245,31 @@ export function PaymentDialog({
           </span>
         </div>
 
+        {!paymentsEnabled && (
+          <p
+            className="payment-error"
+            role="alert"
+          >
+            Payments are temporarily disabled by ViewBid Admin.
+          </p>
+        )}
+
         <button
           className="payment-primary"
           type="button"
-          disabled={submitting}
+          disabled={
+            submitting ||
+            !paymentsEnabled
+          }
           onClick={
             handleContinue
           }
         >
           {submitting
             ? "Preparing payment..."
-            : "Continue to payment"}
+            : paymentsEnabled
+              ? "Continue to payment"
+              : "Payments disabled"}
         </button>
 
         {import.meta.env.DEV &&
@@ -274,8 +307,7 @@ export function PaymentDialog({
         )}
 
         <p className="payment-disclosure">
-          Payments are non-refundable after successful
-          processing, except where required by law.
+          {refundPolicyText}
         </p>
       </section>
     </div>
