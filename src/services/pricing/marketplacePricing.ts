@@ -21,7 +21,7 @@ export type MarketplacePricing = {
   maximumPaymentMinor:
     number;
   currency:
-    "USD";
+    "INR";
 };
 
 type PricingResult = {
