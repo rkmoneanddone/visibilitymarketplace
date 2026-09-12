@@ -1,51 +1,60 @@
 /*
  * ViewBid homepage visual hierarchy refresh.
- *
- * This file intentionally contains presentation-only overrides for the
- * existing homepage. No layout semantics, application behaviour, payment,
- * ranking, or data logic is changed here.
+ * Presentation-only overrides. No application behaviour, ranking,
+ * payment, or data logic is changed here.
  */
 
-/* Hero: give the opening statement a confident, identifiable surface. */
+/* Page canvas */
+body {
+  background: #eef3f8 !important;
+}
+
+.page-shell {
+  background: transparent;
+}
+
+/* Hero: stronger brand presence instead of a pale banner. */
 .compact-intro {
   margin-top: 14px;
-  padding: 16px 20px !important;
-  border: 1px solid #cfe0ef !important;
-  border-left: 5px solid #2f6fe4 !important;
-  border-radius: 16px;
+  padding: 18px 22px !important;
+  border: 1px solid #8fb8ea !important;
+  border-left: 6px solid #2563eb !important;
+  border-radius: 18px;
   background:
-    linear-gradient(115deg, #eef6ff 0%, #f8fbff 55%, #eefbf8 100%) !important;
+    linear-gradient(115deg, #dcecff 0%, #edf6ff 50%, #daf6ef 100%) !important;
   box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.03),
-    0 9px 24px rgba(44, 82, 130, 0.07);
+    0 2px 4px rgba(15, 23, 42, 0.05),
+    0 14px 32px rgba(37, 99, 235, 0.10);
 }
 
 .compact-intro h1 {
-  color: #153553 !important;
-  font-weight: 600 !important;
-  letter-spacing: -0.035em !important;
+  color: #0d355f !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.04em !important;
 }
 
 .compact-intro .intro-side p {
-  color: #466078 !important;
+  color: #315472 !important;
+  font-weight: 500;
 }
 
-/* Category navigation: make each filter feel like a real control. */
+/* Category navigation: crisp, saturated filter chips. */
 .type-strip {
   margin-top: 12px;
-  padding: 8px 8px 10px !important;
-  border: 1px solid #dce6ef !important;
-  border-radius: 14px;
-  background: #ffffff;
-  box-shadow: 0 3px 12px rgba(25, 54, 87, 0.045);
+  padding: 9px 10px 11px !important;
+  border: 1px solid #c5d5e5 !important;
+  border-radius: 16px;
+  background: #ffffff !important;
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.04),
+    0 8px 20px rgba(26, 55, 92, 0.07);
 }
 
 .type-strip .type-link {
   border-width: 1px !important;
   border-style: solid !important;
-  border-color: transparent !important;
   border-radius: 999px !important;
-  font-weight: 500;
+  font-weight: 600 !important;
   transition:
     transform 120ms ease,
     box-shadow 120ms ease,
@@ -54,259 +63,299 @@
 
 .type-strip .type-link:hover {
   transform: translateY(-1px);
-  border-color: rgba(77, 111, 155, 0.16) !important;
-  box-shadow: 0 4px 10px rgba(27, 52, 86, 0.07);
+  box-shadow: 0 4px 10px rgba(27, 52, 86, 0.10);
 }
 
 .type-strip .type-link.active {
-  border-color: #58bfd0 !important;
-  background: #dff8fb !important;
-  color: #087f94 !important;
+  border-color: #1696aa !important;
+  background: #bff2f6 !important;
+  color: #066b7b !important;
   box-shadow:
-    0 0 0 2px rgba(88, 191, 208, 0.10),
-    0 5px 12px rgba(25, 139, 157, 0.10) !important;
+    0 0 0 2px rgba(22, 150, 170, 0.10),
+    0 5px 12px rgba(22, 150, 170, 0.14) !important;
 }
 
-/* Public leaderboard: the main working area should read as the primary card. */
+/* Public leaderboard: unmistakably the primary working surface. */
 .board-heading {
-  margin-top: 12px !important;
-  padding: 15px 16px 10px !important;
-  border: 1px solid #cfdaea;
-  border-bottom: 0;
-  border-radius: 16px 16px 0 0;
-  background: linear-gradient(180deg, #f6f9ff 0%, #ffffff 100%);
+  margin-top: 14px !important;
+  padding: 16px 18px 11px !important;
+  border: 1px solid #86a9db !important;
+  border-bottom: 0 !important;
+  border-left: 6px solid #336cc8 !important;
+  border-radius: 18px 18px 0 0 !important;
+  background:
+    linear-gradient(135deg, #dfeaff 0%, #edf4ff 70%) !important;
 }
 
 .board-heading .eyebrow {
-  color: #4369a6 !important;
-  font-weight: 600;
+  color: #285aa5 !important;
+  font-weight: 700 !important;
 }
 
 .board-heading h2 {
-  color: #153553 !important;
-  font-weight: 600 !important;
+  color: #0d3768 !important;
+  font-weight: 700 !important;
 }
 
 .market-ranking-periods {
-  border: 1px solid #d3deeb !important;
-  background: #eef3f9 !important;
-  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
+  border: 1px solid #9db4d5 !important;
+  background: #cfdcf0 !important;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06) !important;
+}
+
+.market-ranking-periods button {
+  color: #3d5f89 !important;
 }
 
 .market-ranking-periods button.active {
-  color: #234f94 !important;
+  color: #163f76 !important;
   background: #ffffff !important;
   box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.08),
-    0 3px 8px rgba(40, 73, 118, 0.08) !important;
+    0 1px 2px rgba(15, 23, 42, 0.10),
+    0 4px 10px rgba(40, 73, 118, 0.12) !important;
 }
 
 .home-search-only {
   margin-bottom: 0 !important;
-  padding: 0 16px 13px;
-  border-right: 1px solid #cfdaea;
-  border-left: 1px solid #cfdaea;
-  background: #ffffff;
+  padding: 0 18px 14px !important;
+  border-right: 1px solid #86a9db !important;
+  border-left: 6px solid #336cc8 !important;
+  background: #edf4ff !important;
 }
 
 .home-search-only .search-field {
-  border: 1px solid #b8c8da !important;
-  border-radius: 11px !important;
-  background: #fbfdff !important;
-  box-shadow: inset 0 1px 2px rgba(24, 54, 89, 0.025);
+  border: 1px solid #9fb9d8 !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  box-shadow:
+    inset 0 1px 2px rgba(24, 54, 89, 0.03),
+    0 2px 5px rgba(31, 67, 111, 0.04);
 }
 
 .home-search-only .search-field:focus-within {
-  border-color: #5e8bd5 !important;
-  box-shadow: 0 0 0 3px rgba(70, 117, 192, 0.10);
+  border-color: #3974cb !important;
+  box-shadow: 0 0 0 3px rgba(57, 116, 203, 0.13) !important;
 }
 
 .marketplace-listing-list {
   margin-top: 0 !important;
-  padding: 9px 12px 12px !important;
-  border: 1px solid #cfdaea !important;
+  padding: 12px 14px 14px !important;
+  border: 1px solid #86a9db !important;
   border-top: 0 !important;
-  border-left: 4px solid #4d79c7 !important;
-  border-radius: 0 0 16px 16px !important;
-  background: #fbfdff;
+  border-left: 6px solid #336cc8 !important;
+  border-radius: 0 0 18px 18px !important;
+  background: #f6f9ff !important;
   box-shadow:
-    0 2px 3px rgba(15, 23, 42, 0.025),
-    0 10px 24px rgba(35, 68, 111, 0.055);
+    0 4px 7px rgba(15, 23, 42, 0.04),
+    0 14px 30px rgba(35, 68, 111, 0.10) !important;
 }
 
 .marketplace-listing-row {
-  border-color: #d8e2ec !important;
+  border-color: #c5d5e7 !important;
   background: #ffffff !important;
-  box-shadow: 0 2px 7px rgba(32, 60, 94, 0.035);
+  box-shadow: 0 3px 9px rgba(32, 60, 94, 0.05) !important;
 }
 
 .marketplace-listing-row:hover {
-  border-color: #aec4df !important;
-  background: #f9fbff !important;
-  box-shadow: 0 6px 15px rgba(32, 60, 94, 0.07);
+  border-color: #7aa0cf !important;
+  background: #f4f8ff !important;
+  box-shadow: 0 7px 17px rgba(32, 60, 94, 0.10) !important;
 }
 
 .empty-board {
-  color: #4f6377 !important;
+  color: #34577b !important;
+  font-weight: 500;
 }
 
-/* Boards are a separate product concept: reinforce that with a green family. */
+/* Boards: visibly separate product area in a richer green family. */
 .home-boards-preview {
-  margin-top: 22px !important;
-  padding: 16px !important;
-  border: 1px solid #a9cfbe !important;
-  border-left: 5px solid #3f9775 !important;
-  border-radius: 16px !important;
+  margin-top: 26px !important;
+  padding: 17px !important;
+  border: 1px solid #78b89a !important;
+  border-left: 6px solid #23865f !important;
+  border-radius: 18px !important;
   background:
-    linear-gradient(120deg, #f3fbf7 0%, #ffffff 60%) !important;
+    linear-gradient(130deg, #dff4e9 0%, #edf9f3 70%) !important;
   box-shadow:
-    0 2px 3px rgba(24, 80, 58, 0.03),
-    0 10px 24px rgba(24, 80, 58, 0.07) !important;
+    0 3px 5px rgba(24, 80, 58, 0.05),
+    0 14px 28px rgba(24, 80, 58, 0.11) !important;
 }
 
 .home-boards-preview-heading > div > span {
-  color: #28755a !important;
-  font-weight: 700 !important;
+  color: #176746 !important;
+  font-weight: 800 !important;
 }
 
 .home-boards-preview-heading h2 {
-  color: #183f33 !important;
-  font-weight: 600 !important;
+  color: #123d2e !important;
+  font-weight: 700 !important;
 }
 
 .home-board-preview-row {
-  border-color: #c9ddd3 !important;
-  background: rgba(255, 255, 255, 0.90) !important;
-  box-shadow: 0 2px 8px rgba(37, 91, 70, 0.045);
+  border-color: #9ecfb8 !important;
+  background: #ffffff !important;
+  box-shadow: 0 3px 9px rgba(37, 91, 70, 0.06) !important;
 }
 
 .home-board-preview-row:hover {
-  border-color: #8fbea9 !important;
-  box-shadow: 0 5px 14px rgba(37, 91, 70, 0.08);
+  border-color: #65aa8a !important;
+  box-shadow: 0 7px 16px rgba(37, 91, 70, 0.11) !important;
 }
 
-/* Trust strip becomes a quiet bridge instead of disappearing into the page. */
+/* Trust strip should read as a deliberate information band. */
 .home-trust-strip {
-  margin-top: 14px !important;
-  padding: 11px 14px !important;
-  border: 1px solid #dce5ed !important;
-  border-radius: 12px !important;
-  background: #f8fafc !important;
-  color: #5a6d7f !important;
+  margin-top: 16px !important;
+  padding: 12px 16px !important;
+  border: 1px solid #c2d0df !important;
+  border-radius: 14px !important;
+  background: #eaf0f6 !important;
+  color: #445c73 !important;
+  box-shadow: 0 3px 10px rgba(31, 55, 81, 0.045);
 }
 
-/* Right rail: more distinct card families and less washed-out colour. */
+/* Right rail: stronger, unmistakable card families. */
 .side-panel {
-  gap: 16px !important;
-  padding-left: 22px !important;
-  border-left: 1px solid #d5e0e9 !important;
+  gap: 18px !important;
+  padding-left: 28px !important;
+  border-left: 2px solid #c8d4e0 !important;
 }
 
 .side-panel .visibility-cta,
 .side-panel .new-today-card,
 .side-panel .how-card,
 .side-panel .board-summary {
-  border-radius: 16px !important;
+  border-radius: 18px !important;
   box-shadow:
-    0 2px 3px rgba(15, 23, 42, 0.025),
-    0 9px 22px rgba(32, 50, 76, 0.07) !important;
+    0 4px 8px rgba(15, 23, 42, 0.05),
+    0 13px 28px rgba(32, 50, 76, 0.10) !important;
 }
 
 .side-panel .visibility-cta {
-  border-color: #f2a06d !important;
-  border-left: 5px solid #f97316 !important;
+  border-color: #ee8c4c !important;
+  border-left: 6px solid #ea580c !important;
   background:
-    linear-gradient(135deg, #fff1e7 0%, #fff9f5 70%) !important;
+    linear-gradient(135deg, #ffd9bd 0%, #ffeadd 58%, #fff4ec 100%) !important;
 }
 
 .side-panel .visibility-icon {
-  background: #ffe0ca !important;
-  color: #d95b0b !important;
+  background: #ffc899 !important;
+  color: #c94805 !important;
 }
 
 .side-panel .visibility-cta .eyebrow {
-  color: #a34d1e !important;
+  color: #94411b !important;
+  font-weight: 700 !important;
 }
 
 .side-panel .visibility-cta h3 {
-  color: #7d3519 !important;
+  color: #7f2f0f !important;
+  font-weight: 700 !important;
+}
+
+.side-panel .visibility-cta > p:not(.eyebrow) {
+  color: #744027 !important;
 }
 
 .side-panel .visibility-cta button {
-  background: #f97316 !important;
+  background: #f05a0b !important;
   color: #ffffff !important;
-  box-shadow: 0 5px 12px rgba(249, 115, 22, 0.20);
+  box-shadow: 0 7px 15px rgba(234, 88, 12, 0.27) !important;
 }
 
 .side-panel .visibility-cta button:hover {
-  background: #e7620c !important;
+  background: #d94e06 !important;
 }
 
 .side-panel .new-today-card {
-  border-color: #a5d9c0 !important;
-  border-left: 5px solid #49a97c !important;
+  border-color: #74c49d !important;
+  border-left: 6px solid #2c9a68 !important;
   background:
-    linear-gradient(135deg, #edf9f3 0%, #f8fdfb 72%) !important;
+    linear-gradient(135deg, #d7f1e4 0%, #eaf8f1 65%, #f5fcf8 100%) !important;
 }
 
 .side-panel .new-icon {
-  background: #d6f0e2 !important;
-  color: #277a56 !important;
+  background: #bde7cf !important;
+  color: #176c49 !important;
+}
+
+.side-panel .new-today-card .eyebrow {
+  color: #246a4e !important;
+  font-weight: 700 !important;
 }
 
 .side-panel .how-card {
-  border-color: #c9b6ee !important;
-  border-left: 5px solid #8d67d3 !important;
+  border-color: #a88add !important;
+  border-left: 6px solid #7c4dcc !important;
   background:
-    linear-gradient(135deg, #f2ecff 0%, #fbf9ff 72%) !important;
+    linear-gradient(135deg, #e3d7fb 0%, #efe8ff 62%, #f8f5ff 100%) !important;
 }
 
 .side-panel .how-icon {
-  background: #e5d9fb !important;
-  color: #6d47b2 !important;
+  background: #d0bcf6 !important;
+  color: #5e31aa !important;
+}
+
+.side-panel .how-card .eyebrow {
+  color: #6b52a0 !important;
+  font-weight: 700 !important;
+}
+
+.side-panel .how-card h3 {
+  color: #3f286d !important;
+  font-weight: 700 !important;
 }
 
 .side-panel .board-summary {
-  border-color: #e5ca79 !important;
-  border-left: 5px solid #d5a932 !important;
+  border-color: #d9b84f !important;
+  border-left: 6px solid #c79615 !important;
   background:
-    linear-gradient(135deg, #fff8dc 0%, #fffdf5 72%) !important;
+    linear-gradient(135deg, #ffedb5 0%, #fff4cf 65%, #fffaf0 100%) !important;
 }
 
-/* Keep the refresh compact and touch-friendly on smaller screens. */
+/* Stronger hierarchy for key action buttons. */
+.push-button,
+.home-board-preview-row .view-board-button,
+.home-board-preview-row a[href*="/boards/"] {
+  font-weight: 700 !important;
+}
+
+/* Smaller screens: retain the hierarchy without creating bulk. */
 @media (max-width: 900px) {
   .compact-intro {
     margin-top: 10px;
-    padding: 13px 15px !important;
-    border-left-width: 4px !important;
-    border-radius: 14px;
+    padding: 14px 16px !important;
+    border-left-width: 5px !important;
+    border-radius: 15px;
   }
 
   .type-strip {
-    margin-top: 8px;
-    border-radius: 12px;
+    margin-top: 9px;
+    border-radius: 13px;
   }
 
   .board-heading {
-    margin-top: 9px !important;
-    padding: 12px 12px 8px !important;
-    border-radius: 14px 14px 0 0;
+    margin-top: 10px !important;
+    padding: 13px 13px 9px !important;
+    border-left-width: 5px !important;
+    border-radius: 15px 15px 0 0 !important;
   }
 
   .home-search-only {
-    padding: 0 12px 10px;
+    padding: 0 13px 11px !important;
+    border-left-width: 5px !important;
   }
 
   .marketplace-listing-list {
-    padding: 7px 8px 10px !important;
-    border-radius: 0 0 14px 14px !important;
+    padding: 8px 9px 11px !important;
+    border-left-width: 5px !important;
+    border-radius: 0 0 15px 15px !important;
   }
 
   .home-boards-preview {
-    margin-top: 14px !important;
-    padding: 12px !important;
-    border-left-width: 4px !important;
-    border-radius: 14px !important;
+    margin-top: 16px !important;
+    padding: 13px !important;
+    border-left-width: 5px !important;
+    border-radius: 15px !important;
   }
 
   .side-panel {
@@ -316,18 +365,22 @@
 }
 
 @media (max-width: 700px) {
+  body {
+    background: #f4f7fa !important;
+  }
+
   .compact-intro {
     margin-inline: 0 !important;
   }
 
   .type-strip {
-    padding-inline: 5px !important;
+    padding-inline: 6px !important;
   }
 
   .side-panel .visibility-cta,
   .side-panel .new-today-card,
   .side-panel .how-card,
   .side-panel .board-summary {
-    border-radius: 13px !important;
+    border-radius: 14px !important;
   }
 }
