@@ -57,6 +57,8 @@ export const getPublicSystemConfig =
               config.limits.publicPageSize,
             boardPageSize:
               config.limits.boardPageSize,
+            dashboardPageSize:
+              config.limits.dashboardPageSize,
             searchResultLimit:
               config.limits.searchResultLimit,
           },
