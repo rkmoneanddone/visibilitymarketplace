@@ -32,6 +32,10 @@ import {
 } from "../features/listings/ListingSubmissionPaymentButton";
 
 import {
+  PaymentHistorySection,
+} from "../features/payment/PaymentHistorySection";
+
+import {
   MyBoardsSection,
 } from "../features/boards/MyBoardsSection";
 
@@ -640,6 +644,8 @@ export function MyDashboardPage() {
           )}
         </div>
       )}
+
+      <PaymentHistorySection />
 
       <MyBoardEntriesSection
         entries={boardEntries}
