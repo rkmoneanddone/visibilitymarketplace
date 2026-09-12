@@ -18,6 +18,10 @@ import {
   AdminSystemConfigPanel,
 } from "./AdminSystemConfigPanel";
 
+import {
+  AdminEmailConfigPanel,
+} from "./AdminEmailConfigPanel";
+
 type ControlTab =
   | "pricing"
   | "payments"
@@ -247,7 +251,9 @@ export function AdminPricingPanel() {
         )}
       </div>
 
-      {activeTab !== "pricing" ? (
+      {activeTab === "email" ? (
+        <AdminEmailConfigPanel />
+      ) : activeTab !== "pricing" ? (
         <AdminSystemConfigPanel
           section={activeTab}
         />
