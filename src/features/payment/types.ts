@@ -27,7 +27,9 @@ export type PaymentIntentResult = {
 
   paymentIntentId: string;
 
-  status: "created";
+  status:
+    | "created"
+    | "checkout_ready";
 
   providerReady: boolean;
 
@@ -42,4 +44,20 @@ export type EmulatorPaymentCompletionResult = {
   status: "paid";
 
   alreadyFulfilled: boolean;
+};
+
+export type PaymentStatus = {
+  paymentIntentId: string;
+  status: string;
+  purpose: PaymentPurpose | string;
+  amountMinor: number;
+  currency: string;
+  refundStatus: string | null;
+  fulfilled: boolean;
+  message: string;
+};
+
+export type PaymentStatusResult = {
+  success: boolean;
+  payment: PaymentStatus;
 };
