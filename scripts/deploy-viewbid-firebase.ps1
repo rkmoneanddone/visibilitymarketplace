@@ -1,3 +1,7 @@
+param(
+    [switch]$SkipSecrets
+)
+
 $ErrorActionPreference = "Stop"
 
 $expectedProject = "visibilitymarketplace"
@@ -62,12 +66,17 @@ VIEWBID_PUBLIC_URL=https://visibilitymarketplace.web.app
 "@ | Set-Content -Path $functionsEnv -Encoding UTF8
 
 Write-Host "[OK] Wrote non-secret Firebase Functions configuration." -ForegroundColor Green
-Write-Host "Firebase will now securely prompt for the Dodo API key." -ForegroundColor Yellow
 Invoke-CheckedCommand firebase use $expectedProject
-Invoke-CheckedCommand firebase functions:secrets:set DODO_API_KEY
 
-Write-Host "Firebase will now securely prompt for the Dodo webhook signing key." -ForegroundColor Yellow
-Invoke-CheckedCommand firebase functions:secrets:set DODO_WEBHOOK_KEY
+if (-not $SkipSecrets) {
+    Write-Host "Firebase will now securely prompt for the Dodo API key." -ForegroundColor Yellow
+    Invoke-CheckedCommand firebase functions:secrets:set DODO_API_KEY
+
+    Write-Host "Firebase will now securely prompt for the Dodo webhook signing key." -ForegroundColor Yellow
+    Invoke-CheckedCommand firebase functions:secrets:set DODO_WEBHOOK_KEY
+} else {
+    Write-Host "[OK] Reusing existing Firebase secret versions for DODO_API_KEY and DODO_WEBHOOK_KEY." -ForegroundColor Green
+}
 
 Write-Host "Building frontend..." -ForegroundColor Cyan
 Invoke-CheckedCommand npm run build
