@@ -1,0 +1,43 @@
+.pushup-custom-amount {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.pushup-custom-amount > span,
+.pushup-custom-amount small {
+  color: #718096;
+  font-size: 11px;
+}
+
+.pushup-custom-amount > div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 11px;
+  border: 1px solid #cfdaea;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.pushup-custom-amount > div > span {
+  color: #56677f;
+  font-weight: 600;
+}
+
+.pushup-custom-amount input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #24364f;
+  font: inherit;
+  font-size: 14px;
+}
+
+.pushup-amount-error {
+  margin: 7px 2px 0;
+  color: #a33a3a;
+  font-size: 11px;
+}
