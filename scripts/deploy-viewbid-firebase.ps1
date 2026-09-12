@@ -1,5 +1,6 @@
 param(
-    [switch]$SkipSecrets
+    [switch]$SkipSecrets,
+    [switch]$SkipMailSecret
 )
 
 $ErrorActionPreference = "Stop"
@@ -62,7 +63,7 @@ $functionsEnv = Join-Path $repoRoot "functions\.env.visibilitymarketplace"
 DODO_API_BASE_URL=
 "@ | Set-Content -Path $functionsEnv -Encoding UTF8
 
-Write-Host "[OK] Runtime business settings now come from the ViewBid Admin Control Center." -ForegroundColor Green
+Write-Host "[OK] Runtime business settings come from the ViewBid Admin Control Center." -ForegroundColor Green
 Write-Host "[OK] Wrote infrastructure-only Firebase Functions configuration." -ForegroundColor Green
 Invoke-CheckedCommand firebase use $expectedProject
 
@@ -74,6 +75,14 @@ if (-not $SkipSecrets) {
     Invoke-CheckedCommand firebase functions:secrets:set DODO_WEBHOOK_KEY
 } else {
     Write-Host "[OK] Reusing existing Firebase secret versions for DODO_API_KEY and DODO_WEBHOOK_KEY." -ForegroundColor Green
+}
+
+if (-not $SkipMailSecret) {
+    Write-Host "Firebase will now securely prompt for the Hostinger mailbox password for connect@quickstories.in." -ForegroundColor Yellow
+    Write-Host "Enter the mailbox password only at the Firebase CLI prompt. Do not place it in source code." -ForegroundColor Yellow
+    Invoke-CheckedCommand firebase functions:secrets:set HOSTINGER_SMTP_PASSWORD
+} else {
+    Write-Host "[OK] Reusing the existing Firebase secret version for HOSTINGER_SMTP_PASSWORD." -ForegroundColor Green
 }
 
 Write-Host "Building frontend..." -ForegroundColor Cyan
