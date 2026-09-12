@@ -44,6 +44,18 @@ const completeEmulatorPaymentCallable =
     "completeEmulatorPayment",
   );
 
+const createEmulatorPaymentIntentCallable =
+  httpsCallable<
+    Omit<
+      PaymentRequest,
+      "title"
+    >,
+    PaymentIntentResult
+  >(
+    functions,
+    "createPaymentIntent",
+  );
+
 const createDodoPaymentIntentCallable =
   httpsCallable<
     Omit<
@@ -59,8 +71,13 @@ const createDodoPaymentIntentCallable =
 export async function createPaymentIntent(
   request: PaymentRequest,
 ): Promise<PaymentIntentResult> {
+  const callable =
+    useFirebaseEmulators
+      ? createEmulatorPaymentIntentCallable
+      : createDodoPaymentIntentCallable;
+
   const result =
-    await createDodoPaymentIntentCallable({
+    await callable({
       purpose:
         request.purpose,
 
