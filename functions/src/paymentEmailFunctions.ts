@@ -14,7 +14,7 @@ import {
 } from "firebase-admin/firestore";
 
 import {
-  resendApiKey,
+  hostingerSmtpPassword,
   sendConfiguredEmail,
   type EmailTemplateKey,
 } from "./mailer";
@@ -170,7 +170,7 @@ export const sendPaymentStatusEmail =
       document:
         "paymentIntents/{paymentIntentId}",
       region: "asia-south1",
-      secrets: [resendApiKey],
+      secrets: [hostingerSmtpPassword],
     },
     async (event) => {
       const before =
