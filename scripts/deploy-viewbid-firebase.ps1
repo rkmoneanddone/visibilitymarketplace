@@ -3,6 +3,22 @@ $ErrorActionPreference = "Stop"
 $expectedProject = "visibilitymarketplace"
 $expectedBranch = "chatgpt-dev"
 
+function Invoke-CheckedCommand {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Command,
+
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [string[]]$Arguments
+    )
+
+    & $Command @Arguments
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Command failed with exit code $LASTEXITCODE: $Command $($Arguments -join ' ')"
+    }
+}
+
 Write-Host "== ViewBid Firebase Deployment ==" -ForegroundColor Cyan
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -47,22 +63,22 @@ VIEWBID_PUBLIC_URL=https://visibilitymarketplace.web.app
 
 Write-Host "[OK] Wrote non-secret Firebase Functions configuration." -ForegroundColor Green
 Write-Host "Firebase will now securely prompt for the Dodo API key." -ForegroundColor Yellow
-firebase use $expectedProject
-firebase functions:secrets:set DODO_API_KEY
+Invoke-CheckedCommand firebase use $expectedProject
+Invoke-CheckedCommand firebase functions:secrets:set DODO_API_KEY
 
 Write-Host "Firebase will now securely prompt for the Dodo webhook signing key." -ForegroundColor Yellow
-firebase functions:secrets:set DODO_WEBHOOK_KEY
+Invoke-CheckedCommand firebase functions:secrets:set DODO_WEBHOOK_KEY
 
 Write-Host "Building frontend..." -ForegroundColor Cyan
-npm run build
+Invoke-CheckedCommand npm run build
 
 Write-Host "Building Firebase Functions..." -ForegroundColor Cyan
-npm --prefix functions run build
+Invoke-CheckedCommand npm --prefix functions run build
 
 Write-Host "Deploying ViewBid Hosting, Functions, Firestore rules/indexes and Storage rules..." -ForegroundColor Cyan
-firebase deploy --only "hosting,functions,firestore:rules,firestore:indexes,storage"
+Invoke-CheckedCommand firebase deploy --only "hosting,functions,firestore:rules,firestore:indexes,storage"
 
-Write-Host "" 
+Write-Host ""
 Write-Host "ViewBid Firebase deployment complete." -ForegroundColor Green
 Write-Host "Hosting: https://visibilitymarketplace.web.app" -ForegroundColor Green
 Write-Host "Dodo review page: https://visibilitymarketplace.web.app/dodo-review.html" -ForegroundColor Green
