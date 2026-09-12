@@ -34,7 +34,7 @@ type ControlTab =
   | "system"
   | "audit";
 
-function dollarsToMinor(
+function rupeesToMinor(
   value: string,
 ): number {
   const amount = Number(value);
@@ -46,10 +46,10 @@ function dollarsToMinor(
   return Math.round(amount * 100);
 }
 
-function minorToDollars(
+function minorToRupees(
   value: number,
 ): string {
-  return (value / 100).toFixed(2);
+  return (value / 100).toFixed(0);
 }
 
 export function AdminPricingPanel() {
@@ -109,7 +109,7 @@ export function AdminPricingPanel() {
     value: string,
   ) {
     const minor =
-      dollarsToMinor(value);
+      rupeesToMinor(value);
 
     if (minor < 0) {
       return;
@@ -134,7 +134,7 @@ export function AdminPricingPanel() {
     value: string,
   ) {
     const minor =
-      dollarsToMinor(value);
+      rupeesToMinor(value);
 
     if (minor < 0) {
       return;
@@ -177,7 +177,7 @@ export function AdminPricingPanel() {
       );
 
       setMessage(
-        "Unable to save pricing. Check that every Listing fee is $0-$999 and every Board/Push amount is $1-$999.",
+        "Unable to save pricing. Listing fees must be ₹0-₹99,900 and Board/Push amounts must be ₹100-₹99,900.",
       );
     } finally {
       setSaving(false);
@@ -229,28 +229,27 @@ export function AdminPricingPanel() {
       ) : (
         <section className="admin-pricing-panel">
           <div className="admin-pricing-note">
-            Listing fees may be $0-$999.
-            Board and Push minimums must
-            be $1-$999. Prices are
-            enforced by the server.
+            Base pricing is INR. Listing fees may be ₹0-₹99,900.
+            Board and Push minimums must be ₹100-₹99,900.
+            Customer-facing UI shows ₹ in India and $ internationally.
           </div>
 
           <div className="admin-pricing-grid">
             <label>
-              Board activation fee ($)
+              Board activation fee (₹)
               <input
                 type="number"
-                min="1"
-                max="999"
-                step="0.01"
-                value={minorToDollars(
+                min="100"
+                max="99900"
+                step="1"
+                value={minorToRupees(
                   pricing.boardActivationFeeMinor,
                 )}
                 onChange={(event) =>
                   setPricing({
                     ...pricing,
                     boardActivationFeeMinor:
-                      dollarsToMinor(
+                      rupeesToMinor(
                         event.target.value,
                       ),
                   })
@@ -259,20 +258,20 @@ export function AdminPricingPanel() {
             </label>
 
             <label>
-              Board Entry minimum ($)
+              Board Entry minimum (₹)
               <input
                 type="number"
-                min="1"
-                max="999"
-                step="0.01"
-                value={minorToDollars(
+                min="100"
+                max="99900"
+                step="1"
+                value={minorToRupees(
                   pricing.boardEntryMinimumMinor,
                 )}
                 onChange={(event) =>
                   setPricing({
                     ...pricing,
                     boardEntryMinimumMinor:
-                      dollarsToMinor(
+                      rupeesToMinor(
                         event.target.value,
                       ),
                   })
@@ -281,20 +280,20 @@ export function AdminPricingPanel() {
             </label>
 
             <label>
-              Board Push minimum ($)
+              Board Push minimum (₹)
               <input
                 type="number"
-                min="1"
-                max="999"
-                step="0.01"
-                value={minorToDollars(
+                min="100"
+                max="99900"
+                step="1"
+                value={minorToRupees(
                   pricing.boardPushMinimumMinor,
                 )}
                 onChange={(event) =>
                   setPricing({
                     ...pricing,
                     boardPushMinimumMinor:
-                      dollarsToMinor(
+                      rupeesToMinor(
                         event.target.value,
                       ),
                   })
@@ -303,20 +302,20 @@ export function AdminPricingPanel() {
             </label>
 
             <label>
-              Maximum payment ($)
+              Maximum payment (₹)
               <input
                 type="number"
-                min="1"
-                max="999"
-                step="0.01"
-                value={minorToDollars(
+                min="100"
+                max="99900"
+                step="1"
+                value={minorToRupees(
                   pricing.maximumPaymentMinor,
                 )}
                 onChange={(event) =>
                   setPricing({
                     ...pricing,
                     maximumPaymentMinor:
-                      dollarsToMinor(
+                      rupeesToMinor(
                         event.target.value,
                       ),
                   })
@@ -328,8 +327,8 @@ export function AdminPricingPanel() {
           <div className="admin-pricing-types">
             <div className="admin-pricing-types-head">
               <span>Listing Type</span>
-              <span>Listing fee</span>
-              <span>Public Push min</span>
+              <span>Listing fee (₹)</span>
+              <span>Public Push min (₹)</span>
             </div>
 
             {listingTypes.map(
@@ -341,12 +340,12 @@ export function AdminPricingPanel() {
                   <strong>{type.name}</strong>
 
                   <input
-                    aria-label={`${type.name} Listing fee`}
+                    aria-label={`${type.name} Listing fee in rupees`}
                     type="number"
                     min="0"
-                    max="999"
-                    step="0.01"
-                    value={minorToDollars(
+                    max="99900"
+                    step="1"
+                    value={minorToRupees(
                       pricing.listingFeesMinor[
                         type.id
                       ] ?? 0,
@@ -360,15 +359,15 @@ export function AdminPricingPanel() {
                   />
 
                   <input
-                    aria-label={`${type.name} Public Push minimum`}
+                    aria-label={`${type.name} Public Push minimum in rupees`}
                     type="number"
-                    min="1"
-                    max="999"
-                    step="0.01"
-                    value={minorToDollars(
+                    min="100"
+                    max="99900"
+                    step="1"
+                    value={minorToRupees(
                       pricing.publicPushMinimumMinor[
                         type.id
-                      ] ?? 100,
+                      ] ?? 10_000,
                     )}
                     onChange={(event) =>
                       updatePushMinimum(
