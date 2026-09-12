@@ -20,6 +20,9 @@ import type {
 
 import {
   formatMoneyMinor,
+  inrMinorToViewerInput,
+  viewerCurrencySymbol,
+  viewerMajorToInrMinor,
 } from "../../lib/marketplace/money";
 
 import type {
@@ -37,39 +40,11 @@ type PushUpDialogProps = {
 };
 
 const quickAmountsMinor = [
-  100,
-  500,
-  1000,
-  2500,
+  10_000,
+  50_000,
+  100_000,
+  250_000,
 ];
-
-function dollarsFromMinor(
-  amountMinor: number,
-) {
-  return (amountMinor / 100).toFixed(2);
-}
-
-function minorFromDollars(
-  value: string,
-): number | null {
-  const normalized = value.trim();
-
-  if (!/^\d+(?:\.\d{0,2})?$/.test(normalized)) {
-    return null;
-  }
-
-  const parsed = Number(normalized);
-
-  if (!Number.isFinite(parsed)) {
-    return null;
-  }
-
-  const minor = Math.round(parsed * 100);
-
-  return Number.isSafeInteger(minor)
-    ? minor
-    : null;
-}
 
 export function PushUpDialog({
   targets,
@@ -81,33 +56,26 @@ export function PushUpDialog({
     targets.find(
       (target) =>
         target.id === initialTargetId,
-    )?.minimumAmountMinor ?? 100;
+    )?.minimumAmountMinor ?? 10_000;
 
   const [query, setQuery] =
     useState("");
 
-  const [
-    selectedTargetId,
-    setSelectedTargetId,
-  ] = useState(
-    initialTargetId ?? "",
-  );
+  const [selectedTargetId, setSelectedTargetId] =
+    useState(initialTargetId ?? "");
 
   const [amountMinor, setAmountMinor] =
     useState(initialMinimum);
 
   const [amountInput, setAmountInput] =
-    useState(
-      dollarsFromMinor(initialMinimum),
-    );
+    useState(inrMinorToViewerInput(initialMinimum));
 
   const [paymentOpen, setPaymentOpen] =
     useState(false);
 
   const selectedTarget =
     targets.find(
-      (target) =>
-        target.id === selectedTargetId,
+      (target) => target.id === selectedTargetId,
     ) ?? null;
 
   useEffect(() => {
@@ -115,113 +83,74 @@ export function PushUpDialog({
       return;
     }
 
-    if (
-      amountMinor <
-      selectedTarget.minimumAmountMinor
-    ) {
-      setAmountMinor(
-        selectedTarget.minimumAmountMinor,
-      );
+    if (amountMinor < selectedTarget.minimumAmountMinor) {
+      setAmountMinor(selectedTarget.minimumAmountMinor);
       setAmountInput(
-        dollarsFromMinor(
-          selectedTarget.minimumAmountMinor,
-        ),
+        inrMinorToViewerInput(selectedTarget.minimumAmountMinor),
       );
     }
-  }, [
-    selectedTarget,
-    amountMinor,
-  ]);
+  }, [selectedTarget, amountMinor]);
 
-  const filteredTargets =
-    useMemo(() => {
-      const normalized =
-        query
-          .trim()
-          .toLowerCase();
+  const filteredTargets = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
 
-      if (!normalized) {
-        if (!initialTargetId) {
-          return [];
-        }
-
-        return targets.filter(
-          (target) =>
-            target.id === initialTargetId,
-        );
+    if (!normalized) {
+      if (!initialTargetId) {
+        return [];
       }
 
       return targets.filter(
-        (target) =>
-          target.title
-            .toLowerCase()
-            .includes(normalized) ||
-          target.handle
-            ?.toLowerCase()
-            .includes(normalized),
+        (target) => target.id === initialTargetId,
       );
-    }, [
-      targets,
-      query,
-      initialTargetId,
-    ]);
+    }
 
-  const availableAmounts =
-    useMemo(() => {
-      const minimum =
-        selectedTarget
-          ?.minimumAmountMinor ?? 100;
+    return targets.filter(
+      (target) =>
+        target.title.toLowerCase().includes(normalized) ||
+        target.handle?.toLowerCase().includes(normalized),
+    );
+  }, [targets, query, initialTargetId]);
 
-      return Array.from(
-        new Set([
-          minimum,
-          ...quickAmountsMinor.filter(
-            (value) => value >= minimum,
-          ),
-        ]),
-      ).sort((a, b) => a - b);
-    }, [selectedTarget]);
+  const availableAmounts = useMemo(() => {
+    const minimum =
+      selectedTarget?.minimumAmountMinor ?? 10_000;
+
+    return Array.from(
+      new Set([
+        minimum,
+        ...quickAmountsMinor.filter(
+          (value) => value >= minimum,
+        ),
+      ]),
+    ).sort((a, b) => a - b);
+  }, [selectedTarget]);
 
   const minimumAmountMinor =
-    selectedTarget
-      ?.minimumAmountMinor ?? 100;
+    selectedTarget?.minimumAmountMinor ?? 10_000;
 
   const amountValid =
     Boolean(selectedTarget) &&
     amountMinor >= minimumAmountMinor;
 
-  const paymentRequest:
-    PaymentRequest | null =
-      selectedTarget && amountValid
-        ? {
-            purpose:
-              selectedTarget.purpose,
-            targetKind:
-              selectedTarget.paymentTargetKind,
-            targetId:
-              selectedTarget.paymentTargetId,
-            amountMinor,
-            currency:
-              selectedTarget.currency,
-            title:
-              `Push Up ${selectedTarget.title}`,
-            description:
-              `${contextLabel} - ${selectedTarget.title}`,
-          }
-        : null;
+  const paymentRequest: PaymentRequest | null =
+    selectedTarget && amountValid
+      ? {
+          purpose: selectedTarget.purpose,
+          targetKind: selectedTarget.paymentTargetKind,
+          targetId: selectedTarget.paymentTargetId,
+          amountMinor,
+          currency: selectedTarget.currency,
+          title: `Push Up ${selectedTarget.title}`,
+          description: `${contextLabel} - ${selectedTarget.title}`,
+        }
+      : null;
 
-  function selectAmount(
-    value: number,
-  ) {
+  function selectAmount(value: number) {
     setAmountMinor(value);
-    setAmountInput(
-      dollarsFromMinor(value),
-    );
+    setAmountInput(inrMinorToViewerInput(value));
   }
 
-  function updateCustomAmount(
-    value: string,
-  ) {
+  function updateCustomAmount(value: string) {
     if (
       value &&
       !/^\d*(?:\.\d{0,2})?$/.test(value)
@@ -230,13 +159,7 @@ export function PushUpDialog({
     }
 
     setAmountInput(value);
-
-    const parsed =
-      minorFromDollars(value);
-
-    setAmountMinor(
-      parsed ?? 0,
-    );
+    setAmountMinor(viewerMajorToInrMinor(value) ?? 0);
   }
 
   return (
@@ -245,10 +168,7 @@ export function PushUpDialog({
         className="pushup-overlay"
         role="presentation"
         onMouseDown={(event) => {
-          if (
-            event.target ===
-            event.currentTarget
-          ) {
+          if (event.target === event.currentTarget) {
             onClose();
           }
         }}
@@ -274,8 +194,7 @@ export function PushUpDialog({
 
               <p>
                 Choose the listing and amount.
-                Ranking changes only after
-                verified payment.
+                Ranking changes only after verified payment.
               </p>
             </div>
 
@@ -296,9 +215,7 @@ export function PushUpDialog({
               <input
                 type="search"
                 value={query}
-                onChange={(event) =>
-                  setQuery(event.target.value)
-                }
+                onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search listing or @handle"
                 autoFocus={!initialTargetId}
               />
@@ -307,74 +224,48 @@ export function PushUpDialog({
 
           <div className="pushup-listings">
             {filteredTargets.length > 0 ? (
-              filteredTargets.map(
-                (target) => {
-                  const selected =
-                    target.id === selectedTargetId;
+              filteredTargets.map((target) => {
+                const selected =
+                  target.id === selectedTargetId;
 
-                  return (
-                    <button
-                      type="button"
-                      key={target.id}
-                      className={`pushup-listing ${
-                        selected
-                          ? "selected"
-                          : ""
-                      }`}
-                      onClick={() => {
-                        setSelectedTargetId(
-                          target.id,
-                        );
+                return (
+                  <button
+                    type="button"
+                    key={target.id}
+                    className={`pushup-listing ${selected ? "selected" : ""}`}
+                    onClick={() => {
+                      setSelectedTargetId(target.id);
 
-                        if (
-                          amountMinor <
-                          target.minimumAmountMinor
-                        ) {
-                          selectAmount(
-                            target.minimumAmountMinor,
-                          );
-                        }
-                      }}
-                    >
-                      <span className="pushup-listing-mark">
-                        {target.imageUrl ? (
-                          <img
-                            src={target.imageUrl}
-                            alt=""
-                          />
-                        ) : (
-                          target.title
-                            .charAt(0)
-                            .toUpperCase()
+                      if (amountMinor < target.minimumAmountMinor) {
+                        selectAmount(target.minimumAmountMinor);
+                      }
+                    }}
+                  >
+                    <span className="pushup-listing-mark">
+                      {target.imageUrl ? (
+                        <img src={target.imageUrl} alt="" />
+                      ) : (
+                        target.title.charAt(0).toUpperCase()
+                      )}
+                    </span>
+
+                    <span className="pushup-listing-copy">
+                      <strong>{target.title}</strong>
+                      {target.handle && <small>{target.handle}</small>}
+                    </span>
+
+                    <span className="pushup-listing-total">
+                      <strong>
+                        {formatMoneyMinor(
+                          target.currentBoostTotalMinor,
+                          target.currency,
                         )}
-                      </span>
-
-                      <span className="pushup-listing-copy">
-                        <strong>
-                          {target.title}
-                        </strong>
-
-                        {target.handle && (
-                          <small>
-                            {target.handle}
-                          </small>
-                        )}
-                      </span>
-
-                      <span className="pushup-listing-total">
-                        <strong>
-                          {formatMoneyMinor(
-                            target.currentBoostTotalMinor,
-                            target.currency,
-                          )}
-                        </strong>
-
-                        <small>pushed</small>
-                      </span>
-                    </button>
-                  );
-                },
-              )
+                      </strong>
+                      <small>pushed</small>
+                    </span>
+                  </button>
+                );
+              })
             ) : (
               <div className="pushup-empty">
                 {query.trim()
@@ -388,12 +279,10 @@ export function PushUpDialog({
             <div className="pushup-amount-row">
               <div className="pushup-current-amount">
                 <span>Push Up</span>
-
                 <strong>
                   {formatMoneyMinor(
                     amountMinor,
-                    selectedTarget
-                      ?.currency ?? "USD",
+                    selectedTarget?.currency ?? "INR",
                   )}
                 </strong>
               </div>
@@ -401,50 +290,39 @@ export function PushUpDialog({
               <label className="pushup-custom-amount">
                 <span>Custom amount</span>
                 <div>
-                  <span>$</span>
+                  <span>{viewerCurrencySymbol()}</span>
                   <input
                     type="text"
                     inputMode="decimal"
                     value={amountInput}
                     onChange={(event) =>
-                      updateCustomAmount(
-                        event.target.value,
-                      )
+                      updateCustomAmount(event.target.value)
                     }
-                    aria-label="Custom Push Up amount in dollars"
+                    aria-label="Custom Push Up amount"
                   />
                 </div>
                 <small>
                   Minimum {formatMoneyMinor(
                     minimumAmountMinor,
-                    selectedTarget?.currency ?? "USD",
+                    selectedTarget?.currency ?? "INR",
                   )}
                 </small>
               </label>
 
               <div className="pushup-amounts">
-                {availableAmounts.map(
-                  (value) => (
-                    <button
-                      type="button"
-                      key={value}
-                      className={
-                        amountMinor === value
-                          ? "active"
-                          : ""
-                      }
-                      onClick={() =>
-                        selectAmount(value)
-                      }
-                    >
-                      {formatMoneyMinor(
-                        value,
-                        selectedTarget
-                          ?.currency ?? "USD",
-                      )}
-                    </button>
-                  ),
-                )}
+                {availableAmounts.map((value) => (
+                  <button
+                    type="button"
+                    key={value}
+                    className={amountMinor === value ? "active" : ""}
+                    onClick={() => selectAmount(value)}
+                  >
+                    {formatMoneyMinor(
+                      value,
+                      selectedTarget?.currency ?? "INR",
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -461,24 +339,18 @@ export function PushUpDialog({
               className="pushup-pay"
               type="button"
               disabled={!paymentRequest}
-              onClick={() =>
-                setPaymentOpen(true)
-              }
+              onClick={() => setPaymentOpen(true)}
             >
-              Continue to payment
-              {" - "}
-              {formatMoneyMinor(
+              Continue to payment - {formatMoneyMinor(
                 amountMinor,
-                selectedTarget
-                  ?.currency ?? "USD",
+                selectedTarget?.currency ?? "INR",
               )}
             </button>
 
             <p className="pushup-disclosure">
               Paid visibility affects ranking.
-              Payments are non-refundable after
-              successful processing, except where
-              required by law.
+              Payments are non-refundable after successful processing,
+              except where required by law.
             </p>
           </div>
         </section>
@@ -488,9 +360,7 @@ export function PushUpDialog({
         <PaymentDialog
           open={paymentOpen}
           request={paymentRequest}
-          onClose={() =>
-            setPaymentOpen(false)
-          }
+          onClose={() => setPaymentOpen(false)}
         />
       )}
     </>
