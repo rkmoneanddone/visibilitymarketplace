@@ -1,5 +1,6 @@
 import "./App.css";
 import "./pages/home-visual-refresh.css";
+import "./pages/home-header-highlight.css";
 
 import type {
   ReactNode,
