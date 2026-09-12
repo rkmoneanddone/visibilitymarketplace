@@ -13,6 +13,7 @@ import type {
   EmulatorPaymentCompletionResult,
   PaymentIntentResult,
   PaymentRequest,
+  PaymentStatusResult,
 } from "../../features/payment/types";
 
 const functions =
@@ -68,6 +69,18 @@ const createDodoPaymentIntentCallable =
     "createDodoPaymentIntent",
   );
 
+const getPaymentStatusCallable =
+  httpsCallable<
+    {
+      paymentIntentId: string;
+      clientStatusToken: string;
+    },
+    PaymentStatusResult
+  >(
+    functions,
+    "getPaymentStatus",
+  );
+
 export async function createPaymentIntent(
   request: PaymentRequest,
 ): Promise<PaymentIntentResult> {
@@ -106,6 +119,19 @@ export async function completeEmulatorPayment(
   const result =
     await completeEmulatorPaymentCallable({
       paymentIntentId,
+    });
+
+  return result.data;
+}
+
+export async function getPaymentStatus(
+  paymentIntentId: string,
+  clientStatusToken: string,
+): Promise<PaymentStatusResult> {
+  const result =
+    await getPaymentStatusCallable({
+      paymentIntentId,
+      clientStatusToken,
     });
 
   return result.data;
