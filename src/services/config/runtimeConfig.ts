@@ -31,6 +31,7 @@ export type PublicRuntimeConfig = {
   limits: {
     publicPageSize: number;
     boardPageSize: number;
+    dashboardPageSize: number;
     searchResultLimit: number;
   };
 };
